@@ -9,19 +9,28 @@ export default function TimelineScreen() {
 
   const renderItem = ({ item }: { item: any }) => {
     const isPee = item.type === 'PEE';
+    const isPoop = item.type === 'POOP';
+    const isCombo = item.type === 'COMBO';
+
     const dateFormatted = new Date(item.loggedAt).toLocaleTimeString('id-ID', {
       hour: '2-digit',
       minute: '2-digit',
     });
 
+    const badgeColor = isPee ? Colors.peeAmber : isPoop ? Colors.poopLight : Colors.bothTeal;
+    const badgeTitle = isPee
+      ? "Lil' Drip (Kencing)"
+      : isPoop
+      ? 'Mr. Plop (BAB)'
+      : 'Sir Flush (Keduanya)';
+    const emoji = isPee ? '💧' : isPoop ? '💩' : '🚽';
+
     return (
       <View style={styles.logCard}>
         <View style={styles.cardHeader}>
           <View style={styles.typeBadge}>
-            <Text style={styles.emoji}>{isPee ? '💧' : '💩'}</Text>
-            <Text style={[styles.typeTitle, { color: isPee ? Colors.peeAmber : Colors.poopLight }]}>
-              {isPee ? "Lil' Drip (Kencing)" : 'Mr. Plop (BAB)'}
-            </Text>
+            <Text style={styles.emoji}>{emoji}</Text>
+            <Text style={[styles.typeTitle, { color: badgeColor }]}>{badgeTitle}</Text>
           </View>
           <TouchableOpacity onPress={() => removeLog(item.id)} style={styles.deleteBtn}>
             <Trash2 size={16} color={Colors.darkBorder} />

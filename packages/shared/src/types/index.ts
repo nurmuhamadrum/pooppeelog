@@ -1,4 +1,4 @@
-export type LogType = 'PEE' | 'POOP';
+export type LogType = 'PEE' | 'POOP' | 'COMBO';
 
 export type MoodPee = 'LEGA' | 'NAHAN_LAMA' | 'DARURAT';
 export type MoodPoop = 'LEGA_BANGET' | 'BIASA_AJA' | 'MASIH_GANJEL' | 'TRAGEDI';

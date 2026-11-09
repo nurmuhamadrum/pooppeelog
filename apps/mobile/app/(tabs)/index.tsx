@@ -14,7 +14,7 @@ import * as Location from 'expo-location';
 import { Colors } from '@/constants/Colors';
 import { darkMapStyle } from '@/constants/MapStyle';
 import { useAppStore } from '@/src/store/useAppStore';
-import { MrPlopIcon, LilDripIcon } from '@/src/components/MascotIcons';
+import { MrPlopIcon, LilDripIcon, SirFlushIcon } from '@/src/components/MascotIcons';
 import { Log } from '@poop-pee-log/shared';
 import { Eye, EyeOff, Navigation, X } from 'lucide-react-native';
 
@@ -120,7 +120,9 @@ export default function MapScreen() {
 
   const filteredLogs = displayLogs.filter((log) => {
     if (mapFilter === 'ALL') return true;
-    return log.type === mapFilter;
+    if (mapFilter === 'PEE') return log.type === 'PEE' || log.type === 'COMBO';
+    if (mapFilter === 'POOP') return log.type === 'POOP' || log.type === 'COMBO';
+    return true;
   });
 
   const centerOnUser = () => {
@@ -158,9 +160,13 @@ export default function MapScreen() {
       >
         {filteredLogs.map((log) => {
           const isPee = log.type === 'PEE';
+          const isPoop = log.type === 'POOP';
+          const isCombo = log.type === 'COMBO';
           const isSelected = selectedLog?.id === log.id;
           const lat = blurLocation && log.blurredLatitude ? log.blurredLatitude : log.latitude;
           const lng = blurLocation && log.blurredLongitude ? log.blurredLongitude : log.longitude;
+
+          const markerBg = isPee ? Colors.peeAmber : isPoop ? Colors.poopBrown : Colors.bothTeal;
 
           return (
             <Marker
@@ -174,19 +180,21 @@ export default function MapScreen() {
                   style={[
                     styles.pinCircle,
                     {
-                      backgroundColor: isPee ? Colors.peeAmber : Colors.poopBrown,
+                      backgroundColor: markerBg,
                       borderColor: Colors.darkBg,
                     },
                     isSelected && styles.pinCircleSelected,
                   ]}
                 >
-                  {isPee ? <LilDripIcon size={20} /> : <MrPlopIcon size={20} />}
+                  {isPee && <LilDripIcon size={20} />}
+                  {isPoop && <MrPlopIcon size={20} />}
+                  {isCombo && <SirFlushIcon size={20} />}
                 </View>
                 {/* Tiny needle pointer */}
                 <View
                   style={[
                     styles.pinNeedle,
-                    { backgroundColor: isPee ? Colors.peeAmber : Colors.poopBrown },
+                    { backgroundColor: markerBg },
                   ]}
                 />
 
@@ -261,16 +269,29 @@ export default function MapScreen() {
             <View
               style={[
                 styles.popupAvatar,
-                { backgroundColor: selectedLog.type === 'PEE' ? Colors.peeAmber : Colors.poopBrown },
+                {
+                  backgroundColor:
+                    selectedLog.type === 'PEE'
+                      ? Colors.peeAmber
+                      : selectedLog.type === 'POOP'
+                      ? Colors.poopBrown
+                      : Colors.bothTeal,
+                },
               ]}
             >
-              {selectedLog.type === 'PEE' ? <LilDripIcon size={26} /> : <MrPlopIcon size={26} />}
+              {selectedLog.type === 'PEE' && <LilDripIcon size={26} />}
+              {selectedLog.type === 'POOP' && <MrPlopIcon size={26} />}
+              {selectedLog.type === 'COMBO' && <SirFlushIcon size={26} />}
             </View>
 
             <View style={{ flex: 1 }}>
               <View style={styles.popupTitleRow}>
                 <Text style={styles.popupTitle}>
-                  {selectedLog.type === 'PEE' ? "Lil' Drip • " : "Mr. Plop • "}
+                  {selectedLog.type === 'PEE'
+                    ? "Lil' Drip • "
+                    : selectedLog.type === 'POOP'
+                    ? "Mr. Plop • "
+                    : "Sir Flush • "}
                   {selectedLog.mood || 'Lega Banget'}
                 </Text>
                 <Text style={styles.popupTime}>

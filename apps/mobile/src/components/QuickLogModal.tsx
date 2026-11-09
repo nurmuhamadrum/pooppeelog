@@ -40,8 +40,10 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
       const loc = await getCurrentLocationWithAddress();
       const now = new Date().toISOString();
 
-      const randomOffsetLat = (Math.random() - 0.5) * 0.0009;
-      const randomOffsetLng = (Math.random() - 0.5) * 0.0009;
+      // Logika penentuan koordinat:
+      // Hanya buat blurred offset konsisten berdasarkan pembulatan lokasi agar di lokasi yang sama tidak membuat banyak titik terpisah secara acak
+      const blurOffsetLat = ((Math.sin(loc.latitude * 1000) * 0.0004));
+      const blurOffsetLng = ((Math.cos(loc.longitude * 1000) * 0.0004));
 
       await addLog({
         type,
@@ -52,12 +54,12 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
         district: loc.district,
         subdistrict: loc.subdistrict,
         country: loc.country,
-        mood: type === 'PEE' ? 'Lega Banget' : 'Plong Sekali',
+        mood: type === 'PEE' ? 'Lega Banget' : type === 'POOP' ? 'Plong Sekali' : 'Kombo Sukses 🚽',
         note: '',
         loggedAt: now,
         isBlurred: blurLocation,
-        blurredLatitude: blurLocation ? loc.latitude + randomOffsetLat : undefined,
-        blurredLongitude: blurLocation ? loc.longitude + randomOffsetLng : undefined,
+        blurredLatitude: blurLocation ? loc.latitude + blurOffsetLat : undefined,
+        blurredLongitude: blurLocation ? loc.longitude + blurOffsetLng : undefined,
       });
 
       setIsSubmitting(false);
@@ -131,7 +133,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
               {/* SIR FLUSH (FULL WIDTH COMBO) */}
               <TouchableOpacity
                 style={styles.comboButton}
-                onPress={() => handleQuickLog('PEE')}
+                onPress={() => handleQuickLog('COMBO')}
                 activeOpacity={0.85}
                 disabled={isSubmitting}
               >
