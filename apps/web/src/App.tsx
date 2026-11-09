@@ -8,6 +8,7 @@ import { BadgesSection } from './components/BadgesSection';
 import { PrivacyManifesto } from './components/PrivacyManifesto';
 import { BuyMeACoffeeSection } from './components/BuyMeACoffeeSection';
 import { FAQSection } from './components/FAQSection';
+import { DownloadSection } from './components/DownloadSection';
 import { Footer } from './components/Footer';
 
 export const App: React.FC = () => {
@@ -21,6 +22,7 @@ export const App: React.FC = () => {
         <InteractiveMockup />
         <BadgesSection />
         <PrivacyManifesto />
+        <DownloadSection />
         <BuyMeACoffeeSection />
         <FAQSection />
       </main>
