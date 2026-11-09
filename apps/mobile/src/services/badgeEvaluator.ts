@@ -72,3 +72,4 @@ export function evaluateBadges(logs: Log[]): EvaluatedBadge[] {
     },
   ];
 }
+
