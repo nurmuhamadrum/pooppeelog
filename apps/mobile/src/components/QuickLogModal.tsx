@@ -15,7 +15,7 @@ import { MrPlopIcon, LilDripIcon, SirFlushIcon } from './MascotIcons';
 import { useAppStore } from '../store/useAppStore';
 import { getCurrentLocationWithAddress } from '../services/location';
 import { LogType } from '@poop-pee-log/shared';
-import { X, Check, Smile, Sparkles } from 'lucide-react-native';
+import { X } from 'lucide-react-native';
 
 interface QuickLogModalProps {
   visible: boolean;
@@ -24,9 +24,10 @@ interface QuickLogModalProps {
 
 export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }) => {
   const addLog = useAppStore((state: any) => state.addLog);
-  const blurLocation = useAppStore((state: any) => state.blurLocation);
+  const updateLogMoodAndNote = useAppStore((state: any) => state.updateLogMoodAndNote);
 
   const [step, setStep] = useState<'SELECT' | 'MOOD_NOTE'>('SELECT');
+  const [currentCreatedLogId, setCurrentCreatedLogId] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<LogType>('PEE');
   const [selectedMood, setSelectedMood] = useState<string>('Lega Banget');
   const [note, setNote] = useState<string>('');
@@ -36,16 +37,16 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
     setIsSubmitting(true);
     setSelectedType(type);
 
+    const defaultMood =
+      type === 'PEE' ? 'Lega Banget' : type === 'POOP' ? 'Plong Sekali' : 'Kombo Sukses';
+    setSelectedMood(defaultMood);
+
     try {
       const loc = await getCurrentLocationWithAddress();
       const now = new Date().toISOString();
 
-      // Logika penentuan koordinat:
-      // Hanya buat blurred offset konsisten berdasarkan pembulatan lokasi agar di lokasi yang sama tidak membuat banyak titik terpisah secara acak
-      const blurOffsetLat = ((Math.sin(loc.latitude * 1000) * 0.0004));
-      const blurOffsetLng = ((Math.cos(loc.longitude * 1000) * 0.0004));
-
-      await addLog({
+      // Koordinat presisi asli (blur 50m dihilangkan agar akurat di 1 titik)
+      const createdLog = await addLog({
         type,
         latitude: loc.latitude,
         longitude: loc.longitude,
@@ -54,14 +55,13 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
         district: loc.district,
         subdistrict: loc.subdistrict,
         country: loc.country,
-        mood: type === 'PEE' ? 'Lega Banget' : type === 'POOP' ? 'Plong Sekali' : 'Kombo Sukses 🚽',
+        mood: defaultMood,
         note: '',
         loggedAt: now,
-        isBlurred: blurLocation,
-        blurredLatitude: blurLocation ? loc.latitude + blurOffsetLat : undefined,
-        blurredLongitude: blurLocation ? loc.longitude + blurOffsetLng : undefined,
+        isBlurred: false,
       });
 
+      setCurrentCreatedLogId(createdLog.id);
       setIsSubmitting(false);
       setStep('MOOD_NOTE');
     } catch (error) {
@@ -71,9 +71,17 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
     }
   };
 
+  const handleSaveMoodAndNote = async () => {
+    if (currentCreatedLogId) {
+      await updateLogMoodAndNote(currentCreatedLogId, selectedMood, note);
+    }
+    handleFinish();
+  };
+
   const handleFinish = () => {
     setStep('SELECT');
     setNote('');
+    setCurrentCreatedLogId(null);
     onClose();
   };
 
@@ -154,12 +162,14 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
             </View>
           )}
 
-          {/* STEP 2: MOOD & NOTE (PERSIS MOCKUP) */}
+          {/* STEP 2: MOOD & NOTE (TERSIMPAN KE DATABASE LOKAL) */}
           {step === 'MOOD_NOTE' && (
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styles.moodHeader}>
                 <View style={styles.avatarMini}>
-                  <SirFlushIcon size={34} />
+                  {selectedType === 'PEE' && <LilDripIcon size={30} />}
+                  {selectedType === 'POOP' && <MrPlopIcon size={30} />}
+                  {selectedType === 'COMBO' && <SirFlushIcon size={30} />}
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.moodTag}>LEGA TERCATAT! ⚡</Text>
@@ -220,7 +230,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
                 onChangeText={setNote}
               />
 
-              <TouchableOpacity style={styles.submitBtn} onPress={handleFinish}>
+              <TouchableOpacity style={styles.submitBtn} onPress={handleSaveMoodAndNote}>
                 <Text style={styles.submitBtnText}>Simpan & Buka Buku Harian</Text>
               </TouchableOpacity>
             </ScrollView>
@@ -379,10 +389,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   avatarMini: {
-    width: 42,
-    height: 42,
+    width: 44,
+    height: 44,
     borderRadius: 14,
-    backgroundColor: Colors.bothTeal,
+    backgroundColor: Colors.darkBg,
+    borderWidth: 1,
+    borderColor: Colors.darkBorder,
     alignItems: 'center',
     justifyContent: 'center',
   },

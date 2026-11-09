@@ -25,34 +25,78 @@ import {
   Shield,
   Smile,
   Info,
+  Filter,
 } from 'lucide-react-native';
 
-export default function TimelineScreen() {
-  const { logs, removeLog, blurLocation } = useAppStore();
-  const [selectedDetailLog, setSelectedDetailLog] = useState<Log | null>(null);
+type TimeFilter = 'WEEK' | 'MONTH' | 'YEAR' | 'ALL';
 
-  // Grouping logs by Bulan & Tahun (cth: "November 2026", "Oktober 2026")
+export default function TimelineScreen() {
+  const { logs, removeLog } = useAppStore();
+  const [selectedDetailLog, setSelectedDetailLog] = useState<Log | null>(null);
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('ALL');
+
+  // Filter logs berdasarkan periode waktu
+  const filteredLogs = useMemo(() => {
+    const now = new Date();
+    return logs.filter((log) => {
+      const logDate = new Date(log.loggedAt);
+      if (timeFilter === 'WEEK') {
+        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        return logDate >= oneWeekAgo;
+      }
+      if (timeFilter === 'MONTH') {
+        return (
+          logDate.getFullYear() === now.getFullYear() &&
+          logDate.getMonth() === now.getMonth()
+        );
+      }
+      if (timeFilter === 'YEAR') {
+        return logDate.getFullYear() === now.getFullYear();
+      }
+      return true; // 'ALL'
+    });
+  }, [logs, timeFilter]);
+
+  // Grouping logs berdasarkan mode filter
   const sections = useMemo(() => {
     const groups: { [key: string]: Log[] } = {};
 
-    logs.forEach((log) => {
+    filteredLogs.forEach((log) => {
       const date = new Date(log.loggedAt);
-      const monthYear = date.toLocaleDateString('id-ID', {
-        month: 'long',
-        year: 'numeric',
-      });
+      let groupHeader = '';
 
-      if (!groups[monthYear]) {
-        groups[monthYear] = [];
+      if (timeFilter === 'WEEK') {
+        // Kelompokkan per Hari (contoh: "Senin, 9 Nov 2026")
+        groupHeader = date.toLocaleDateString('id-ID', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'short',
+        });
+      } else if (timeFilter === 'YEAR') {
+        // Kelompokkan per Bulan (contoh: "November 2026")
+        groupHeader = date.toLocaleDateString('id-ID', {
+          month: 'long',
+          year: 'numeric',
+        });
+      } else {
+        // Default Bulan & Tahun
+        groupHeader = date.toLocaleDateString('id-ID', {
+          month: 'long',
+          year: 'numeric',
+        });
       }
-      groups[monthYear].push(log);
+
+      if (!groups[groupHeader]) {
+        groups[groupHeader] = [];
+      }
+      groups[groupHeader].push(log);
     });
 
     return Object.keys(groups).map((title) => ({
       title,
       data: groups[title],
     }));
-  }, [logs]);
+  }, [filteredLogs, timeFilter]);
 
   const renderItem = ({ item }: { item: Log }) => {
     const isPee = item.type === 'PEE';
@@ -148,16 +192,59 @@ export default function TimelineScreen() {
       <View style={styles.headerArea}>
         <Text style={styles.pageTitle}>Buku Harian Lega</Text>
         <Text style={styles.pageSubtitle}>
-          {logs.length > 0 ? `Total ${logs.length} jejak buang air tercatat` : 'Belum ada catatan aktivitas'}
+          {filteredLogs.length > 0
+            ? `Menampilkan ${filteredLogs.length} dari ${logs.length} catatan aktivitas`
+            : 'Belum ada catatan pada periode ini'}
         </Text>
       </View>
 
-      {logs.length === 0 ? (
+      {/* Filter Waktu: Minggu Ini, Bulan Ini, Tahun Ini, Semua */}
+      <View style={styles.filterContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
+          <TouchableOpacity
+            style={[styles.filterPill, timeFilter === 'WEEK' && styles.filterPillActive]}
+            onPress={() => setTimeFilter('WEEK')}
+          >
+            <Text style={[styles.filterPillText, timeFilter === 'WEEK' && styles.filterPillTextActive]}>
+              7 Hari Terakhir
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.filterPill, timeFilter === 'MONTH' && styles.filterPillActive]}
+            onPress={() => setTimeFilter('MONTH')}
+          >
+            <Text style={[styles.filterPillText, timeFilter === 'MONTH' && styles.filterPillTextActive]}>
+              Bulan Ini
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.filterPill, timeFilter === 'YEAR' && styles.filterPillActive]}
+            onPress={() => setTimeFilter('YEAR')}
+          >
+            <Text style={[styles.filterPillText, timeFilter === 'YEAR' && styles.filterPillTextActive]}>
+              Tahun Ini
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.filterPill, timeFilter === 'ALL' && styles.filterPillActive]}
+            onPress={() => setTimeFilter('ALL')}
+          >
+            <Text style={[styles.filterPillText, timeFilter === 'ALL' && styles.filterPillTextActive]}>
+              Semua Waktu ({logs.length})
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+
+      {filteredLogs.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyEmoji}>📜</Text>
-          <Text style={styles.emptyTitle}>Belum Ada Catatan</Text>
+          <Text style={styles.emptyTitle}>Tidak Ada Catatan di Periode Ini</Text>
           <Text style={styles.emptySubtitle}>
-            Gunakan tombol (+) di tengah bawah untuk mulai mendokumentasikan riwayat kelegaanmu.
+            Pilih filter waktu lain atau gunakan tombol (+) di tengah bawah untuk mulai mendokumentasikan kelegaanmu.
           </Text>
         </View>
       ) : (
@@ -301,14 +388,14 @@ export default function TimelineScreen() {
                   }}
                 >
                   <Trash2 size={16} color={Colors.emergencyRed} />
-                  <Text style={styles.deleteModalBtnText}>Hapus Log Ini</Text>
+                  <Text style={styles.deleteModalBtnText}>Hapus Catatan Ini</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.doneModalBtn}
+                  style={styles.closeModalBtn}
                   onPress={() => setSelectedDetailLog(null)}
                 >
-                  <Text style={styles.doneModalBtnText}>Tutup</Text>
+                  <Text style={styles.closeModalBtnText}>Tutup</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -327,7 +414,7 @@ const styles = StyleSheet.create({
   },
   headerArea: {
     paddingHorizontal: 20,
-    paddingBottom: 8,
+    paddingBottom: 6,
   },
   pageTitle: {
     fontSize: 22,
@@ -341,36 +428,70 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     marginTop: 2,
   },
+  filterContainer: {
+    marginTop: 6,
+    marginBottom: 6,
+  },
+  filterRow: {
+    paddingHorizontal: 20,
+    gap: 8,
+    flexDirection: 'row',
+  },
+  filterPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    backgroundColor: Colors.darkSurface,
+    borderWidth: 1,
+    borderColor: Colors.darkBorder,
+  },
+  filterPillActive: {
+    backgroundColor: Colors.peeAmber,
+    borderColor: Colors.peeAmber,
+  },
+  filterPillText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.peachTint,
+  },
+  filterPillTextActive: {
+    color: '#000',
+    fontWeight: '900',
+  },
   listContent: {
     paddingHorizontal: 16,
-    paddingBottom: 120,
+    paddingBottom: 110,
   },
   sectionHeaderContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 18,
-    marginBottom: 8,
+    gap: 6,
+    backgroundColor: Colors.darkBg,
+    paddingVertical: 10,
     paddingHorizontal: 4,
   },
   sectionHeaderText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '900',
-    color: Colors.peeAmber,
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
+    color: Colors.creamBg,
+    letterSpacing: 0.4,
   },
   logCard: {
     backgroundColor: Colors.darkSurface,
-    borderRadius: 22,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: Colors.darkBorder,
     padding: 14,
     marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 3,
   },
   cardHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 12,
   },
   avatarBox: {
@@ -379,168 +500,162 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 3,
   },
   typeTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '900',
   },
   timeText: {
     fontSize: 11,
     color: Colors.peachTint,
     opacity: 0.6,
-    fontWeight: '700',
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    gap: 4,
+    marginTop: 2,
   },
   locationText: {
     fontSize: 11,
     color: Colors.peachTint,
-    fontWeight: '600',
+    opacity: 0.75,
+    flex: 1,
   },
   moodPill: {
-    alignSelf: 'flex-start',
     backgroundColor: 'rgba(245, 183, 0, 0.12)',
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 8,
-    marginTop: 4,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginTop: 6,
   },
   moodPillText: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: '800',
     color: Colors.peeAmber,
   },
   noteBox: {
+    backgroundColor: 'rgba(0, 0, 0, 0.25)',
+    borderRadius: 10,
+    padding: 8,
     marginTop: 10,
-    backgroundColor: Colors.darkBg,
-    padding: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(61, 53, 46, 0.6)',
   },
   noteText: {
     fontSize: 11,
-    color: Colors.creamBg,
+    color: Colors.peachTint,
+    opacity: 0.85,
     fontStyle: 'italic',
-    lineHeight: 16,
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
+    justifyContent: 'center',
+    padding: 30,
+    marginTop: 60,
   },
   emptyEmoji: {
     fontSize: 48,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '900',
     color: Colors.creamBg,
+    textAlign: 'center',
   },
   emptySubtitle: {
     fontSize: 12,
     color: Colors.peachTint,
-    opacity: 0.7,
+    opacity: 0.65,
     textAlign: 'center',
     marginTop: 6,
     lineHeight: 18,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'rgba(0, 0, 0, 0.78)',
     justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
   modalCard: {
-    backgroundColor: Colors.darkSurface,
-    borderRadius: 28,
-    borderWidth: 1,
+    width: '100%',
+    backgroundColor: Colors.darkBg,
+    borderRadius: 24,
+    borderWidth: 1.5,
     borderColor: Colors.darkBorder,
     padding: 20,
-    maxHeight: '80%',
+    maxHeight: '85%',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.darkBorder,
-    paddingBottom: 16,
+    alignItems: 'center',
     marginBottom: 16,
   },
   modalAvatarRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    flex: 1,
   },
   modalAvatar: {
-    width: 52,
-    height: 52,
+    width: 48,
+    height: 48,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalTypeTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '900',
     color: Colors.creamBg,
   },
   modalDateSubtitle: {
     fontSize: 11,
     color: Colors.peachTint,
-    opacity: 0.65,
+    opacity: 0.6,
     marginTop: 2,
   },
   modalCloseBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.darkBg,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: Colors.darkSurface,
+    padding: 6,
+    borderRadius: 14,
   },
   modalBody: {
-    marginBottom: 16,
+    marginBottom: 14,
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 12,
-    marginBottom: 14,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(61, 53, 46, 0.4)',
   },
   detailLabel: {
     fontSize: 9,
     fontWeight: '900',
     color: Colors.peachTint,
-    opacity: 0.6,
-    letterSpacing: 0.5,
-    marginBottom: 2,
+    opacity: 0.5,
+    letterSpacing: 0.6,
   },
   detailValue: {
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '800',
     color: Colors.creamBg,
-    lineHeight: 18,
+    marginTop: 2,
   },
   detailSubValue: {
     fontSize: 10,
     color: Colors.peachTint,
     opacity: 0.5,
-    marginTop: 2,
+    marginTop: 1,
   },
   privacyBox: {
     flexDirection: 'row',
@@ -549,51 +664,49 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(47, 184, 172, 0.12)',
     padding: 10,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(47, 184, 172, 0.3)',
-    marginTop: 8,
+    marginTop: 12,
   },
   privacyBoxText: {
-    flex: 1,
     fontSize: 10,
     color: Colors.bothTeal,
     fontWeight: '700',
+    flex: 1,
   },
   modalFooter: {
     flexDirection: 'row',
     gap: 10,
-    borderTopWidth: 1,
-    borderTopColor: Colors.darkBorder,
-    paddingTop: 14,
+    marginTop: 4,
   },
   deleteModalBtn: {
     flex: 1,
+    backgroundColor: 'rgba(255, 90, 95, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 90, 95, 0.4)',
+    borderRadius: 14,
+    paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    paddingVertical: 12,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255, 90, 95, 0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 90, 95, 0.3)',
   },
   deleteModalBtnText: {
-    color: Colors.emergencyRed,
     fontSize: 11,
     fontWeight: '800',
+    color: Colors.emergencyRed,
   },
-  doneModalBtn: {
+  closeModalBtn: {
     flex: 1,
+    backgroundColor: Colors.darkSurface,
+    borderWidth: 1,
+    borderColor: Colors.darkBorder,
+    borderRadius: 14,
+    paddingVertical: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 14,
-    backgroundColor: Colors.peeAmber,
   },
-  doneModalBtnText: {
-    color: Colors.ink,
-    fontSize: 12,
-    fontWeight: '900',
+  closeModalBtnText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Colors.creamBg,
   },
 });

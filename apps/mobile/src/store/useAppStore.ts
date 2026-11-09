@@ -1,25 +1,27 @@
 import { create } from 'zustand';
 import { Log } from '@poop-pee-log/shared';
-import { getLocalLogs, insertLocalLog, deleteLocalLog, getDatabase } from '../db/sqlite';
+import {
+  getLocalLogs,
+  insertLocalLog,
+  updateLocalLogMoodAndNote,
+  deleteLocalLog,
+  getDatabase,
+} from '../db/sqlite';
 import { getOrCreateGuestUser } from '../services/supabase';
 
 interface AppState {
-  // Data
   logs: Log[];
   userId: string | null;
   isLoading: boolean;
 
-  // Filter & UI settings
-  mapFilter: 'ALL' | 'PEE' | 'POOP';
-  blurLocation: boolean;
+  mapFilter: 'ALL' | 'PEE' | 'POOP' | 'COMBO';
   appLockEnabled: boolean;
 
-  // Actions
   initialize: () => Promise<void>;
   addLog: (logData: Omit<Log, 'id' | 'userId' | 'clientCreatedAt' | 'syncStatus'>) => Promise<Log>;
+  updateLogMoodAndNote: (id: string, mood: string, note: string) => Promise<void>;
   removeLog: (id: string) => Promise<void>;
-  setMapFilter: (filter: 'ALL' | 'PEE' | 'POOP') => void;
-  toggleBlurLocation: () => void;
+  setMapFilter: (filter: 'ALL' | 'PEE' | 'POOP' | 'COMBO') => void;
   toggleAppLock: () => void;
 }
 
@@ -28,13 +30,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   userId: null,
   isLoading: true,
   mapFilter: 'ALL',
-  blurLocation: true,
   appLockEnabled: false,
 
   initialize: async () => {
     try {
       set({ isLoading: true });
-      await getDatabase(); // Inisialisasi tabel SQLite
+      await getDatabase();
       const guestId = await getOrCreateGuestUser();
       const loadedLogs = await getLocalLogs();
 
@@ -62,15 +63,23 @@ export const useAppStore = create<AppState>((set, get) => ({
       syncStatus: 'pending',
     };
 
-    // 1. Simpan ke SQLite (<10ms)
+    // Simpan ke SQLite
     await insertLocalLog(fullLog);
 
-    // 2. Update state lokal instan
+    // Update state lokal
     set((state) => ({
       logs: [fullLog, ...state.logs],
     }));
 
     return fullLog;
+  },
+
+  updateLogMoodAndNote: async (id: string, mood: string, note: string) => {
+    await updateLocalLogMoodAndNote(id, mood, note);
+
+    set((state) => ({
+      logs: state.logs.map((l) => (l.id === id ? { ...l, mood, note } : l)),
+    }));
   },
 
   removeLog: async (id: string) => {
@@ -81,7 +90,5 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   setMapFilter: (filter) => set({ mapFilter: filter }),
-  toggleBlurLocation: () => set((state) => ({ blurLocation: !state.blurLocation })),
   toggleAppLock: () => set((state) => ({ appLockEnabled: !state.appLockEnabled })),
 }));
-

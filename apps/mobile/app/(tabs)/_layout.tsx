@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Colors } from '@/constants/Colors';
-import { MapPin, Calendar, BarChart3, Lock } from 'lucide-react-native';
+import { MapPin, Calendar, BarChart3, User } from 'lucide-react-native';
 import { SirFlushIcon } from '@/src/components/MascotIcons';
 import { QuickLogModal } from '@/src/components/QuickLogModal';
 
@@ -81,12 +81,12 @@ export default function TabLayout() {
           }}
         />
 
-        {/* Tab 4: Kunci / Pengaturan */}
+        {/* Tab 4: Profil & Pengaturan */}
         <Tabs.Screen
           name="settings"
           options={{
-            title: 'Kunci',
-            tabBarIcon: ({ color }) => <Lock size={22} color={color} />,
+            title: 'Profil',
+            tabBarIcon: ({ color }) => <User size={22} color={color} />,
           }}
         />
       </Tabs>

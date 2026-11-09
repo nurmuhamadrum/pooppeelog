@@ -14,7 +14,6 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
 }
 
 async function initDatabase(db: SQLite.SQLiteDatabase) {
-  // Aktifkan mode WAL untuk performa baca/tulis kilat (<10ms)
   await db.execAsync(`
     PRAGMA journal_mode = WAL;
 
@@ -82,6 +81,18 @@ export async function insertLocalLog(log: Log): Promise<void> {
   );
 }
 
+export async function updateLocalLogMoodAndNote(
+  id: string,
+  mood: string,
+  note: string
+): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync(
+    `UPDATE local_logs SET mood = ?, note = ? WHERE id = ?`,
+    [mood, note, id]
+  );
+}
+
 export async function getLocalLogs(limit = 100): Promise<Log[]> {
   const db = await getDatabase();
   const rows = await db.getAllAsync<any>(
@@ -123,4 +134,3 @@ export async function clearAllLocalData(): Promise<void> {
     DELETE FROM user_preferences;
   `);
 }
-
