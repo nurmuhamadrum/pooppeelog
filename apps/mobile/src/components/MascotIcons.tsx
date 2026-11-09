@@ -128,3 +128,4 @@ export const SirFlushIcon: React.FC<MascotProps> = ({ size = 48 }) => (
     <Circle cx="65" cy="32" r="3" fill="#FF6B6B" opacity={0.7} />
   </Svg>
 );
+

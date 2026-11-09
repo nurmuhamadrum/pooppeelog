@@ -66,3 +66,4 @@ export async function getCurrentLocationWithAddress(): Promise<LocationResult> {
     return fallback;
   }
 }
+
