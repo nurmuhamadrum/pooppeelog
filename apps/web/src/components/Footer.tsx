@@ -41,13 +41,13 @@ export const Footer: React.FC = () => {
             </div>
 
             <a
-              href="https://buymeacoffee.com"
+              href="https://saweria.co/pooppeelog"
               target="_blank"
               rel="noreferrer"
-              className="px-4 py-2 rounded-xl bg-[#FFDD00] text-black font-black text-xs flex items-center gap-2 shadow hover:bg-[#ffe338] transition-transform hover:scale-105 active:scale-95"
+              className="px-4 py-2 rounded-xl bg-[#FAAE2B] text-black font-black text-xs flex items-center gap-2 shadow hover:bg-[#fbb944] transition-transform hover:scale-105 active:scale-95"
             >
               <span>☕</span>
-              <span>Buy Me a Coffee</span>
+              <span>Dukung di Saweria</span>
             </a>
           </div>
         </div>

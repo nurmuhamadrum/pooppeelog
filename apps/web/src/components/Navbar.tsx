@@ -45,14 +45,14 @@ export const Navbar: React.FC = () => {
         {/* CTA Buttons */}
         <div className="hidden md:flex items-center gap-3">
           <a
-            href="https://buymeacoffee.com"
+            href="https://saweria.co/pooppeelog"
             target="_blank"
             rel="noreferrer"
-            className="px-4 py-2.5 rounded-full bg-[#FFDD00] text-black font-black text-xs flex items-center gap-1.5 shadow-md hover:bg-[#ffe338] hover:scale-105 active:scale-95 transition-all"
-            title="Dukung Developer di Buy Me a Coffee"
+            className="px-4 py-2.5 rounded-full bg-[#FAAE2B] text-black font-black text-xs flex items-center gap-1.5 shadow-md hover:bg-[#fbb944] hover:scale-105 active:scale-95 transition-all"
+            title="Dukung Developer di Saweria"
           >
             <Coffee className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>Buy Me a Coffee</span>
+            <span>Dukung di Saweria</span>
           </a>
 
           <a
@@ -84,14 +84,14 @@ export const Navbar: React.FC = () => {
           <a href="#privasi" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-pee-amber">Privasi 100%</a>
           <div className="pt-2 flex flex-col gap-2.5">
             <a
-              href="https://buymeacoffee.com"
+              href="https://saweria.co/pooppeelog"
               target="_blank"
               rel="noreferrer"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full py-3 rounded-xl bg-[#FFDD00] text-black font-black text-xs flex items-center justify-center gap-2 shadow"
+              className="w-full py-3 rounded-xl bg-[#FAAE2B] text-black font-black text-xs flex items-center justify-center gap-2 shadow"
             >
               <Coffee className="w-4 h-4 stroke-[2.5]" />
-              <span>Buy Me a Coffee</span>
+              <span>Dukung di Saweria</span>
             </a>
             <a
               href="#download"
