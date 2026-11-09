@@ -18,7 +18,18 @@ import { darkMapStyle } from '@/constants/MapStyle';
 import { useAppStore } from '@/src/store/useAppStore';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from '@/src/components/MascotIcons';
 import { Log } from '@poop-pee-log/shared';
-import { Navigation, X, ChevronRight, Calendar, Clock, Smile, FileText, MapPin } from 'lucide-react-native';
+import {
+  Navigation,
+  X,
+  ChevronRight,
+  Calendar,
+  Clock,
+  Smile,
+  FileText,
+  MapPin,
+  Sparkles,
+  Layers,
+} from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -129,23 +140,37 @@ export default function MapScreen() {
   const displayLogs: any[] = logs.length > 0 ? logs : DEFAULT_INITIAL_PINS;
 
   // Filter jenis buang air
+  // Normalisasi type menjadi UPPERCASE agar konsisten saat perbandingan
   const filteredLogs = useMemo(() => {
     return displayLogs.filter((log) => {
+      const logType = String(log.type || '').toUpperCase();
       if (mapFilter === 'ALL') return true;
-      if (mapFilter === 'PEE') return log.type === 'PEE';
-      if (mapFilter === 'POOP') return log.type === 'POOP';
-      if (mapFilter === 'COMBO') return log.type === 'COMBO';
+      if (mapFilter === 'PEE') return logType === 'PEE';
+      if (mapFilter === 'POOP') return logType === 'POOP';
+      if (mapFilter === 'COMBO') return logType === 'COMBO';
       return true;
     });
   }, [displayLogs, mapFilter]);
 
+  // Hitung jumlah masing-masing kategori untuk badge di filter pills
+  const counts = useMemo(() => {
+    let pee = 0;
+    let poop = 0;
+    let combo = 0;
+    displayLogs.forEach((l) => {
+      const t = String(l.type || '').toUpperCase();
+      if (t === 'PEE') pee++;
+      else if (t === 'POOP') poop++;
+      else if (t === 'COMBO') combo++;
+    });
+    return { all: displayLogs.length, pee, poop, combo };
+  }, [displayLogs]);
+
   // GROUPING LOGS PADA LOKASI YANG SAMA
-  // Membulatkan koordinat ke 4 desimal (~10 meter) sehingga log di toilet yang sama menyatu jadi 1 pin akurat dengan badge count
   const locationGroups: LocationGroup[] = useMemo(() => {
     const map = new Map<string, LocationGroup>();
 
     filteredLogs.forEach((log) => {
-      // Pembulatan 4 angka desimal (~11 meter)
       const latKey = log.latitude.toFixed(4);
       const lngKey = log.longitude.toFixed(4);
       const groupKey = `${latKey}_${lngKey}`;
@@ -204,9 +229,10 @@ export default function MapScreen() {
       >
         {locationGroups.map((group) => {
           const log = group.latestLog;
-          const isPee = log.type === 'PEE';
-          const isPoop = log.type === 'POOP';
-          const isCombo = log.type === 'COMBO';
+          const logType = String(log.type || '').toUpperCase();
+          const isPee = logType === 'PEE';
+          const isPoop = logType === 'POOP';
+          const isCombo = logType === 'COMBO';
           const isSelected = selectedGroup?.key === group.key;
           const count = group.logs.length;
 
@@ -217,35 +243,41 @@ export default function MapScreen() {
               key={group.key}
               coordinate={{ latitude: group.latitude, longitude: group.longitude }}
               onPress={() => setSelectedGroup(group)}
-              tracksViewChanges={false}
-              centerOffset={{ x: 0, y: -18 }}
+              tracksViewChanges={true}
+              anchor={{ x: 0.5, y: 0.88 }}
             >
-              <View style={styles.markerContainer}>
-                {/* Pin Circle Mascot Avatar */}
-                <View
-                  style={[
-                    styles.pinCircle,
-                    {
-                      backgroundColor: markerBg,
-                      borderColor: isSelected ? '#FFFFFF' : Colors.darkBg,
-                    },
-                    isSelected && styles.pinCircleSelected,
-                  ]}
-                >
-                  {isPee && <LilDripIcon size={22} />}
-                  {isPoop && <MrPlopIcon size={22} />}
-                  {isCombo && <SirFlushIcon size={22} />}
+              {/* Outer fixed canvas wrapper untuk mencegah clipping/terpotong di iOS & Android */}
+              <View style={styles.markerAnchorWrapper}>
+                <View style={styles.markerContainer}>
+                  {/* Pin Circle Mascot Avatar */}
+                  <View
+                    style={[
+                      styles.pinCircle,
+                      {
+                        backgroundColor: markerBg,
+                        borderColor: isSelected ? '#FFFFFF' : Colors.darkBg,
+                      },
+                      isSelected && styles.pinCircleSelected,
+                    ]}
+                  >
+                    {isPee && <LilDripIcon size={20} />}
+                    {isPoop && <MrPlopIcon size={20} />}
+                    {isCombo && <SirFlushIcon size={20} />}
 
-                  {/* Badge Counter jika lebih dari 1 log di titik ini */}
-                  {count > 1 && (
-                    <View style={styles.countBadge}>
-                      <Text style={styles.countBadgeText}>{count}</Text>
-                    </View>
-                  )}
+                    {/* Badge Counter jika lebih dari 1 log di titik ini */}
+                    {count > 1 && (
+                      <View style={styles.countBadge}>
+                        <Text style={styles.countBadgeText}>{count}</Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Tiny needle pointer */}
+                  <View style={[styles.pinNeedle, { backgroundColor: markerBg }]} />
+
+                  {/* Pulsing selection ring glow */}
+                  {isSelected && <View style={[styles.selectionPulse, { borderColor: markerBg }]} />}
                 </View>
-
-                {/* Tiny needle pointer */}
-                <View style={[styles.pinNeedle, { backgroundColor: markerBg }]} />
               </View>
             </Marker>
           );
@@ -255,48 +287,79 @@ export default function MapScreen() {
       {/* 2. TOP FILTER PILLS BAR */}
       <SafeAreaView style={styles.safeTopBar} pointerEvents="box-none">
         <View style={styles.topFilterBar}>
-          <View style={styles.filterPills}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterPillsScroll}
+          >
             <TouchableOpacity
               style={[styles.pill, mapFilter === 'ALL' && styles.pillActive]}
               onPress={() => setMapFilter('ALL')}
+              activeOpacity={0.8}
             >
               <Text style={[styles.pillText, mapFilter === 'ALL' && styles.pillTextActive]}>
-                Semua ({displayLogs.length})
+                Semua ({counts.all})
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.pill, mapFilter === 'PEE' && styles.pillActive]}
               onPress={() => setMapFilter('PEE')}
+              activeOpacity={0.8}
             >
               <Text style={[styles.pillText, mapFilter === 'PEE' && styles.pillTextActive]}>
-                💧 Pee ({displayLogs.filter((l: any) => l.type === 'PEE').length})
+                💧 Pee ({counts.pee})
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.pill, mapFilter === 'POOP' && styles.pillActive]}
               onPress={() => setMapFilter('POOP')}
+              activeOpacity={0.8}
             >
               <Text style={[styles.pillText, mapFilter === 'POOP' && styles.pillTextActive]}>
-                💩 Poop ({displayLogs.filter((l: any) => l.type === 'POOP').length})
+                💩 Poop ({counts.poop})
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.pill, mapFilter === 'COMBO' && styles.pillActive]}
+              style={[
+                styles.pill,
+                mapFilter === 'COMBO' && styles.pillActiveFlush,
+              ]}
               onPress={() => setMapFilter('COMBO')}
+              activeOpacity={0.8}
             >
-              <Text style={[styles.pillText, mapFilter === 'COMBO' && styles.pillTextActive]}>
-                🚽 Flush ({displayLogs.filter((l: any) => l.type === 'COMBO').length})
+              <Text
+                style={[
+                  styles.pillText,
+                  mapFilter === 'COMBO' && styles.pillTextActiveDark,
+                ]}
+              >
+                🚽 Flush ({counts.combo})
               </Text>
             </TouchableOpacity>
+          </ScrollView>
+        </View>
+
+        {/* Top Floating Stats Pill (Informatif: Total titik & total log aktif) */}
+        <View style={styles.mapInfoPillRow} pointerEvents="none">
+          <View style={styles.mapInfoPill}>
+            <MapPin size={12} color={Colors.peeAmber} />
+            <Text style={styles.mapInfoPillText}>
+              <Text style={{ fontWeight: '900', color: Colors.creamBg }}>{locationGroups.length}</Text> Titik Terpetakan
+            </Text>
+            <View style={styles.infoPillDivider} />
+            <Layers size={12} color={Colors.bothTeal} />
+            <Text style={styles.mapInfoPillText}>
+              <Text style={{ fontWeight: '900', color: Colors.creamBg }}>{filteredLogs.length}</Text> Catatan
+            </Text>
           </View>
         </View>
       </SafeAreaView>
 
       {/* 3. FLOATING ACTION: RE-CENTER KE LOKASI GPS PENGGUNA */}
-      <TouchableOpacity style={styles.recenterBtn} onPress={centerOnUser}>
+      <TouchableOpacity style={styles.recenterBtn} onPress={centerOnUser} activeOpacity={0.85}>
         <Navigation size={20} color={Colors.creamBg} />
       </TouchableOpacity>
 
@@ -309,25 +372,25 @@ export default function MapScreen() {
                 styles.popupAvatar,
                 {
                   backgroundColor:
-                    selectedGroup.latestLog.type === 'PEE'
+                    String(selectedGroup.latestLog.type).toUpperCase() === 'PEE'
                       ? Colors.peeAmber
-                      : selectedGroup.latestLog.type === 'POOP'
+                      : String(selectedGroup.latestLog.type).toUpperCase() === 'POOP'
                       ? Colors.poopBrown
                       : Colors.bothTeal,
                 },
               ]}
             >
-              {selectedGroup.latestLog.type === 'PEE' && <LilDripIcon size={26} />}
-              {selectedGroup.latestLog.type === 'POOP' && <MrPlopIcon size={26} />}
-              {selectedGroup.latestLog.type === 'COMBO' && <SirFlushIcon size={26} />}
+              {String(selectedGroup.latestLog.type).toUpperCase() === 'PEE' && <LilDripIcon size={26} />}
+              {String(selectedGroup.latestLog.type).toUpperCase() === 'POOP' && <MrPlopIcon size={26} />}
+              {String(selectedGroup.latestLog.type).toUpperCase() === 'COMBO' && <SirFlushIcon size={26} />}
             </View>
 
             <View style={{ flex: 1 }}>
               <View style={styles.popupTitleRow}>
                 <Text style={styles.popupTitle}>
-                  {selectedGroup.latestLog.type === 'PEE'
+                  {String(selectedGroup.latestLog.type).toUpperCase() === 'PEE'
                     ? "Lil' Drip • "
-                    : selectedGroup.latestLog.type === 'POOP'
+                    : String(selectedGroup.latestLog.type).toUpperCase() === 'POOP'
                     ? "Mr. Plop • "
                     : "Sir Flush • "}
                   {selectedGroup.latestLog.mood || 'Lega Banget'}
@@ -364,6 +427,7 @@ export default function MapScreen() {
             <TouchableOpacity
               style={styles.detailButton}
               onPress={() => setDetailModalVisible(true)}
+              activeOpacity={0.8}
             >
               <Text style={styles.detailButtonText}>Lihat Detail</Text>
               <ChevronRight size={14} color={Colors.peeAmber} />
@@ -406,21 +470,21 @@ export default function MapScreen() {
                 <View style={styles.statDivider} />
                 <View style={styles.statSummaryItem}>
                   <Text style={[styles.statSummaryNumber, { color: Colors.peeAmber }]}>
-                    {selectedGroup.logs.filter((l) => l.type === 'PEE').length}
+                    {selectedGroup.logs.filter((l) => String(l.type).toUpperCase() === 'PEE').length}
                   </Text>
                   <Text style={styles.statSummaryLabel}>Pee</Text>
                 </View>
                 <View style={styles.statDivider} />
                 <View style={styles.statSummaryItem}>
                   <Text style={[styles.statSummaryNumber, { color: Colors.peachTint }]}>
-                    {selectedGroup.logs.filter((l) => l.type === 'POOP').length}
+                    {selectedGroup.logs.filter((l) => String(l.type).toUpperCase() === 'POOP').length}
                   </Text>
                   <Text style={styles.statSummaryLabel}>Poop</Text>
                 </View>
                 <View style={styles.statDivider} />
                 <View style={styles.statSummaryItem}>
                   <Text style={[styles.statSummaryNumber, { color: Colors.bothTeal }]}>
-                    {selectedGroup.logs.filter((l) => l.type === 'COMBO').length}
+                    {selectedGroup.logs.filter((l) => String(l.type).toUpperCase() === 'COMBO').length}
                   </Text>
                   <Text style={styles.statSummaryLabel}>Sir Flush</Text>
                 </View>
@@ -430,9 +494,10 @@ export default function MapScreen() {
 
               <ScrollView style={styles.logList} showsVerticalScrollIndicator={false}>
                 {selectedGroup.logs.map((item, idx) => {
-                  const isPee = item.type === 'PEE';
-                  const isPoop = item.type === 'POOP';
-                  const isCombo = item.type === 'COMBO';
+                  const t = String(item.type || '').toUpperCase();
+                  const isPee = t === 'PEE';
+                  const isPoop = t === 'POOP';
+                  const isCombo = t === 'COMBO';
                   const logColor = isPee
                     ? Colors.peeAmber
                     : isPoop
@@ -509,33 +574,35 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   topFilterBar: {
-    marginTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 28) + 12 : 12,
-    marginHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 28) + 10 : 10,
+    marginHorizontal: 12,
   },
-  filterPills: {
+  filterPillsScroll: {
     flexDirection: 'row',
     backgroundColor: 'rgba(46, 40, 35, 0.94)',
-    borderRadius: 22,
+    borderRadius: 24,
     padding: 4,
     borderWidth: 1,
     borderColor: Colors.darkBorder,
-    flex: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 6,
     elevation: 6,
+    gap: 4,
   },
   pill: {
-    flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
     borderRadius: 18,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   pillActive: {
     backgroundColor: Colors.peeAmber,
+  },
+  pillActiveFlush: {
+    backgroundColor: Colors.bothTeal,
   },
   pillText: {
     fontSize: 11,
@@ -545,6 +612,40 @@ const styles = StyleSheet.create({
   pillTextActive: {
     color: '#000',
     fontWeight: '900',
+  },
+  pillTextActiveDark: {
+    color: '#000',
+    fontWeight: '900',
+  },
+  mapInfoPillRow: {
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  mapInfoPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(30, 26, 23, 0.88)',
+    borderRadius: 20,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(61, 53, 46, 0.8)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  mapInfoPillText: {
+    fontSize: 10,
+    color: Colors.peachTint,
+    opacity: 0.9,
+  },
+  infoPillDivider: {
+    width: 1,
+    height: 12,
+    backgroundColor: Colors.darkBorder,
   },
   recenterBtn: {
     position: 'absolute',
@@ -564,69 +665,70 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
+  markerAnchorWrapper: {
+    width: 60,
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   markerContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 6,
-    overflow: 'visible',
+    width: 48,
+    height: 48,
   },
   pinCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 2.5,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.4,
-    shadowRadius: 5,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 4,
+    elevation: 5,
   },
   pinCircleSelected: {
-    transform: [{ scale: 1.15 }],
-    borderWidth: 3,
+    borderWidth: 2.5,
     borderColor: '#FFF',
+    shadowColor: '#FFF',
+    shadowOpacity: 0.5,
   },
   countBadge: {
     position: 'absolute',
-    top: -6,
-    right: -6,
+    top: -5,
+    right: -5,
     backgroundColor: Colors.emergencyRed,
-    borderRadius: 9,
-    minWidth: 18,
-    height: 18,
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: 3,
     borderWidth: 1.5,
     borderColor: Colors.darkBg,
-    zIndex: 99,
   },
   countBadgeText: {
     color: '#FFF',
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: '900',
   },
   pinNeedle: {
-    width: 8,
-    height: 8,
+    width: 7,
+    height: 7,
     transform: [{ rotate: '45deg' }],
-    marginTop: -4,
+    marginTop: -3,
+    borderRadius: 1,
   },
-  pinBadgeLabel: {
-    marginTop: 4,
-    backgroundColor: 'rgba(30, 26, 23, 0.96)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.darkBorder,
-  },
-  pinBadgeText: {
-    color: Colors.creamBg,
-    fontSize: 9,
-    fontWeight: '800',
+  selectionPulse: {
+    position: 'absolute',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1.5,
+    opacity: 0.7,
   },
   popupCard: {
     position: 'absolute',
