@@ -67,13 +67,13 @@ export const BuyMeACoffeeSection: React.FC = () => {
             {/* Mascot Trio with Coffee */}
             <div className="flex items-center gap-4">
               <div className="flex items-center -space-x-3">
-                <div className="w-14 h-14 rounded-2xl bg-poop-brown p-2 border-2 border-dark-bg shadow-xl flex items-center justify-center transform -rotate-6">
+                <div className="w-14 h-14 rounded-full bg-poop-brown p-2 border-2 border-dark-bg shadow-xl flex items-center justify-center transform -rotate-6">
                   <MrPlopSVG />
                 </div>
-                <div className="w-16 h-16 rounded-2xl bg-pee-amber p-2.5 border-2 border-dark-bg shadow-2xl z-10 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-full bg-pee-amber p-2.5 border-2 border-dark-bg shadow-2xl z-10 flex items-center justify-center">
                   <LilDripSVG />
                 </div>
-                <div className="w-14 h-14 rounded-2xl bg-both-teal p-2 border-2 border-dark-bg shadow-xl flex items-center justify-center transform rotate-6">
+                <div className="w-14 h-14 rounded-full bg-both-teal p-2 border-2 border-dark-bg shadow-xl flex items-center justify-center transform rotate-6">
                   <SirFlushSVG />
                 </div>
               </div>

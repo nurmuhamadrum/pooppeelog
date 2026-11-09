@@ -21,6 +21,19 @@ export const BadgesSection: React.FC = () => {
     }
   };
 
+  const getMascotBgColor = (mascot: string) => {
+    switch (mascot) {
+      case 'MR_PLOP':
+        return 'bg-poop-brown';
+      case 'LIL_DRIP':
+        return 'bg-pee-amber';
+      case 'SIR_FLUSH':
+        return 'bg-both-teal';
+      default:
+        return 'bg-pee-amber';
+    }
+  };
+
   const getMascotSVG = (mascot: string) => {
     switch (mascot) {
       case 'MR_PLOP':
@@ -58,8 +71,12 @@ export const BadgesSection: React.FC = () => {
               className="group bg-dark-surface border border-dark-border rounded-3xl p-6 text-center hover:border-pee-amber/60 hover:shadow-xl hover:shadow-pee-amber/10 transition-all flex flex-col justify-between"
             >
               <div>
-                {/* Mascot Icon Container */}
-                <div className="w-16 h-16 rounded-2xl bg-dark-bg border border-dark-border p-2 mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform">
+                {/* Mascot Icon Container - circular with matching brand background & dark-bg border */}
+                <div
+                  className={`w-16 h-16 rounded-full ${getMascotBgColor(
+                    badge.mascot
+                  )} border-2 border-dark-bg p-2 mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform flex items-center justify-center`}
+                >
                   {getMascotSVG(badge.mascot)}
                 </div>
 

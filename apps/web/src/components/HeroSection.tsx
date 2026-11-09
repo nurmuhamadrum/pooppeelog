@@ -29,7 +29,7 @@ export const HeroSection: React.FC = () => {
             <Sparkles className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '6s' }} />
             <span>Lifelogger Biologis Personal & Aman</span>
             <span className="text-[10px] bg-pee-amber/20 text-pee-amber px-2 py-0.5 rounded-full font-extrabold">
-              v1.0 Ready
+              v1.0
             </span>
           </div>
 
@@ -60,7 +60,7 @@ export const HeroSection: React.FC = () => {
               <button
                 type="button"
                 onClick={() => triggerBubble('Mr. Plop: "Plong itu hak asasi setiap manusia! 🍫"')}
-                className={`w-10 h-10 rounded-2xl bg-gradient-to-br from-[#5C3217] to-[#241208] p-1.5 border-2 border-white/20 shadow-md hover:scale-125 hover:z-20 active:scale-90 transition-all ${
+                className={`w-10 h-10 rounded-full bg-poop-brown p-1 border-2 border-dark-bg shadow-md hover:scale-125 hover:z-20 active:scale-90 transition-all flex items-center justify-center ${
                   poopWiggle ? 'mascot-bounce-wiggle' : ''
                 }`}
                 title="Sapa Mr. Plop"
@@ -70,7 +70,7 @@ export const HeroSection: React.FC = () => {
               <button
                 type="button"
                 onClick={() => triggerBubble('Lil\' Drip: "Gluk gluk... Jangan nahan kencing ya! 💧"')}
-                className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#0B4B75] to-[#041A29] p-1.5 border-2 border-white/20 shadow-md hover:scale-125 hover:z-20 active:scale-90 transition-all"
+                className="w-10 h-10 rounded-full bg-pee-amber p-1 border-2 border-dark-bg shadow-md hover:scale-125 hover:z-20 active:scale-90 transition-all flex items-center justify-center"
                 title="Sapa Lil' Drip"
               >
                 <LilDripSVG />
@@ -78,7 +78,7 @@ export const HeroSection: React.FC = () => {
               <button
                 type="button"
                 onClick={() => triggerBubble('Sir Flush: "Wussshh! Login akunmu melindungi data tetap aman & tersimpan awet! 🛡️"')}
-                className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#134E4A] to-[#082220] p-1.5 border-2 border-white/20 shadow-md hover:scale-125 hover:z-20 active:scale-90 transition-all"
+                className="w-10 h-10 rounded-full bg-both-teal p-1 border-2 border-dark-bg shadow-md hover:scale-125 hover:z-20 active:scale-90 transition-all flex items-center justify-center"
                 title="Sapa Sir Flush"
               >
                 <SirFlushSVG />
@@ -146,20 +146,20 @@ export const HeroSection: React.FC = () => {
         </div>
 
         {/* Right Column: Interactive Phone Frame in Real Size (Displays Quick-Log Catat Kelegaan) */}
-        <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
-          {/* Floating Playful Mascot Badges around Phone */}
-          <div className="hidden sm:flex absolute -top-4 -left-4 z-30 items-center gap-1.5 bg-dark-surface/95 backdrop-blur border border-[#C98A58]/50 px-3 py-1.5 rounded-2xl shadow-xl transform -rotate-6 hover:rotate-0 transition-transform">
-            <span className="w-5 h-5 rounded-full bg-[#7A4824] p-0.5 flex-shrink-0">
+        <div className="lg:col-span-5 flex flex-col items-center justify-center relative pt-8 sm:pt-6 pb-6">
+          {/* Floating Playful Mascot Badges around Phone - placed safely at top-left and top-right so they never overlap the phone or bottom info text */}
+          <div className="hidden sm:flex absolute -top-3 -left-6 z-30 items-center gap-1.5 bg-dark-surface/95 backdrop-blur border border-dark-border px-3.5 py-1.5 rounded-full shadow-2xl transform -rotate-6 hover:rotate-0 transition-transform">
+            <span className="w-6 h-6 rounded-full bg-poop-brown p-0.5 border border-dark-bg flex-shrink-0 flex items-center justify-center">
               <MrPlopSVG />
             </span>
-            <span className="text-[10px] font-black text-cream-bg">Lega Maksimal!</span>
+            <span className="text-xs font-black text-cream-bg">Lega Maksimal!</span>
           </div>
 
-          <div className="hidden sm:flex absolute -bottom-3 -right-2 z-30 items-center gap-1.5 bg-dark-surface/95 backdrop-blur border border-drip-blue/50 px-3 py-1.5 rounded-2xl shadow-xl transform rotate-3 hover:rotate-0 transition-transform">
-            <span className="w-5 h-5 rounded-full bg-[#0E78C2] p-0.5 flex-shrink-0">
+          <div className="hidden sm:flex absolute -top-3 -right-6 z-30 items-center gap-1.5 bg-dark-surface/95 backdrop-blur border border-dark-border px-3.5 py-1.5 rounded-full shadow-2xl transform rotate-6 hover:rotate-0 transition-transform">
+            <span className="w-6 h-6 rounded-full bg-pee-amber p-0.5 border border-dark-bg flex-shrink-0 flex items-center justify-center">
               <LilDripSVG />
             </span>
-            <span className="text-[10px] font-black text-cream-bg">1-Tap Kencing</span>
+            <span className="text-xs font-black text-cream-bg">1-Tap Kencing</span>
           </div>
 
           {/* Interactive Phone Mockup with standard real-device sizing showing quick-log */}

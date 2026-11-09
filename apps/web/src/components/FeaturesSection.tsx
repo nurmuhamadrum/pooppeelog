@@ -40,7 +40,7 @@ export const FeaturesSection: React.FC = () => {
             </p>
 
             <div className="bg-dark-bg/80 border border-dark-border p-4 rounded-2xl flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-pee-amber p-1 flex-shrink-0 shadow">
+              <div className="w-10 h-10 rounded-full bg-pee-amber p-1 flex-shrink-0 shadow flex items-center justify-center border border-dark-bg">
                 <LilDripSVG />
               </div>
               <div className="text-xs">
@@ -69,7 +69,7 @@ export const FeaturesSection: React.FC = () => {
             </p>
 
             <div className="bg-dark-bg/80 border border-dark-border p-4 rounded-2xl flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-poop-brown p-1 flex-shrink-0 shadow">
+              <div className="w-10 h-10 rounded-full bg-poop-brown p-1 flex-shrink-0 shadow flex items-center justify-center border border-dark-bg">
                 <MrPlopSVG />
               </div>
               <div className="text-xs">
@@ -98,7 +98,7 @@ export const FeaturesSection: React.FC = () => {
             </p>
 
             <div className="bg-dark-bg/80 border border-dark-border p-4 rounded-2xl flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-both-teal p-1 flex-shrink-0 shadow">
+              <div className="w-10 h-10 rounded-full bg-both-teal p-1 flex-shrink-0 shadow flex items-center justify-center border border-dark-bg">
                 <SirFlushSVG />
               </div>
               <div className="text-xs">

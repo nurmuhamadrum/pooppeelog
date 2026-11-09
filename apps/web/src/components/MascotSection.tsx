@@ -90,8 +90,8 @@ export const MascotSection: React.FC = () => {
             </div>
 
             <div>
-              {/* Mascot Bubble / Avatar Container - using lighter caramel warm gradient background so Mr Plop pops out with high contrast */}
-              <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-[#5C3217] via-[#3E210F] to-[#241208] p-3 mx-auto mb-4 shadow-xl border-2 border-[#C98A58]/40 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 relative flex items-center justify-center">
+              {/* Mascot Bubble Container - identical to header style with circle shape and brand bg */}
+              <div className="w-32 h-32 rounded-full bg-poop-brown p-3 mx-auto mb-4 shadow-xl border-4 border-dark-bg transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 relative flex items-center justify-center">
                 <div className={`w-full h-full ${tappedMascot === 'plop' ? 'mascot-bounce-wiggle' : 'mascot-float'}`}>
                   <MrPlopSVG />
                 </div>
@@ -138,8 +138,8 @@ export const MascotSection: React.FC = () => {
             </div>
 
             <div>
-              {/* Mascot Bubble Container */}
-              <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-[#0B4B75] via-[#08304B] to-[#041A29] p-3 mx-auto mb-4 shadow-xl border-2 border-drip-blue/40 transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 relative flex items-center justify-center">
+              {/* Mascot Bubble Container - identical to header style with circle shape and brand bg */}
+              <div className="w-32 h-32 rounded-full bg-pee-amber p-3 mx-auto mb-4 shadow-xl border-4 border-dark-bg transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 relative flex items-center justify-center">
                 <div className={`w-full h-full ${tappedMascot === 'drip' ? 'mascot-bounce-wiggle' : 'mascot-float'}`}>
                   <LilDripSVG />
                 </div>
@@ -186,8 +186,8 @@ export const MascotSection: React.FC = () => {
             </div>
 
             <div>
-              {/* Mascot Bubble Container */}
-              <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-[#134E4A] via-[#0F3936] to-[#082220] p-3 mx-auto mb-4 shadow-xl border-2 border-both-teal/40 transform group-hover:scale-110 group-hover:rotate-2 transition-transform duration-300 relative flex items-center justify-center">
+              {/* Mascot Bubble Container - identical to header style with circle shape and brand bg */}
+              <div className="w-32 h-32 rounded-full bg-both-teal p-3 mx-auto mb-4 shadow-xl border-4 border-dark-bg transform group-hover:scale-110 group-hover:rotate-2 transition-transform duration-300 relative flex items-center justify-center">
                 <div className={`w-full h-full ${tappedMascot === 'flush' ? 'mascot-bounce-wiggle' : 'mascot-float'}`}>
                   <SirFlushSVG />
                 </div>

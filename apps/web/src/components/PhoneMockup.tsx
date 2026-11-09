@@ -465,41 +465,41 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({
         {/* B. QUICK LOG SCREEN (BESAR & TAKTIL) */}
         {/* ============================== */}
         {activeScreen === 'quick-log' && (
-          <div className="flex-1 flex flex-col justify-end p-5 bg-dark-bg/85 backdrop-blur-md">
-            <div className="bg-dark-surface border border-dark-border rounded-[36px] p-6 shadow-2xl text-center animate-fadeIn">
-              <div className="w-14 h-1.5 bg-dark-border rounded-full mx-auto mb-4" />
-              <h3 className="text-2xl font-black text-cream-bg">Catat Kelegaan</h3>
-              <p className="text-xs text-peach-tint/70 mt-1 mb-5">
+          <div className="flex-1 flex flex-col justify-center px-4 py-3 bg-dark-bg/85 backdrop-blur-md overflow-y-auto">
+            <div className="bg-dark-surface border border-dark-border rounded-[32px] p-5 shadow-2xl text-center animate-fadeIn my-auto">
+              <div className="w-12 h-1.5 bg-dark-border rounded-full mx-auto mb-3" />
+              <h3 className="text-xl sm:text-2xl font-black text-cream-bg">Catat Kelegaan</h3>
+              <p className="text-[11px] sm:text-xs text-peach-tint/70 mt-0.5 mb-4">
                 Pilih aksi cepat di bawah. Waktu & GPS terisi otomatis!
               </p>
 
               {/* 2 LARGE ACTION BUTTONS (PEE & POOP) */}
-              <div className="grid grid-cols-2 gap-3.5 mb-3.5">
+              <div className="grid grid-cols-2 gap-3 mb-3">
                 {/* LIL' DRIP (PEE) - EXTRA LARGE BUTTON */}
                 <button
                   onClick={() => setScreen('mood')}
-                  className="group p-5 rounded-3xl bg-pee-amber/15 border-2 border-pee-amber hover:bg-pee-amber/25 transition-all flex flex-col items-center gap-3 active:scale-95 shadow-xl shadow-pee-amber/15"
+                  className="group p-3.5 sm:p-4 rounded-3xl bg-pee-amber/15 border-2 border-pee-amber hover:bg-pee-amber/25 transition-all flex flex-col items-center gap-2 active:scale-95 shadow-xl shadow-pee-amber/15"
                 >
-                  <div className="w-20 h-20 rounded-3xl bg-pee-amber p-2 shadow-lg group-hover:scale-105 transition-transform flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-pee-amber p-1.5 shadow-lg group-hover:scale-105 transition-transform flex items-center justify-center border-2 border-dark-bg">
                     <LilDripSVG />
                   </div>
                   <div>
-                    <div className="font-black text-base text-pee-amber tracking-wider">LIL' DRIP</div>
-                    <div className="text-xs text-peach-tint/80 font-semibold mt-0.5">PEE (Kencing)</div>
+                    <div className="font-black text-sm sm:text-base text-pee-amber tracking-wider">LIL' DRIP</div>
+                    <div className="text-[11px] text-peach-tint/80 font-semibold mt-0.5">PEE (Kencing)</div>
                   </div>
                 </button>
 
                 {/* MR. PLOP (POOP) - EXTRA LARGE BUTTON */}
                 <button
                   onClick={() => setScreen('mood')}
-                  className="group p-5 rounded-3xl bg-poop-brown/20 border-2 border-poop-brown hover:bg-poop-brown/30 transition-all flex flex-col items-center gap-3 active:scale-95 shadow-xl shadow-poop-brown/20"
+                  className="group p-3.5 sm:p-4 rounded-3xl bg-poop-brown/20 border-2 border-poop-brown hover:bg-poop-brown/30 transition-all flex flex-col items-center gap-2 active:scale-95 shadow-xl shadow-poop-brown/20"
                 >
-                  <div className="w-20 h-20 rounded-3xl bg-poop-brown p-2 shadow-lg group-hover:scale-105 transition-transform flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-poop-brown p-1.5 shadow-lg group-hover:scale-105 transition-transform flex items-center justify-center border-2 border-dark-bg">
                     <MrPlopSVG />
                   </div>
                   <div>
-                    <div className="font-black text-base text-peach-tint tracking-wider">MR. PLOP</div>
-                    <div className="text-xs text-peach-tint/80 font-semibold mt-0.5">POOP (BAB)</div>
+                    <div className="font-black text-sm sm:text-base text-peach-tint tracking-wider">MR. PLOP</div>
+                    <div className="text-[11px] text-peach-tint/80 font-semibold mt-0.5">POOP (BAB)</div>
                   </div>
                 </button>
               </div>
@@ -507,16 +507,16 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({
               {/* SIR FLUSH (COMBO KEDUANYA) - LARGE FULL-WIDTH BUTTON */}
               <button
                 onClick={() => setScreen('mood')}
-                className="w-full py-4 px-5 rounded-2xl bg-both-teal/15 border-2 border-both-teal hover:bg-both-teal/25 transition flex items-center justify-center gap-3.5 shadow-lg active:scale-98"
+                className="w-full py-3 px-4 rounded-2xl bg-both-teal/15 border-2 border-both-teal hover:bg-both-teal/25 transition flex items-center justify-center gap-3 shadow-lg active:scale-98"
               >
-                <div className="w-10 h-10 rounded-xl bg-both-teal p-1 flex-shrink-0 shadow">
+                <div className="w-9 h-9 rounded-full bg-both-teal p-1 flex-shrink-0 shadow flex items-center justify-center border border-dark-bg">
                   <SirFlushSVG />
                 </div>
                 <div className="text-left">
-                  <span className="font-black text-sm text-both-teal block leading-tight">
+                  <span className="font-black text-xs sm:text-sm text-both-teal block leading-tight">
                     Sir Flush (Keduanya Sekaligus)
                   </span>
-                  <span className="text-[11px] text-peach-tint/70 block mt-0.5">
+                  <span className="text-[10px] text-peach-tint/70 block mt-0.5">
                     Paket kombo kencing & BAB dalam satu waktu
                   </span>
                 </div>

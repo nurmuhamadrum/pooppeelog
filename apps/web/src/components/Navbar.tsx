@@ -24,7 +24,7 @@ export const Navbar: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-black text-lg text-cream-bg tracking-tight">Poop Pee Log</span>
-              <span className="text-[10px] bg-both-teal/20 text-both-teal border border-both-teal/40 px-2 py-0.5 rounded-full font-bold">MVP Fase 1</span>
+              <span className="text-[10px] bg-both-teal/20 text-both-teal border border-both-teal/40 px-2 py-0.5 rounded-full font-bold">v1.0</span>
             </div>
             <span className="text-[11px] text-peach-tint/70 font-medium block -mt-0.5">Track. Log. Lega.</span>
           </div>

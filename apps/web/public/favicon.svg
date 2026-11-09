@@ -1,0 +1,29 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Circle background (teal seperti Sir Flush) -->
+  <circle cx="50" cy="50" r="48" fill="#2FB8AC" />
+
+  <!-- Toilet icon in solid white -->
+  <!-- Water Tank Lid -->
+  <rect x="34" y="16" width="32" height="6" rx="3" fill="#FFFFFF" />
+
+  <!-- Water Tank -->
+  <rect x="28" y="21" width="44" height="25" rx="5" fill="#FFFFFF" />
+
+  <!-- Flush Handle -->
+  <rect x="23" y="27" width="6" height="4" rx="2" fill="#FFFFFF" />
+
+  <!-- Toilet Rim / Seat -->
+  <rect x="20" y="45" width="60" height="9" rx="4.5" fill="#FFFFFF" />
+
+  <!-- Toilet Bowl -->
+  <path
+    d="M28 53 C28 69, 38 76, 44 78 L56 78 C62 76, 72 69, 72 53 Z"
+    fill="#FFFFFF"
+  />
+
+  <!-- Toilet Base Stand -->
+  <path
+    d="M38 75 L62 75 L65 85 L35 85 Z"
+    fill="#FFFFFF"
+  />
+</svg>
