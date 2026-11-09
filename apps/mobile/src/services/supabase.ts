@@ -37,3 +37,4 @@ export async function getOrCreateGuestUser(): Promise<string> {
 
   return guestId;
 }
+

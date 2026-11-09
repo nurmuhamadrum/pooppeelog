@@ -84,3 +84,4 @@ export const useAppStore = create<AppState>((set, get) => ({
   toggleBlurLocation: () => set((state) => ({ blurLocation: !state.blurLocation })),
   toggleAppLock: () => set((state) => ({ appLockEnabled: !state.appLockEnabled })),
 }));
+

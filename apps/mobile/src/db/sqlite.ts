@@ -123,3 +123,4 @@ export async function clearAllLocalData(): Promise<void> {
     DELETE FROM user_preferences;
   `);
 }
+
