@@ -1,0 +1,15 @@
+{
+  "name": "poop-pee-log-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace=@poop-pee-log/web run dev",
+    "build:web": "npm --workspace=@poop-pee-log/web run build",
+    "preview:web": "npm --workspace=@poop-pee-log/web run preview",
+    "dev:mobile": "npm --workspace=@poop-pee-log/mobile run start"
+  }
+}

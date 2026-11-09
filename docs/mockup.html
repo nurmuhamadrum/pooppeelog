@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poop Pee Log - Figma Mascot Edition (Mr. Plop, Lil' Drip & Sir Flush)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* Color Palette Variables */
+    :root {
+      --color-poop-brown: #8B5E3C;
+      --color-pee-amber: #F5B700;
+      --color-drip-blue: #3BA3E8;
+      --color-both-teal: #2FB8AC;
+      --color-emergency: #FF5A5F;
+      --color-cream-bg: #FFF6EA;
+      --color-peach-tint: #F3E3D6;
+      --color-ink: #2B1A0E;
+      --color-dark-bg: #1E1A17;
+      --color-dark-surface: #2E2823;
+    }
+    body {
+      background-color: #1E1A17;
+      color: #FFF6EA;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(139, 94, 60, 0.4); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(139, 94, 60, 0.7); }
+    .phone-shadow {
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6), 0 0 0 12px #2E2823, 0 0 0 14px #423A33;
+    }
+    .map-pattern {
+      background-color: #1E1A17;
+      background-image: radial-gradient(#3D352E 1.5px, transparent 1.5px), radial-gradient(#3D352E 1.5px, #1E1A17 1.5px);
+      background-size: 24px 24px;
+      background-position: 0 0, 12px 12px;
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans antialiased selection:bg-[#F5B700] selection:text-[#2B1A0E]">
+
+  <!-- SVG MASCOT TEMPLATES (DEFINITIONS) -->
+  <svg class="hidden">
+    <defs>
+      <!-- MR. PLOP (POOP MASCOT) -->
+      <g id="mascot-mr-plop">
+        <!-- Top swirl -->
+        <path d="M50 12C48 18 42 22 40 26C38 30 43 32 50 32C57 32 62 30 60 26C58 22 52 18 50 12Z" fill="#A27049"/>
+        <path d="M50 12C49 16 43 20 42 25C47 28 53 28 58 25C57 20 51 16 50 12Z" fill="#8B5E3C"/>
+        <!-- Middle Tier -->
+        <ellipse cx="50" cy="46" rx="28" ry="15" fill="#8B5E3C"/>
+        <path d="M24 46C24 38 36 34 50 34C64 34 76 38 76 46C76 53 64 57 50 57C36 57 24 53 24 46Z" fill="#8B5E3C"/>
+        <!-- Bottom Tier -->
+        <ellipse cx="50" cy="70" rx="38" ry="18" fill="#8B5E3C"/>
+        <ellipse cx="50" cy="65" rx="36" ry="16" fill="#996843"/>
+        <ellipse cx="50" cy="42" rx="24" ry="12" fill="#996843"/>
+        <!-- Eyes -->
+        <circle cx="39" cy="54" r="7" fill="#FFFFFF"/>
+        <circle cx="61" cy="54" r="7" fill="#FFFFFF"/>
+        <circle cx="40" cy="54" r="4.5" fill="#2B1A0E"/>
+        <circle cx="62" cy="54" r="4.5" fill="#2B1A0E"/>
+        <circle cx="42" cy="52" r="1.8" fill="#FFFFFF"/>
+        <circle cx="64" cy="52" r="1.8" fill="#FFFFFF"/>
+        <!-- Rosy Cheeks -->
+        <circle cx="30" cy="62" r="4.5" fill="#FF5A5F" opacity="0.6"/>
+        <circle cx="70" cy="62" r="4.5" fill="#FF5A5F" opacity="0.6"/>
+        <!-- Happy Smile -->
+        <path d="M43 62C47 66 53 66 57 62" stroke="#2B1A0E" stroke-width="3" stroke-linecap="round"/>
+      </g>
+
+      <!-- LIL' DRIP (PEE MASCOT) -->
+      <g id="mascot-lil-drip">
+        <path d="M50 10C50 10 20 48 20 66C20 82.5 33.5 94 50 94C66.5 94 80 82.5 80 66C80 48 50 10 50 10Z" fill="#3BA3E8"/>
+        <!-- Droplet Highlight -->
+        <path d="M30 52C28 58 28 66 31 72C33 70 34 64 34 58C34 55 32 53 30 52Z" fill="#72C2F8" opacity="0.8"/>
+        <!-- Eyes -->
+        <circle cx="39" cy="64" r="7.5" fill="#FFFFFF"/>
+        <circle cx="61" cy="64" r="7.5" fill="#FFFFFF"/>
+        <circle cx="39.5" cy="64" r="4.8" fill="#2B1A0E"/>
+        <circle cx="61.5" cy="64" r="4.8" fill="#2B1A0E"/>
+        <circle cx="41.5" cy="62" r="2" fill="#FFFFFF"/>
+        <circle cx="63.5" cy="62" r="2" fill="#FFFFFF"/>
+        <!-- Rosy Cheeks -->
+        <circle cx="28" cy="73" r="5" fill="#FF5A5F" opacity="0.6"/>
+        <circle cx="72" cy="73" r="5" fill="#FF5A5F" opacity="0.6"/>
+        <!-- Cute Smile -->
+        <path d="M44 73C47 77 53 77 56 73" stroke="#2B1A0E" stroke-width="3" stroke-linecap="round"/>
+      </g>
+
+      <!-- SIR FLUSH (BOTH / COMBO MASCOT) -->
+      <g id="mascot-sir-flush">
+        <!-- Tank -->
+        <rect x="30" y="16" width="40" height="26" rx="6" fill="#FFFFFF" stroke="#2B1A0E" stroke-width="3"/>
+        <rect x="42" y="12" width="16" height="5" rx="2.5" fill="#FFFFFF" stroke="#2B1A0E" stroke-width="2.5"/>
+        <!-- Flush Handle -->
+        <circle cx="35" cy="22" r="2.5" fill="#2B1A0E"/>
+        <!-- Bowl -->
+        <path d="M32 42H68C68 42 66 66 58 74H42C34 66 32 42 32 42Z" fill="#FFFFFF" stroke="#2B1A0E" stroke-width="3"/>
+        <rect x="24" y="38" width="52" height="8" rx="4" fill="#FFFFFF" stroke="#2B1A0E" stroke-width="3"/>
+        <path d="M40 74H60L63 86H37L40 74Z" fill="#FFFFFF" stroke="#2B1A0E" stroke-width="3"/>
+        <!-- Toilet Face -->
+        <circle cx="42" cy="55" r="4" fill="#2B1A0E"/>
+        <circle cx="58" cy="55" r="4" fill="#2B1A0E"/>
+        <circle cx="43.5" cy="53.5" r="1.5" fill="#FFFFFF"/>
+        <circle cx="59.5" cy="53.5" r="1.5" fill="#FFFFFF"/>
+        <circle cx="34" cy="60" r="3.5" fill="#FF5A5F" opacity="0.6"/>
+        <circle cx="66" cy="60" r="3.5" fill="#FF5A5F" opacity="0.6"/>
+        <path d="M46 62C48 65 52 65 54 62" stroke="#2B1A0E" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Floating Mini Drip -->
+        <g transform="translate(4, 18) scale(0.24)">
+          <path d="M50 10C50 10 20 48 20 66C20 82.5 33.5 94 50 94C66.5 94 80 82.5 80 66C80 48 50 10 50 10Z" fill="#3BA3E8" stroke="#2B1A0E" stroke-width="6"/>
+        </g>
+        <!-- Floating Mini Poop -->
+        <g transform="translate(74, 20) scale(0.24)">
+          <ellipse cx="50" cy="70" rx="38" ry="18" fill="#8B5E3C" stroke="#2B1A0E" stroke-width="6"/>
+          <ellipse cx="50" cy="46" rx="28" ry="15" fill="#8B5E3C" stroke="#2B1A0E" stroke-width="6"/>
+          <path d="M50 12C48 18 42 22 40 26C38 30 43 32 50 32C57 32 62 30 60 26C58 22 52 18 50 12Z" fill="#8B5E3C" stroke="#2B1A0E" stroke-width="6"/>
+        </g>
+      </g>
+    </defs>
+  </svg>
+
+  <!-- TOP HEADER / FIGMA TOOLBAR -->
+  <header class="border-b border-[#3D352E] bg-[#1E1A17]/95 backdrop-blur sticky top-0 z-50 px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <!-- Mascot Trio Logo -->
+      <div class="flex items-center -space-x-2">
+        <div class="w-8 h-8 rounded-full bg-[#8B5E3C] p-0.5 border-2 border-[#1E1A17] shadow flex items-center justify-center">
+          <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-mr-plop"/></svg>
+        </div>
+        <div class="w-8 h-8 rounded-full bg-[#F5B700] p-0.5 border-2 border-[#1E1A17] shadow flex items-center justify-center">
+          <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-lil-drip"/></svg>
+        </div>
+        <div class="w-8 h-8 rounded-full bg-[#2FB8AC] p-0.5 border-2 border-[#1E1A17] shadow flex items-center justify-center">
+          <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-sir-flush"/></svg>
+        </div>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-bold text-base tracking-tight text-[#FFF6EA]">Poop Pee Log</h1>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-[#F5B700]/20 text-[#F5B700] font-semibold border border-[#F5B700]/40">Mascot Edition</span>
+        </div>
+        <p class="text-xs text-[#F3E3D6]/70">Featuring Mr. Plop, Lil' Drip & Sir Flush</p>
+      </div>
+    </div>
+
+    <!-- VIEWPORT SWITCHER -->
+    <div class="flex items-center bg-[#2E2823] p-1 rounded-xl border border-[#3D352E] text-xs font-medium">
+      <button onclick="switchView('mobile')" id="btn-tab-mobile" class="px-4 py-1.5 rounded-lg transition-all flex items-center gap-2 bg-[#F5B700] text-[#2B1A0E] font-bold shadow">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" stroke-width="2"/><path stroke-width="2" d="M12 18h.01"/></svg>
+        Mobile App (390×844)
+      </button>
+      <button onclick="switchView('website')" id="btn-tab-website" class="px-4 py-1.5 rounded-lg transition-all flex items-center gap-2 text-[#F3E3D6]/70 hover:text-white">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2" stroke-width="2"/><path stroke-width="2" d="M8 21h8m-4-4v4"/></svg>
+        Website Landing Page
+      </button>
+      <button onclick="switchView('tokens')" id="btn-tab-tokens" class="px-4 py-1.5 rounded-lg transition-all flex items-center gap-2 text-[#F3E3D6]/70 hover:text-white">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-width="2" d="m4.93 4.93 4.24 4.24m5.66 5.66 4.24 4.24m-14.14 0 4.24-4.24m5.66-5.66 4.24-4.24"/></svg>
+        Color Palette & Mascots
+      </button>
+    </div>
+
+    <div class="flex items-center gap-2 text-xs">
+      <span class="inline-flex items-center gap-1.5 text-[#2FB8AC] bg-[#2FB8AC]/10 border border-[#2FB8AC]/30 px-2.5 py-1 rounded-md font-medium">
+        <span class="w-2 h-2 rounded-full bg-[#2FB8AC] animate-pulse"></span>
+        Palette Verified
+      </span>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 1: MOBILE APP SCREENS -->
+  <!-- ========================================================================= -->
+  <main id="view-mobile" class="p-6 md:p-10 max-w-7xl mx-auto transition-all">
+    <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 text-[#F5B700] text-xs font-bold tracking-wider uppercase mb-1">
+          <span>Official Mascot UI</span>
+          <span>•</span>
+          <span>iPhone 16 Pro Frame</span>
+        </div>
+        <h2 class="text-2xl font-black tracking-tight text-[#FFF6EA]">Mobile Lifelogger Prototype</h2>
+        <p class="text-[#F3E3D6]/70 text-sm mt-1">Gunakan tombol di kanan atas frame untuk berpindah layar, atau sentuh tombol FAB + LOG di bawah.</p>
+      </div>
+
+      <!-- Mobile Screen Switcher Buttons -->
+      <div class="flex flex-wrap items-center gap-1.5 bg-[#2E2823] border border-[#3D352E] p-1.5 rounded-xl text-xs">
+        <button onclick="showMobileScreen('map')" id="m-btn-map" class="px-3 py-1.5 rounded-lg bg-[#3D352E] text-[#F5B700] font-bold">1. Map Home</button>
+        <button onclick="showMobileScreen('quick-log')" id="m-btn-quick-log" class="px-3 py-1.5 rounded-lg text-[#F3E3D6]/70 hover:text-white">2. Quick Log (3-Detik)</button>
+        <button onclick="showMobileScreen('mood')" id="m-btn-mood" class="px-3 py-1.5 rounded-lg text-[#F3E3D6]/70 hover:text-white">3. Mood Sheet</button>
+        <button onclick="showMobileScreen('timeline')" id="m-btn-timeline" class="px-3 py-1.5 rounded-lg text-[#F3E3D6]/70 hover:text-white">4. Diary</button>
+        <button onclick="showMobileScreen('stats')" id="m-btn-stats" class="px-3 py-1.5 rounded-lg text-[#F3E3D6]/70 hover:text-white">5. Stats & Badges</button>
+        <button onclick="showMobileScreen('lock')" id="m-btn-lock" class="px-3 py-1.5 rounded-lg text-[#F3E3D6]/70 hover:text-white">6. App Lock</button>
+      </div>
+    </div>
+
+    <!-- Phone Canvas Display -->
+    <div class="flex justify-center items-center py-4">
+      <div class="w-[390px] h-[812px] bg-[#1E1A17] rounded-[50px] phone-shadow relative overflow-hidden flex flex-col border border-[#3D352E]">
+        
+        <!-- STATUS BAR -->
+        <div class="h-10 pt-3 px-7 flex items-center justify-between text-xs text-[#FFF6EA] select-none z-40 bg-[#1E1A17]/80 backdrop-blur-sm">
+          <span class="font-bold text-xs tracking-tight">11:30</span>
+          <div class="w-24 h-5 bg-black rounded-full flex items-center justify-end px-2 gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#2FB8AC] animate-ping"></span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+            <div class="w-5 h-2.5 border border-[#FFF6EA] rounded-sm p-0.5 flex items-center"><div class="h-full w-full bg-[#2FB8AC] rounded-2xs"></div></div>
+          </div>
+        </div>
+
+        <!-- ============================== -->
+        <!-- SCREEN 1: MAP HOME WITH MASCOT PINS -->
+        <!-- ============================== -->
+        <div id="screen-map" class="flex-1 flex flex-col relative overflow-hidden map-pattern">
+          <!-- Top Floating Bar -->
+          <div class="absolute top-3 inset-x-4 z-30 flex items-center justify-between">
+            <div class="bg-[#2E2823]/95 backdrop-blur-md border border-[#3D352E] px-3.5 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
+              <span class="w-2 h-2 rounded-full bg-[#2FB8AC]"></span>
+              <span class="text-xs font-bold text-[#FFF6EA]">Jakarta Pusat</span>
+              <span class="text-[10px] bg-[#1E1A17] text-[#F3E3D6]/70 px-1.5 py-0.5 rounded font-medium">Blur 50m</span>
+            </div>
+
+            <!-- Layer Filter -->
+            <div class="flex bg-[#2E2823]/95 backdrop-blur-md border border-[#3D352E] p-0.5 rounded-full text-[11px] font-bold shadow-lg">
+              <button class="px-2.5 py-1 rounded-full bg-[#F5B700] text-[#2B1A0E]">Semua</button>
+              <button class="px-2.5 py-1 rounded-full text-[#F3E3D6]/80 hover:text-white">Pee</button>
+              <button class="px-2.5 py-1 rounded-full text-[#F3E3D6]/80 hover:text-white">Poop</button>
+            </div>
+          </div>
+
+          <!-- MAP PINS WITH MASCOT AVATARS -->
+          <div class="relative w-full h-full">
+            <!-- Cluster Marker (Sir Flush Theme) -->
+            <div onclick="selectPin('cluster')" class="absolute top-32 left-24 cursor-pointer transform hover:scale-110 transition-all">
+              <div class="w-14 h-14 rounded-full bg-[#2FB8AC] p-1 shadow-xl shadow-[#2FB8AC]/30 animate-pulse flex items-center justify-center">
+                <div class="w-full h-full rounded-full bg-[#1E1A17] flex flex-col items-center justify-center text-[#2FB8AC] font-black text-xs border border-[#2FB8AC]/40">
+                  <span class="text-sm">8</span>
+                  <span class="text-[8px] -mt-1 text-[#F3E3D6]/60">logs</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Single Lil' Drip Pin (Pee) -->
+            <div onclick="selectPin('pee')" class="absolute top-64 right-16 cursor-pointer transform hover:scale-110 transition-all">
+              <div class="flex flex-col items-center">
+                <div class="w-11 h-11 rounded-2xl bg-[#F5B700] border-2 border-white shadow-xl shadow-[#F5B700]/40 p-1 flex items-center justify-center">
+                  <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-lil-drip"/></svg>
+                </div>
+                <div class="w-2 h-2 bg-[#F5B700] rotate-45 -mt-1 border-r-2 border-b-2 border-white"></div>
+                <span class="text-[10px] bg-[#2E2823] text-[#F5B700] px-2 py-0.5 rounded-full shadow border border-[#3D352E] font-bold mt-1">Menteng</span>
+              </div>
+            </div>
+
+            <!-- Single Mr. Plop Pin (Poop) -->
+            <div onclick="selectPin('poop')" class="absolute bottom-40 left-12 cursor-pointer transform hover:scale-110 transition-all">
+              <div class="flex flex-col items-center">
+                <div class="w-11 h-11 rounded-2xl bg-[#8B5E3C] border-2 border-white shadow-xl shadow-[#8B5E3C]/40 p-1 flex items-center justify-center">
+                  <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-mr-plop"/></svg>
+                </div>
+                <div class="w-2 h-2 bg-[#8B5E3C] rotate-45 -mt-1 border-r-2 border-b-2 border-white"></div>
+                <span class="text-[10px] bg-[#2E2823] text-[#F3E3D6] px-2 py-0.5 rounded-full shadow border border-[#3D352E] font-bold mt-1">Grand Indonesia</span>
+              </div>
+            </div>
+
+            <!-- Recenter Button -->
+            <button class="absolute bottom-24 right-4 w-11 h-11 bg-[#2E2823] border border-[#3D352E] rounded-full flex items-center justify-center shadow-lg active:scale-95">
+              <svg class="w-5 h-5 text-[#F5B700]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 2v3m0 14v3m10-10h-3M5 12H2m15 0a5 5 0 1 1-10 0 5 5 0 0 1 10 0Z"/></svg>
+            </button>
+
+            <!-- PIN DETAIL POP-UP CARD -->
+            <div id="pin-detail-card" class="absolute bottom-24 inset-x-4 bg-[#2E2823]/98 backdrop-blur-md border border-[#3D352E] rounded-2xl p-4 shadow-2xl flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div id="card-pin-avatar" class="w-12 h-12 rounded-xl bg-[#F5B700] p-1 border border-white/30 shadow flex items-center justify-center">
+                  <svg id="card-pin-svg" viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-lil-drip"/></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span id="card-pin-title" class="font-extrabold text-sm text-[#FFF6EA]">Lil' Drip • Lega Banget</span>
+                    <span class="text-[10px] text-[#F3E3D6]/60">14:15 WIB</span>
+                  </div>
+                  <p id="card-pin-location" class="text-xs text-[#F3E3D6]/90 mt-0.5">Kec. Menteng, Jakarta Pusat</p>
+                  <p id="card-pin-note" class="text-[11px] text-[#F5B700] italic mt-0.5">"Setelah meeting 3 jam akhirnya plong!"</p>
+                </div>
+              </div>
+              <button onclick="closePinCard()" class="text-[#F3E3D6]/60 hover:text-white p-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M6 18 18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================== -->
+        <!-- SCREEN 2: QUICK LOG WITH MASCOTS (3-DETIK) -->
+        <!-- ============================== -->
+        <div id="screen-quick-log" class="hidden flex-1 flex flex-col justify-end p-5 bg-[#1E1A17]/85 backdrop-blur-md z-40">
+          <div class="bg-[#2E2823] border border-[#3D352E] rounded-[32px] p-6 shadow-2xl text-center">
+            <div class="w-12 h-1 bg-[#4A3F37] rounded-full mx-auto mb-4"></div>
+            <h3 class="text-xl font-black text-[#FFF6EA]">Catat Kelegaan</h3>
+            <p class="text-xs text-[#F3E3D6]/70 mt-1 mb-5">Pilih maskot dalam 1 ketukan. GPS & waktu otomatis tercatat!</p>
+
+            <div class="grid grid-cols-2 gap-3 mb-3">
+              <!-- LIL' DRIP (PEE) BUTTON -->
+              <button onclick="simulateLogSaved('PEE')" class="group p-4 rounded-2xl bg-[#F5B700]/15 border-2 border-[#F5B700] hover:bg-[#F5B700]/25 transition-all flex flex-col items-center gap-2 active:scale-95 shadow-lg shadow-[#F5B700]/10">
+                <div class="w-16 h-16 rounded-2xl bg-[#F5B700] p-1.5 shadow-md group-hover:scale-105 transition-transform">
+                  <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-lil-drip"/></svg>
+                </div>
+                <div>
+                  <div class="font-black text-sm text-[#F5B700] tracking-wider">LIL' DRIP</div>
+                  <div class="text-[10px] text-[#F3E3D6]/70">Pee / Buang Air Kecil</div>
+                </div>
+              </button>
+
+              <!-- MR. PLOP (POOP) BUTTON -->
+              <button onclick="simulateLogSaved('POOP')" class="group p-4 rounded-2xl bg-[#8B5E3C]/20 border-2 border-[#8B5E3C] hover:bg-[#8B5E3C]/30 transition-all flex flex-col items-center gap-2 active:scale-95 shadow-lg shadow-[#8B5E3C]/15">
+                <div class="w-16 h-16 rounded-2xl bg-[#8B5E3C] p-1.5 shadow-md group-hover:scale-105 transition-transform">
+                  <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-mr-plop"/></svg>
+                </div>
+                <div>
+                  <div class="font-black text-sm text-[#F3E3D6] tracking-wider">MR. PLOP</div>
+                  <div class="text-[10px] text-[#F3E3D6]/70">Poop / Buang Air Besar</div>
+                </div>
+              </button>
+            </div>
+
+            <!-- COMBO SIR FLUSH (BOTH) -->
+            <button onclick="simulateLogSaved('BOTH')" class="w-full py-3 px-4 rounded-xl bg-[#2FB8AC]/15 border border-[#2FB8AC] hover:bg-[#2FB8AC]/25 transition flex items-center justify-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-[#2FB8AC] p-0.5">
+                <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-sir-flush"/></svg>
+              </div>
+              <div class="text-left">
+                <span class="font-bold text-xs text-[#2FB8AC]">Sir Flush (Keduanya Sekaligus)</span>
+                <span class="text-[10px] text-[#F3E3D6]/60 block -mt-0.5">Paket lengkap buang air kecil & besar</span>
+              </div>
+            </button>
+
+            <button onclick="showMobileScreen('map')" class="mt-4 text-xs text-[#F3E3D6]/60 hover:text-white py-1">Batal</button>
+          </div>
+        </div>
+
+        <!-- ============================== -->
+        <!-- SCREEN 3: MOOD SHEET WITH PALETTE -->
+        <!-- ============================== -->
+        <div id="screen-mood" class="hidden flex-1 flex flex-col justify-end p-4 bg-[#1E1A17]/80 backdrop-blur-sm z-40">
+          <div class="bg-[#2E2823] border border-[#3D352E] rounded-[28px] p-5 shadow-2xl">
+            <div class="w-10 h-1 bg-[#4A3F37] rounded-full mx-auto mb-3"></div>
+
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-[#2FB8AC] p-1 shadow">
+                  <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-sir-flush"/></svg>
+                </div>
+                <div>
+                  <span class="text-[10px] uppercase font-bold text-[#2FB8AC] tracking-wider">Lega Tercatat!</span>
+                  <h4 class="text-sm font-bold text-[#FFF6EA]">Bagaimana Suasana Hatimu?</h4>
+                </div>
+              </div>
+              <button onclick="showMobileScreen('map')" class="text-xs text-[#F5B700] font-semibold">Lewati</button>
+            </div>
+
+            <!-- Mood Pills -->
+            <label class="text-[11px] text-[#F3E3D6]/70 font-semibold block mb-2">Pilih Mood:</label>
+            <div class="grid grid-cols-2 gap-2 mb-3">
+              <button class="px-3 py-2 rounded-xl bg-[#2FB8AC]/20 border border-[#2FB8AC] text-[#2FB8AC] text-xs font-bold text-left flex items-center gap-2">
+                <span>😌</span> Lega Banget
+              </button>
+              <button class="px-3 py-2 rounded-xl bg-[#1E1A17] border border-[#3D352E] text-[#F3E3D6] text-xs font-medium text-left flex items-center gap-2 hover:border-[#F5B700]">
+                <span>⏱️</span> Nahan Lama
+              </button>
+              <button class="px-3 py-2 rounded-xl bg-[#FF5A5F]/20 border border-[#FF5A5F] text-[#FF5A5F] text-xs font-bold text-left flex items-center gap-2">
+                <span>🚨</span> Momen Darurat
+              </button>
+              <button class="px-3 py-2 rounded-xl bg-[#1E1A17] border border-[#3D352E] text-[#F3E3D6] text-xs font-medium text-left flex items-center gap-2 hover:border-[#8B5E3C]">
+                <span>💥</span> Tragedi Kloset
+              </button>
+            </div>
+
+            <!-- Note Input -->
+            <label class="text-[11px] text-[#F3E3D6]/70 font-semibold flex items-center justify-between mb-1">
+              <span>Catatan Bebas (Opsional):</span>
+              <span class="text-[10px] text-[#F3E3D6]/50">34/100</span>
+            </label>
+            <input type="text" value="Kopi susu di rest area km 57 juara!" class="w-full bg-[#1E1A17] border border-[#3D352E] rounded-xl px-3 py-2 text-xs text-[#FFF6EA] placeholder-[#F3E3D6]/40 focus:outline-none focus:border-[#F5B700] mb-4" />
+
+            <button onclick="showMobileScreen('timeline')" class="w-full py-3 rounded-xl bg-[#F5B700] text-[#2B1A0E] font-black text-xs shadow-lg shadow-[#F5B700]/20 active:scale-98 transition">
+              Simpan & Buka Buku Harian
+            </button>
+          </div>
+        </div>
+
+        <!-- ============================== -->
+        <!-- SCREEN 4: TIMELINE DIARY -->
+        <!-- ============================== -->
+        <div id="screen-timeline" class="hidden flex-1 flex flex-col bg-[#1E1A17] p-4 overflow-y-auto">
+          <div class="mb-4">
+            <h3 class="text-lg font-black text-[#FFF6EA]">Buku Harian Lega</h3>
+            <p class="text-xs text-[#F3E3D6]/70">Total 12 jejak lega tercatat</p>
+          </div>
+
+          <!-- Search -->
+          <div class="bg-[#2E2823] border border-[#3D352E] rounded-xl px-3 py-2 flex items-center gap-2 mb-4">
+            <svg class="w-3.5 h-3.5 text-[#F3E3D6]/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+            <input type="text" placeholder="Cari kota, toilet, catatan..." class="bg-transparent text-xs text-[#FFF6EA] focus:outline-none w-full placeholder-[#F3E3D6]/40" />
+          </div>
+
+          <!-- Items -->
+          <div class="space-y-3">
+            <div class="text-[11px] font-bold text-[#F5B700] uppercase tracking-wider">Hari Ini • 9 Nov 2026</div>
+
+            <!-- Lil' Drip Log -->
+            <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-3 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#F5B700] p-1 flex items-center justify-center shadow">
+                  <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-lil-drip"/></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-xs text-[#FFF6EA]">Lil' Drip • Lega Banget</span>
+                    <span class="text-[10px] text-[#F3E3D6]/50">14:15</span>
+                  </div>
+                  <p class="text-[11px] text-[#F3E3D6]/80">Kec. Menteng, Jakarta Pusat</p>
+                  <p class="text-[11px] text-[#F5B700] italic mt-0.5">"Setelah meeting 3 jam akhirnya plong!"</p>
+                </div>
+              </div>
+              <button class="text-[#F3E3D6]/40 hover:text-[#FF5A5F] p-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21q.512.078 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+              </button>
+            </div>
+
+            <!-- Mr. Plop Log -->
+            <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-3 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[#8B5E3C] p-1 flex items-center justify-center shadow">
+                  <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-mr-plop"/></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-xs text-[#FFF6EA]">Mr. Plop • Masih Ganjel</span>
+                    <span class="text-[10px] text-[#F3E3D6]/50">08:30</span>
+                  </div>
+                  <p class="text-[11px] text-[#F3E3D6]/80">Grand Indonesia, Lt. 3A</p>
+                  <p class="text-[11px] text-[#F3E3D6]/60 italic mt-0.5">"Kloset otomatisnya dingin bgt"</p>
+                </div>
+              </div>
+              <button class="text-[#F3E3D6]/40 hover:text-[#FF5A5F] p-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21q.512.078 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================== -->
+        <!-- SCREEN 5: STATS & BADGES -->
+        <!-- ============================== -->
+        <div id="screen-stats" class="hidden flex-1 flex flex-col bg-[#1E1A17] p-4 overflow-y-auto">
+          <div class="mb-4">
+            <h3 class="text-lg font-black text-[#FFF6EA]">Statistik & Lencana</h3>
+            <p class="text-xs text-[#F3E3D6]/70">Pencapaian bersama Mr. Plop & Lil' Drip</p>
+          </div>
+
+          <!-- Streak Card -->
+          <div class="bg-gradient-to-r from-[#8B5E3C]/40 via-[#F5B700]/30 to-[#2E2823] border border-[#F5B700]/50 rounded-2xl p-4 mb-4 flex items-center justify-between shadow-xl">
+            <div>
+              <span class="text-[10px] font-black text-[#F5B700] uppercase tracking-wider">Streak Aktif</span>
+              <div class="text-2xl font-black text-[#FFF6EA] flex items-center gap-2">
+                5 Hari <span class="text-2xl">🔥</span>
+              </div>
+              <p class="text-[11px] text-[#F3E3D6] mt-0.5">2 hari lagi menuju badge "Lancar Jaya"!</p>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-[#2FB8AC]/20 border border-[#2FB8AC] flex items-center justify-center text-xs font-black text-[#2FB8AC]">
+              71%
+            </div>
+          </div>
+
+          <!-- KPI 2x2 Grid -->
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-3">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-lg bg-[#F5B700] p-0.5"><svg viewBox="0 0 100 100"><use href="#mascot-lil-drip"/></svg></div>
+                <span class="text-[10px] text-[#F3E3D6]/70 uppercase font-bold">Total Pee</span>
+              </div>
+              <div class="text-xl font-black text-[#F5B700] mt-1.5">28 Kali</div>
+              <span class="text-[10px] text-[#2FB8AC] font-medium">💧 Hidrasi prima</span>
+            </div>
+            <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-3">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-lg bg-[#8B5E3C] p-0.5"><svg viewBox="0 0 100 100"><use href="#mascot-mr-plop"/></svg></div>
+                <span class="text-[10px] text-[#F3E3D6]/70 uppercase font-bold">Total Poop</span>
+              </div>
+              <div class="text-xl font-black text-[#F3E3D6] mt-1.5">9 Kali</div>
+              <span class="text-[10px] text-[#F5B700] font-medium">💩 Rutin</span>
+            </div>
+            <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-3">
+              <span class="text-[10px] text-[#F3E3D6]/70 uppercase font-bold">Kecamatan</span>
+              <div class="text-xl font-black text-[#FFF6EA] mt-1">7 Wilayah</div>
+              <span class="text-[10px] text-[#F3E3D6]/50">Jabodetabek</span>
+            </div>
+            <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-3">
+              <span class="text-[10px] text-[#F3E3D6]/70 uppercase font-bold">Ketinggian Max</span>
+              <div class="text-xl font-black text-[#FFF6EA] mt-1">1.450 mdpl</div>
+              <span class="text-[10px] text-[#2FB8AC]">🏔️ Puncak Pass</span>
+            </div>
+          </div>
+
+          <!-- Badges -->
+          <div class="text-xs font-bold text-[#F3E3D6] uppercase tracking-wider mb-2">Koleksi Lencana</div>
+          <div class="grid grid-cols-2 gap-2 pb-6">
+            <div class="bg-[#2E2823] border border-[#F5B700]/50 rounded-xl p-3 text-center">
+              <div class="w-10 h-10 rounded-xl bg-[#F5B700] p-1 mx-auto mb-1"><svg viewBox="0 0 100 100"><use href="#mascot-lil-drip"/></svg></div>
+              <div class="font-bold text-xs text-[#FFF6EA]">Pendatang Baru</div>
+              <span class="inline-block mt-1 text-[9px] bg-[#2FB8AC]/20 text-[#2FB8AC] px-1.5 py-0.5 rounded font-bold">DIRAIH</span>
+            </div>
+            <div class="bg-[#2E2823] border border-[#8B5E3C]/50 rounded-xl p-3 text-center">
+              <div class="w-10 h-10 rounded-xl bg-[#8B5E3C] p-1 mx-auto mb-1"><svg viewBox="0 0 100 100"><use href="#mascot-mr-plop"/></svg></div>
+              <div class="font-bold text-xs text-[#FFF6EA]">Penjelajah Kota</div>
+              <span class="inline-block mt-1 text-[9px] bg-[#2FB8AC]/20 text-[#2FB8AC] px-1.5 py-0.5 rounded font-bold">DIRAIH</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================== -->
+        <!-- SCREEN 6: APP LOCK SCREEN -->
+        <!-- ============================== -->
+        <div id="screen-lock" class="hidden flex-1 flex flex-col items-center justify-between bg-[#1E1A17] p-6">
+          <div class="pt-8 text-center">
+            <!-- Mascot Guard Avatar -->
+            <div class="w-16 h-16 rounded-2xl bg-[#2E2823] border border-[#3D352E] p-2 flex items-center justify-center mx-auto mb-3 shadow-xl">
+              <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-sir-flush"/></svg>
+            </div>
+            <h3 class="text-lg font-black text-[#FFF6EA]">Buku Harian Terkunci</h3>
+            <p class="text-xs text-[#F3E3D6]/70 mt-1">Masukkan 4-digit PIN atau gunakan FaceID</p>
+
+            <div class="flex items-center justify-center gap-4 mt-6">
+              <div class="w-3.5 h-3.5 rounded-full bg-[#F5B700] shadow-lg shadow-[#F5B700]/50"></div>
+              <div class="w-3.5 h-3.5 rounded-full bg-[#F5B700] shadow-lg shadow-[#F5B700]/50"></div>
+              <div class="w-3.5 h-3.5 rounded-full bg-[#3D352E]"></div>
+              <div class="w-3.5 h-3.5 rounded-full bg-[#3D352E]"></div>
+            </div>
+          </div>
+
+          <!-- Keypad -->
+          <div class="w-full max-w-[280px] grid grid-cols-3 gap-3 mb-6">
+            <button class="w-16 h-16 rounded-full bg-[#2E2823] border border-[#3D352E] text-xl font-bold text-[#FFF6EA] mx-auto active:bg-[#F5B700] active:text-[#2B1A0E]">1</button>
+            <button class="w-16 h-16 rounded-full bg-[#2E2823] border border-[#3D352E] text-xl font-bold text-[#FFF6EA] mx-auto active:bg-[#F5B700] active:text-[#2B1A0E]">2</button>
+            <button class="w-16 h-16 rounded-full bg-[#2E2823] border border-[#3D352E] text-xl font-bold text-[#FFF6EA] mx-auto active:bg-[#F5B700] active:text-[#2B1A0E]">3</button>
+            <button class="w-16 h-16 rounded-full bg-[#2E2823] border border-[#3D352E] text-xl font-bold text-[#FFF6EA] mx-auto active:bg-[#F5B700] active:text-[#2B1A0E]">4</button>
+            <button class="w-16 h-16 rounded-full bg-[#2E2823] border border-[#3D352E] text-xl font-bold text-[#FFF6EA] mx-auto active:bg-[#F5B700] active:text-[#2B1A0E]">5</button>
+            <button class="w-16 h-16 rounded-full bg-[#2E2823] border border-[#3D352E] text-xl font-bold text-[#FFF6EA] mx-auto active:bg-[#F5B700] active:text-[#2B1A0E]">6</button>
+            <button class="w-16 h-16 rounded-full bg-[#2E2823] border border-[#3D352E] text-xl font-bold text-[#FFF6EA] mx-auto active:bg-[#F5B700] active:text-[#2B1A0E]">7</button>
+            <button class="w-16 h-16 rounded-full bg-[#2E2823] border border-[#3D352E] text-xl font-bold text-[#FFF6EA] mx-auto active:bg-[#F5B700] active:text-[#2B1A0E]">8</button>
+            <button class="w-16 h-16 rounded-full bg-[#2E2823] border border-[#3D352E] text-xl font-bold text-[#FFF6EA] mx-auto active:bg-[#F5B700] active:text-[#2B1A0E]">9</button>
+            <button onclick="showMobileScreen('map')" class="w-16 h-16 rounded-full flex items-center justify-center text-[#2FB8AC] mx-auto" title="FaceID">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M7 3H5a2 2 0 0 0-2 2v2m14-4h2a2 2 0 0 1 2 2v2M3 17v2a2 2 0 0 0 2 2h2m14-4v2a2 2 0 0 1-2 2h-2M9 9h.01M15 9h.01M10 13c.5.5 1.5 1 2 1s1.5-.5 2-1m-4 4h4"/></svg>
+            </button>
+            <button class="w-16 h-16 rounded-full bg-[#2E2823] border border-[#3D352E] text-xl font-bold text-[#FFF6EA] mx-auto active:bg-[#F5B700] active:text-[#2B1A0E]">0</button>
+            <button class="w-16 h-16 rounded-full flex items-center justify-center text-[#F3E3D6]/50 mx-auto active:text-white">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 14 7.5 9.5m0 0L12 5M7.5 9.5H19a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H5"/></svg>
+            </button>
+          </div>
+
+          <button onclick="showMobileScreen('map')" class="text-xs text-[#F5B700] font-bold mb-2">Buka Cepat (Demo Unlock)</button>
+        </div>
+
+        <!-- ============================== -->
+        <!-- BOTTOM TAB BAR WITH MASCOT FAB -->
+        <!-- ============================== -->
+        <nav class="h-20 bg-[#2E2823]/98 backdrop-blur-md border-t border-[#3D352E] px-4 flex items-center justify-between relative z-30 select-none">
+          <button onclick="showMobileScreen('map')" class="flex flex-col items-center gap-1 text-[#F5B700]">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" stroke-width="2"/></svg>
+            <span class="text-[10px] font-bold">Peta</span>
+          </button>
+
+          <button onclick="showMobileScreen('timeline')" class="flex flex-col items-center gap-1 text-[#F3E3D6]/60 hover:text-white">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+            <span class="text-[10px] font-medium">Diary</span>
+          </button>
+
+          <!-- BIG MASCOT FAB BUTTON (+ LOG) -->
+          <div class="-mt-8">
+            <button onclick="showMobileScreen('quick-log')" class="w-15 h-15 rounded-full bg-[#F5B700] text-[#2B1A0E] font-black text-2xl flex items-center justify-center shadow-2xl shadow-[#F5B700]/50 border-4 border-[#1E1A17] hover:scale-105 active:scale-95 transition-all p-3">
+              <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-sir-flush"/></svg>
+            </button>
+          </div>
+
+          <button onclick="showMobileScreen('stats')" class="flex flex-col items-center gap-1 text-[#F3E3D6]/60 hover:text-white">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+            <span class="text-[10px] font-medium">Stats</span>
+          </button>
+
+          <button onclick="showMobileScreen('lock')" class="flex flex-col items-center gap-1 text-[#F3E3D6]/60 hover:text-white">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z"/></svg>
+            <span class="text-[10px] font-medium">Kunci</span>
+          </button>
+        </nav>
+
+        <!-- Home Bar Indicator -->
+        <div class="h-4 bg-[#1E1A17] flex items-center justify-center pb-1">
+          <div class="w-32 h-1 bg-[#4A3F37] rounded-full"></div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 2: WEBSITE LANDING PAGE (MASCOT THEMED) -->
+  <!-- ========================================================================= -->
+  <section id="view-website" class="hidden transition-all bg-[#1E1A17]">
+    <!-- HERO -->
+    <div class="relative overflow-hidden border-b border-[#3D352E] py-16 md:py-24 px-6 max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <!-- Hero Text -->
+        <div class="lg:col-span-7 space-y-6">
+          <!-- Mascot Pill Badge -->
+          <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-[#2E2823] border border-[#3D352E] text-xs font-bold text-[#F5B700]">
+            <span>✨</span> Teman Buang Air Setiamu: Mr. Plop, Lil' Drip & Sir Flush
+          </div>
+          
+          <h2 class="text-4xl md:text-6xl font-black tracking-tight text-[#FFF6EA] leading-tight">
+            Track. Log. <span class="text-[#2FB8AC]">Lega.</span>
+          </h2>
+          
+          <p class="text-base md:text-lg text-[#F3E3D6]/85 max-w-xl leading-relaxed">
+            Seperti Strava, tapi untuk buang air kecil dan besar diri sendiri. Didampingi karakter lucu menggemaskan, catat momen plong di mana saja dalam 3 detik dengan privasi total.
+          </p>
+
+          <!-- Mascot Cards Preview -->
+          <div class="grid grid-cols-3 gap-3 pt-2 max-w-md">
+            <div class="bg-[#2E2823] border border-[#3D352E] p-2.5 rounded-2xl flex items-center gap-2">
+              <div class="w-10 h-10 rounded-xl bg-[#8B5E3C] p-1 flex-shrink-0 shadow"><svg viewBox="0 0 100 100"><use href="#mascot-mr-plop"/></svg></div>
+              <div>
+                <div class="text-xs font-bold text-[#FFF6EA]">Mr. Plop</div>
+                <div class="text-[10px] text-[#F3E3D6]/60">Poop Mascot</div>
+              </div>
+            </div>
+            <div class="bg-[#2E2823] border border-[#3D352E] p-2.5 rounded-2xl flex items-center gap-2">
+              <div class="w-10 h-10 rounded-xl bg-[#F5B700] p-1 flex-shrink-0 shadow"><svg viewBox="0 0 100 100"><use href="#mascot-lil-drip"/></svg></div>
+              <div>
+                <div class="text-xs font-bold text-[#FFF6EA]">Lil' Drip</div>
+                <div class="text-[10px] text-[#F3E3D6]/60">Pee Mascot</div>
+              </div>
+            </div>
+            <div class="bg-[#2E2823] border border-[#3D352E] p-2.5 rounded-2xl flex items-center gap-2">
+              <div class="w-10 h-10 rounded-xl bg-[#2FB8AC] p-1 flex-shrink-0 shadow"><svg viewBox="0 0 100 100"><use href="#mascot-sir-flush"/></svg></div>
+              <div>
+                <div class="text-xs font-bold text-[#FFF6EA]">Sir Flush</div>
+                <div class="text-[10px] text-[#F3E3D6]/60">Combo Mascot</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CTAs -->
+          <div class="flex flex-wrap items-center gap-4 pt-4">
+            <a href="#" class="px-6 py-3.5 rounded-2xl bg-[#F5B700] text-[#2B1A0E] font-black text-sm flex items-center gap-3 shadow-xl shadow-[#F5B700]/30 hover:scale-105 active:scale-95 transition-all">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M3.609 1.814L13.792 12 3.61 22.186a1.996 1.996 0 0 1-.61-1.436V3.25c0-.555.225-1.057.609-1.436zm11.597 11.599l2.709 2.709-12.08 6.942 9.371-9.651zm0-2.826L5.835 1.936l12.08 6.942-2.709 2.709zm1.414 1.413l3.652 2.096c.866.497.866 1.309 0 1.806l-3.652 2.096-2.42-2.42 2.42-2.578z"/></svg>
+              <span>Download di Google Play</span>
+            </a>
+            <a href="#" class="px-6 py-3.5 rounded-2xl bg-[#2E2823] border border-[#3D352E] text-[#FFF6EA] font-extrabold text-sm flex items-center gap-3 hover:bg-[#3D352E] transition-all">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.75 1.04-1.8 1.01-2.87-.96.04-2.06.64-2.7 1.39-.56.65-1.07 1.71-1.02 2.75 1.07.08 2.1-.53 2.71-1.27z"/></svg>
+              <span>Download di App Store</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Phone Mockup -->
+        <div class="lg:col-span-5 flex justify-center">
+          <div class="w-[310px] h-[600px] bg-[#1E1A17] rounded-[45px] border-8 border-[#2E2823] p-2 shadow-2xl relative map-pattern">
+            <div class="w-20 h-4 bg-black rounded-full mx-auto mb-2"></div>
+            <!-- Lil' Drip Pin -->
+            <div class="absolute top-28 left-12 bg-[#2E2823] border border-[#3D352E] px-2.5 py-1 rounded-full text-xs shadow-lg flex items-center gap-1.5 animate-bounce">
+              <div class="w-5 h-5 rounded-md bg-[#F5B700] p-0.5"><svg viewBox="0 0 100 100"><use href="#mascot-lil-drip"/></svg></div>
+              <span class="font-bold text-[#F5B700]">Menteng</span>
+            </div>
+            <!-- Mr. Plop Pin -->
+            <div class="absolute top-56 right-8 bg-[#2E2823] border border-[#3D352E] px-2.5 py-1 rounded-full text-xs shadow-lg flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-md bg-[#8B5E3C] p-0.5"><svg viewBox="0 0 100 100"><use href="#mascot-mr-plop"/></svg></div>
+              <span class="font-bold text-[#F3E3D6]">Grand Indonesia</span>
+            </div>
+            <div class="absolute bottom-16 inset-x-4 bg-[#2E2823]/95 border border-[#3D352E] rounded-2xl p-3 text-center">
+              <span class="text-[10px] text-[#2FB8AC] font-black uppercase">Track. Log. Lega.</span>
+              <div class="font-black text-[#FFF6EA] text-xs mt-0.5">Semua data tersimpan privat di HP</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 PILLARS -->
+    <div class="py-20 px-6 max-w-7xl mx-auto border-b border-[#3D352E]">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <span class="text-xs font-black text-[#F5B700] uppercase tracking-wider">Fitur Utama</span>
+        <h3 class="text-3xl font-black text-[#FFF6EA] mt-1">Dibuat Khusus untuk Kesenangan Pribadi</h3>
+        <p class="text-[#F3E3D6]/70 text-sm mt-2">Bukan aplikasi pencari toilet umum. Ini adalah rekam jejak biologis personalmu.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-[#2E2823] border border-[#3D352E] p-6 rounded-2xl hover:border-[#F5B700] transition-all">
+          <div class="w-12 h-12 rounded-xl bg-[#F5B700] p-1.5 mb-4 shadow"><svg viewBox="0 0 100 100"><use href="#mascot-lil-drip"/></svg></div>
+          <h4 class="font-bold text-base text-[#FFF6EA]">3-Detik Sat-set</h4>
+          <p class="text-[#F3E3D6]/70 text-xs mt-2 leading-relaxed">Hanya 2 ketukan: tap FAB lalu pilih Mr. Plop atau Lil' Drip. GPS & kota terisi otomatis.</p>
+        </div>
+        <div class="bg-[#2E2823] border border-[#3D352E] p-6 rounded-2xl hover:border-[#8B5E3C] transition-all">
+          <div class="w-12 h-12 rounded-xl bg-[#8B5E3C] p-1.5 mb-4 shadow"><svg viewBox="0 0 100 100"><use href="#mascot-mr-plop"/></svg></div>
+          <h4 class="font-bold text-base text-[#FFF6EA]">Peta Aib Pribadi</h4>
+          <p class="text-[#F3E3D6]/70 text-xs mt-2 leading-relaxed">Peta penuh pin jejak toilet yang pernah disinggahi, lengkap dengan blur 50 meter.</p>
+        </div>
+        <div class="bg-[#2E2823] border border-[#3D352E] p-6 rounded-2xl hover:border-[#2FB8AC] transition-all">
+          <div class="w-12 h-12 rounded-xl bg-[#2FB8AC] p-1.5 mb-4 shadow"><svg viewBox="0 0 100 100"><use href="#mascot-sir-flush"/></svg></div>
+          <h4 class="font-bold text-base text-[#FFF6EA]">Streak & Gamifikasi</h4>
+          <p class="text-[#F3E3D6]/70 text-xs mt-2 leading-relaxed">Jaga konsistensi harian, dapatkan badge kocak, dan pantau rasio buang airmu.</p>
+        </div>
+        <div class="bg-[#2E2823] border border-[#3D352E] p-6 rounded-2xl hover:border-[#FF5A5F] transition-all">
+          <div class="w-12 h-12 rounded-xl bg-[#FF5A5F]/20 border border-[#FF5A5F] flex items-center justify-center text-2xl mb-4">🔒</div>
+          <h4 class="font-bold text-base text-[#FFF6EA]">Privasi Mutlak</h4>
+          <p class="text-[#F3E3D6]/70 text-xs mt-2 leading-relaxed">Kunci PIN & Biometrik. Tanpa feed publik, tanpa toilet rating. Datamu 100% aman.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="py-10 px-6 text-center text-xs text-[#F3E3D6]/50 border-t border-[#3D352E]">
+      <p>© 2026 Poop Pee Log. Karakter Mr. Plop, Lil' Drip & Sir Flush adalah maskot resmi.</p>
+      <p class="mt-1">Aplikasi personal diary mandiri. Bukan saran medis.</p>
+    </footer>
+  </section>
+
+
+  <!-- ========================================================================= -->
+  <!-- VIEW 3: COLOR PALETTE & MASCOTS SPECS -->
+  <!-- ========================================================================= -->
+  <section id="view-tokens" class="hidden p-6 md:p-10 max-w-7xl mx-auto transition-all">
+    <div class="mb-8">
+      <span class="text-xs font-black text-[#F5B700] uppercase tracking-wider">Design System</span>
+      <h2 class="text-2xl font-black text-[#FFF6EA] mt-1">Official Color Palette & Mascot Specs</h2>
+      <p class="text-[#F3E3D6]/70 text-sm">Spesifikasi 10 palet warna dan 3 karakter resmi yang digunakan di aplikasi mobile & website.</p>
+    </div>
+
+    <!-- MASCOT SHOWCASE CARDS -->
+    <div class="mb-10">
+      <h3 class="text-lg font-bold text-[#FFF6EA] mb-4">1. Karakter Maskot Resmi</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Mr. Plop -->
+        <div class="bg-[#2E2823] border border-[#3D352E] rounded-3xl p-6 text-center">
+          <div class="w-28 h-28 rounded-3xl bg-[#8B5E3C] p-2.5 mx-auto mb-4 shadow-xl border-2 border-white/20">
+            <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-mr-plop"/></svg>
+          </div>
+          <h4 class="text-xl font-black text-[#FFF6EA]">Mr. Plop</h4>
+          <span class="text-xs font-bold text-[#8B5E3C] bg-[#8B5E3C]/20 px-2 py-0.5 rounded-full inline-block mt-1">Poop Mascot</span>
+          <p class="text-xs text-[#F3E3D6]/80 mt-3 leading-relaxed">
+            Maskot ramah untuk menandai buang air besar (BAB). Tampil pada tombol POOP, pin peta coklat, dan buku harian.
+          </p>
+        </div>
+
+        <!-- Lil' Drip -->
+        <div class="bg-[#2E2823] border border-[#3D352E] rounded-3xl p-6 text-center">
+          <div class="w-28 h-28 rounded-3xl bg-[#F5B700] p-2.5 mx-auto mb-4 shadow-xl border-2 border-white/20">
+            <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-lil-drip"/></svg>
+          </div>
+          <h4 class="text-xl font-black text-[#FFF6EA]">Lil' Drip</h4>
+          <span class="text-xs font-bold text-[#F5B700] bg-[#F5B700]/20 px-2 py-0.5 rounded-full inline-block mt-1">Pee Mascot</span>
+          <p class="text-xs text-[#F3E3D6]/80 mt-3 leading-relaxed">
+            Tetesan air biru ceria dengan background kuning emas. Maskot untuk buang air kecil (kencing) dan status hidrasi tubuh.
+          </p>
+        </div>
+
+        <!-- Sir Flush -->
+        <div class="bg-[#2E2823] border border-[#3D352E] rounded-3xl p-6 text-center">
+          <div class="w-28 h-28 rounded-3xl bg-[#2FB8AC] p-2.5 mx-auto mb-4 shadow-xl border-2 border-white/20">
+            <svg viewBox="0 0 100 100" class="w-full h-full"><use href="#mascot-sir-flush"/></svg>
+          </div>
+          <h4 class="text-xl font-black text-[#FFF6EA]">Sir Flush</h4>
+          <span class="text-xs font-bold text-[#2FB8AC] bg-[#2FB8AC]/20 px-2 py-0.5 rounded-full inline-block mt-1">Both / Combo Mascot</span>
+          <p class="text-xs text-[#F3E3D6]/80 mt-3 leading-relaxed">
+            Kloset tersenyum yang mengayomi Mr. Plop dan Lil' Drip. Simbol status lega paripurna dan tombol utama FAB + LOG.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10 COLOR PALETTE TOKENS GRID -->
+    <div>
+      <h3 class="text-lg font-bold text-[#FFF6EA] mb-4">2. Palet Warna Resmi (Sesuai Panduan)</h3>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <!-- 1. Poop Brown -->
+        <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-4">
+          <div class="w-full h-16 rounded-xl bg-[#8B5E3C] mb-3 shadow"></div>
+          <div class="font-bold text-sm text-[#FFF6EA]">Poop brown</div>
+          <div class="text-xs text-[#8B5E3C] font-mono font-bold">#8B5E3C</div>
+        </div>
+        <!-- 2. Pee amber -->
+        <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-4">
+          <div class="w-full h-16 rounded-xl bg-[#F5B700] mb-3 shadow"></div>
+          <div class="font-bold text-sm text-[#FFF6EA]">Pee amber</div>
+          <div class="text-xs text-[#F5B700] font-mono font-bold">#F5B700</div>
+        </div>
+        <!-- 3. Drip blue -->
+        <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-4">
+          <div class="w-full h-16 rounded-xl bg-[#3BA3E8] mb-3 shadow"></div>
+          <div class="font-bold text-sm text-[#FFF6EA]">Drip blue</div>
+          <div class="text-xs text-[#3BA3E8] font-mono font-bold">#3BA3E8</div>
+        </div>
+        <!-- 4. Both teal -->
+        <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-4">
+          <div class="w-full h-16 rounded-xl bg-[#2FB8AC] mb-3 shadow"></div>
+          <div class="font-bold text-sm text-[#FFF6EA]">Both teal</div>
+          <div class="text-xs text-[#2FB8AC] font-mono font-bold">#2FB8AC</div>
+        </div>
+        <!-- 5. Emergency -->
+        <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-4">
+          <div class="w-full h-16 rounded-xl bg-[#FF5A5F] mb-3 shadow"></div>
+          <div class="font-bold text-sm text-[#FFF6EA]">Emergency</div>
+          <div class="text-xs text-[#FF5A5F] font-mono font-bold">#FF5A5F</div>
+        </div>
+        <!-- 6. Cream bg -->
+        <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-4">
+          <div class="w-full h-16 rounded-xl bg-[#FFF6EA] mb-3 shadow"></div>
+          <div class="font-bold text-sm text-[#FFF6EA]">Cream bg</div>
+          <div class="text-xs text-[#FFF6EA] font-mono font-bold">#FFF6EA</div>
+        </div>
+        <!-- 7. Peach tint -->
+        <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-4">
+          <div class="w-full h-16 rounded-xl bg-[#F3E3D6] mb-3 shadow"></div>
+          <div class="font-bold text-sm text-[#FFF6EA]">Peach tint</div>
+          <div class="text-xs text-[#F3E3D6] font-mono font-bold">#F3E3D6</div>
+        </div>
+        <!-- 8. Ink -->
+        <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-4">
+          <div class="w-full h-16 rounded-xl bg-[#2B1A0E] mb-3 shadow border border-[#3D352E]"></div>
+          <div class="font-bold text-sm text-[#FFF6EA]">Ink</div>
+          <div class="text-xs text-[#F3E3D6]/70 font-mono font-bold">#2B1A0E</div>
+        </div>
+        <!-- 9. Dark bg -->
+        <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-4">
+          <div class="w-full h-16 rounded-xl bg-[#1E1A17] mb-3 shadow border border-[#3D352E]"></div>
+          <div class="font-bold text-sm text-[#FFF6EA]">Dark bg</div>
+          <div class="text-xs text-[#F3E3D6]/70 font-mono font-bold">#1E1A17</div>
+        </div>
+        <!-- 10. Dark surface -->
+        <div class="bg-[#2E2823] border border-[#3D352E] rounded-2xl p-4">
+          <div class="w-full h-16 rounded-xl bg-[#2E2823] mb-3 shadow border border-[#3D352E]"></div>
+          <div class="font-bold text-sm text-[#FFF6EA]">Dark surface</div>
+          <div class="text-xs text-[#F3E3D6]/70 font-mono font-bold">#2E2823</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    function switchView(view) {
+      document.getElementById('view-mobile').classList.add('hidden');
+      document.getElementById('view-website').classList.add('hidden');
+      document.getElementById('view-tokens').classList.add('hidden');
+
+      document.getElementById('btn-tab-mobile').className = 'px-4 py-1.5 rounded-lg transition-all flex items-center gap-2 text-[#F3E3D6]/70 hover:text-white';
+      document.getElementById('btn-tab-website').className = 'px-4 py-1.5 rounded-lg transition-all flex items-center gap-2 text-[#F3E3D6]/70 hover:text-white';
+      document.getElementById('btn-tab-tokens').className = 'px-4 py-1.5 rounded-lg transition-all flex items-center gap-2 text-[#F3E3D6]/70 hover:text-white';
+
+      if (view === 'mobile') {
+        document.getElementById('view-mobile').classList.remove('hidden');
+        document.getElementById('btn-tab-mobile').className = 'px-4 py-1.5 rounded-lg transition-all flex items-center gap-2 bg-[#F5B700] text-[#2B1A0E] font-bold shadow';
+      } else if (view === 'website') {
+        document.getElementById('view-website').classList.remove('hidden');
+        document.getElementById('btn-tab-website').className = 'px-4 py-1.5 rounded-lg transition-all flex items-center gap-2 bg-[#F5B700] text-[#2B1A0E] font-bold shadow';
+      } else if (view === 'tokens') {
+        document.getElementById('view-tokens').classList.remove('hidden');
+        document.getElementById('btn-tab-tokens').className = 'px-4 py-1.5 rounded-lg transition-all flex items-center gap-2 bg-[#F5B700] text-[#2B1A0E] font-bold shadow';
+      }
+    }
+
+    function showMobileScreen(screenName) {
+      const screens = ['map', 'quick-log', 'mood', 'timeline', 'stats', 'lock'];
+      screens.forEach(s => {
+        const el = document.getElementById('screen-' + s);
+        if (el) el.classList.add('hidden');
+        const btn = document.getElementById('m-btn-' + s);
+        if (btn) btn.className = 'px-3 py-1.5 rounded-lg text-[#F3E3D6]/70 hover:text-white';
+      });
+
+      const target = document.getElementById('screen-' + screenName);
+      if (target) target.classList.remove('hidden');
+      const activeBtn = document.getElementById('m-btn-' + screenName);
+      if (activeBtn) activeBtn.className = 'px-3 py-1.5 rounded-lg bg-[#3D352E] text-[#F5B700] font-bold';
+    }
+
+    function simulateLogSaved(type) {
+      showMobileScreen('mood');
+    }
+
+    function selectPin(type) {
+      const card = document.getElementById('pin-detail-card');
+      card.classList.remove('hidden');
+      const avatar = document.getElementById('card-pin-avatar');
+      const svg = document.getElementById('card-pin-svg');
+
+      if (type === 'poop') {
+        avatar.style.backgroundColor = '#8B5E3C';
+        svg.innerHTML = '<use href="#mascot-mr-plop"/>';
+        document.getElementById('card-pin-title').innerText = "Mr. Plop • Masih Ganjel";
+        document.getElementById('card-pin-location').innerText = "Grand Indonesia, Lantai 3A";
+        document.getElementById('card-pin-note').innerText = '"Kloset otomatisnya dingin bgt"';
+      } else {
+        avatar.style.backgroundColor = '#F5B700';
+        svg.innerHTML = '<use href="#mascot-lil-drip"/>';
+        document.getElementById('card-pin-title').innerText = "Lil' Drip • Lega Banget";
+        document.getElementById('card-pin-location').innerText = "Kec. Menteng, Jakarta Pusat";
+        document.getElementById('card-pin-note').innerText = '"Setelah meeting 3 jam akhirnya plong!"';
+      }
+    }
+
+    function closePinCard() {
+      document.getElementById('pin-detail-card').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>

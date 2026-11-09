@@ -1,0 +1,96 @@
+import { Badge } from '../types';
+
+export const BRAND_COLORS = {
+  poopBrown: '#8B5E3C',
+  peeAmber: '#F5B700',
+  dripBlue: '#3BA3E8',
+  bothTeal: '#2FB8AC',
+  emergency: '#FF5A5F',
+  creamBg: '#FFF6EA',
+  peachTint: '#F3E3D6',
+  ink: '#2B1A0E',
+  darkBg: '#1E1A17',
+  darkSurface: '#2E2823',
+  darkBorder: '#3D352E',
+} as const;
+
+export const MASCOTS = {
+  mrPlop: {
+    name: 'Mr. Plop',
+    role: 'Poop Mascot',
+    type: 'MR_PLOP',
+    color: BRAND_COLORS.poopBrown,
+    tagline: 'Sang penuntun buang air besar yang hangat dan plong.',
+    description: 'Swirl coklat ramah dengan mata bulat berbinar dan senyum manis. Siap menemani setiap momen BAB tanpa rasa canggung.',
+  },
+  lilDrip: {
+    name: "Lil' Drip",
+    role: 'Pee Mascot',
+    type: 'LIL_DRIP',
+    color: BRAND_COLORS.peeAmber,
+    accentColor: BRAND_COLORS.dripBlue,
+    tagline: 'Tetesan air biru ceria pemantau hidrasi harian.',
+    description: 'Tetesan air biru ceria di atas latar kuning emas. Memastikan tubuhmu selalu terhidrasi prima dan tercatat sat-set.',
+  },
+  sirFlush: {
+    name: 'Sir Flush',
+    role: 'Combo Mascot',
+    type: 'SIR_FLUSH',
+    color: BRAND_COLORS.bothTeal,
+    tagline: 'Kloset ramah penjaga privasi dan kelegaan paripurna.',
+    description: 'Kloset tersenyum yang mengayomi Mr. Plop dan Lil\' Drip. Simbol status lega kombo dan pengaman privasi datamu.',
+  },
+} as const;
+
+export const INITIAL_BADGES: Badge[] = [
+  {
+    id: 'badge_01',
+    code: 'PENDATANG_BARU',
+    title: 'Pendatang Baru',
+    description: 'Mencatat log buang air pertama kali dalam sejarah hidupmu.',
+    iconName: 'award',
+    mascot: 'LIL_DRIP',
+    category: 'MILESTONE',
+    requirementText: 'Log pertama berhasil',
+  },
+  {
+    id: 'badge_02',
+    code: 'PENJELAJAH_KOTA',
+    title: 'Penjelajah Kota',
+    description: 'Berhasil buang air di minimal 3 kecamatan yang berbeda.',
+    iconName: 'compass',
+    mascot: 'MR_PLOP',
+    category: 'EXPLORATION',
+    requirementText: '3 kecamatan berbeda',
+  },
+  {
+    id: 'badge_03',
+    code: 'LANCAR_JAYA',
+    title: 'Lancar Jaya',
+    description: 'Menjaga streak pencatatan buang air selama 7 hari berturut-turut.',
+    iconName: 'flame',
+    mascot: 'SIR_FLUSH',
+    category: 'STREAK',
+    requirementText: 'Streak 7 hari aktif',
+  },
+  {
+    id: 'badge_04',
+    code: 'MUSAFIR',
+    title: 'Musafir',
+    description: 'Menandai jejak buang air di minimal 2 kota atau kabupaten berbeda.',
+    iconName: 'map-pin',
+    mascot: 'MR_PLOP',
+    category: 'EXPLORATION',
+    requirementText: '2 kota/kabupaten berbeda',
+  },
+  {
+    id: 'badge_05',
+    code: 'PUNCAK_LEGA',
+    title: 'Puncak Lega',
+    description: 'Berhasil menuntaskan hajat di dataran tinggi berketinggian > 1.000 mdpl.',
+    iconName: 'mountain',
+    mascot: 'SIR_FLUSH',
+    category: 'ELEVATION',
+    requirementText: 'Ketinggian > 1.000 mdpl',
+  },
+];
