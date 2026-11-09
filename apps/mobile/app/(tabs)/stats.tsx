@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useAppStore } from '@/src/store/useAppStore';
-import { Flame, Award, Zap, Compass } from 'lucide-react-native';
+import { evaluateBadges } from '@/src/services/badgeEvaluator';
+import { Flame, Award, MapPin, Zap } from 'lucide-react-native';
 
 export default function StatsScreen() {
   const { logs } = useAppStore();
@@ -10,6 +11,9 @@ export default function StatsScreen() {
   const totalPee = logs.filter((l) => l.type === 'PEE').length;
   const totalPoop = logs.filter((l) => l.type === 'POOP').length;
   const totalLogs = logs.length;
+
+  const badges = useMemo(() => evaluateBadges(logs), [logs]);
+  const unlockedCount = badges.filter((b) => b.isUnlocked).length;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -39,46 +43,55 @@ export default function StatsScreen() {
         </View>
       </View>
 
-      {/* Badges Preview */}
+      {/* Badges Collection Section */}
       <View style={styles.badgeSection}>
         <View style={styles.sectionHeader}>
-          <Award size={18} color={Colors.bothTeal} />
-          <Text style={styles.sectionTitle}>Koleksi Lencana Master</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Award size={18} color={Colors.bothTeal} />
+            <Text style={styles.sectionTitle}>Koleksi Lencana Master</Text>
+          </View>
+          <Text style={styles.badgeCounterText}>
+            {unlockedCount} / {badges.length} Terbuka
+          </Text>
         </View>
 
         <View style={styles.badgeList}>
-          <View style={[styles.badgeItem, totalLogs >= 1 && styles.badgeUnlocked]}>
-            <Text style={styles.badgeEmoji}>🎖️</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.badgeName}>Lega Perdana</Text>
-              <Text style={styles.badgeDesc}>Mencatat buang air pertama kali di aplikasi</Text>
+          {badges.map((badge) => (
+            <View
+              key={badge.id}
+              style={[styles.badgeItem, badge.isUnlocked && styles.badgeUnlocked]}
+            >
+              <Text style={[styles.badgeEmoji, !badge.isUnlocked && styles.badgeEmojiLocked]}>
+                {badge.emoji}
+              </Text>
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={[
+                    styles.badgeName,
+                    !badge.isUnlocked && { color: Colors.peachTint, opacity: 0.6 },
+                  ]}
+                >
+                  {badge.name}
+                </Text>
+                <Text style={styles.badgeDesc}>{badge.description}</Text>
+              </View>
+              <View
+                style={[
+                  styles.statusPill,
+                  badge.isUnlocked ? styles.statusPillActive : styles.statusPillLocked,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.statusPillText,
+                    badge.isUnlocked ? styles.statusPillTextActive : styles.statusPillTextLocked,
+                  ]}
+                >
+                  {badge.progressText}
+                </Text>
+              </View>
             </View>
-            <Text style={[styles.badgeStatus, { color: totalLogs >= 1 ? Colors.bothTeal : Colors.darkBorder }]}>
-              {totalLogs >= 1 ? 'Terbuka' : 'Terkunci'}
-            </Text>
-          </View>
-
-          <View style={[styles.badgeItem, totalPee >= 5 && styles.badgeUnlocked]}>
-            <Text style={styles.badgeEmoji}>🌊</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.badgeName}>Hidrasi Terjaga</Text>
-              <Text style={styles.badgeDesc}>Mencatat 5x buang air kecil bersama Lil' Drip</Text>
-            </View>
-            <Text style={[styles.badgeStatus, { color: totalPee >= 5 ? Colors.bothTeal : Colors.darkBorder }]}>
-              {totalPee >= 5 ? 'Terbuka' : 'Terkunci'}
-            </Text>
-          </View>
-
-          <View style={[styles.badgeItem, totalPoop >= 3 && styles.badgeUnlocked]}>
-            <Text style={styles.badgeEmoji}>👑</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.badgeName}>Raja Kloset</Text>
-              <Text style={styles.badgeDesc}>Mencatat 3x buang air besar bersama Mr. Plop</Text>
-            </View>
-            <Text style={[styles.badgeStatus, { color: totalPoop >= 3 ? Colors.bothTeal : Colors.darkBorder }]}>
-              {totalPoop >= 3 ? 'Terbuka' : 'Terkunci'}
-            </Text>
-          </View>
+          ))}
         </View>
       </View>
     </ScrollView>
@@ -159,14 +172,19 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 8,
     marginBottom: 14,
   },
   sectionTitle: {
     fontSize: 14,
     fontWeight: '900',
     color: Colors.creamBg,
+  },
+  badgeCounterText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Colors.bothTeal,
   },
   badgeList: {
     gap: 10,
@@ -183,9 +201,13 @@ const styles = StyleSheet.create({
   },
   badgeUnlocked: {
     borderColor: 'rgba(47, 184, 172, 0.5)',
+    backgroundColor: 'rgba(47, 184, 172, 0.05)',
   },
   badgeEmoji: {
     fontSize: 24,
+  },
+  badgeEmojiLocked: {
+    opacity: 0.35,
   },
   badgeName: {
     fontSize: 13,
@@ -196,10 +218,28 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Colors.peachTint,
     opacity: 0.6,
+    marginTop: 2,
   },
-  badgeStatus: {
-    fontSize: 11,
+  statusPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  statusPillActive: {
+    backgroundColor: 'rgba(47, 184, 172, 0.2)',
+  },
+  statusPillLocked: {
+    backgroundColor: Colors.darkSurface,
+  },
+  statusPillText: {
+    fontSize: 10,
     fontWeight: '800',
   },
+  statusPillTextActive: {
+    color: Colors.bothTeal,
+  },
+  statusPillTextLocked: {
+    color: Colors.peachTint,
+    opacity: 0.5,
+  },
 });
-

@@ -72,3 +72,4 @@ export const darkMapStyle = [
     stylers: [{ color: '#3BA3E8' }],
   },
 ];
+

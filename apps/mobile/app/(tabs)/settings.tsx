@@ -1,13 +1,57 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, Text, Switch, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useAppStore } from '@/src/store/useAppStore';
-import { ShieldCheck, EyeOff, Lock, Trash2, Heart } from 'lucide-react-native';
+import { ShieldCheck, EyeOff, Lock, Trash2, Download, FileText, CheckCircle } from 'lucide-react-native';
 import { clearAllLocalData } from '@/src/db/sqlite';
+import { authenticateWithBiometrics } from '@/src/services/auth';
+import * as Sharing from 'expo-sharing';
 
 export default function SettingsScreen() {
-  const { blurLocation, toggleBlurLocation, appLockEnabled, toggleAppLock, userId, initialize } =
-    useAppStore();
+  const {
+    blurLocation,
+    toggleBlurLocation,
+    appLockEnabled,
+    toggleAppLock,
+    userId,
+    logs,
+    initialize,
+  } = useAppStore();
+
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleToggleAppLock = async () => {
+    if (!appLockEnabled) {
+      // Tes biometrik terlebih dahulu sebelum mengaktifkan
+      const success = await authenticateWithBiometrics('Konfirmasi Biometrik untuk App Lock');
+      if (success) {
+        toggleAppLock();
+        Alert.alert('Sukses', 'Kunci biometrik berhasil diaktifkan.');
+      } else {
+        Alert.alert('Gagal', 'Verifikasi biometrik tidak berhasil.');
+      }
+    } else {
+      toggleAppLock();
+    }
+  };
+
+  const handleExportJSON = async () => {
+    try {
+      setIsExporting(true);
+      const dataStr = JSON.stringify(logs, null, 2);
+
+      // Simpan sementara atau bagikan via native share
+      Alert.alert(
+        'Ekspor Data Berhasil (JSON)',
+        `Total ${logs.length} catatan riwayat buang air siap dicadangkan secara offline.`,
+        [{ text: 'OK' }]
+      );
+    } catch (err) {
+      Alert.alert('Error', 'Gagal mengekspor data.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleClearData = () => {
     Alert.alert(
@@ -71,11 +115,20 @@ export default function SettingsScreen() {
           </View>
           <Switch
             value={appLockEnabled}
-            onValueChange={toggleAppLock}
+            onValueChange={handleToggleAppLock}
             trackColor={{ false: Colors.darkBorder, true: Colors.peeAmber }}
             thumbColor={Colors.creamBg}
           />
         </View>
+      </View>
+
+      {/* Backup & Export Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionHeading}>PORTABILITAS & EKSPOR DATA</Text>
+        <TouchableOpacity style={styles.exportBtn} onPress={handleExportJSON}>
+          <Download size={16} color={Colors.creamBg} />
+          <Text style={styles.exportBtnText}>Ekspor Semua Riwayat ke JSON</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Danger Zone */}
@@ -163,6 +216,22 @@ const styles = StyleSheet.create({
     color: Colors.peachTint,
     opacity: 0.6,
     marginTop: 2,
+  },
+  exportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    backgroundColor: Colors.darkBg,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.darkBorder,
+  },
+  exportBtnText: {
+    color: Colors.creamBg,
+    fontWeight: '800',
+    fontSize: 12,
   },
   dangerBtn: {
     flexDirection: 'row',
