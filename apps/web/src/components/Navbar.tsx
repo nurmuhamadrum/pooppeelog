@@ -40,10 +40,6 @@ export const Navbar: React.FC = () => {
             <ShieldCheck className="w-4 h-4 text-both-teal" />
             Privasi 100%
           </a>
-          <a href="#support" className="hover:text-[#FFDD00] transition-colors flex items-center gap-1.5 text-cream-bg">
-            <Coffee className="w-4 h-4 text-[#FFDD00]" />
-            Traktir Kopi
-          </a>
         </nav>
 
         {/* CTA Buttons */}
@@ -86,9 +82,6 @@ export const Navbar: React.FC = () => {
           <a href="#preview" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-pee-amber">Peta Pribadi</a>
           <a href="#lencana" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-pee-amber">Lencana</a>
           <a href="#privasi" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-pee-amber">Privasi 100%</a>
-          <a href="#support" onClick={() => setMobileMenuOpen(false)} className="block py-1 text-[#FFDD00] flex items-center gap-2">
-            <Coffee className="w-4 h-4" /> Traktir Kopi (Buy Me a Coffee)
-          </a>
           <div className="pt-2 flex flex-col gap-2.5">
             <a
               href="https://buymeacoffee.com"

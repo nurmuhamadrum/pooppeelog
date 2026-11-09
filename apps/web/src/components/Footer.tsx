@@ -36,7 +36,6 @@ export const Footer: React.FC = () => {
               <a href="#preview" className="hover:text-pee-amber">Simulator</a>
               <a href="#lencana" className="hover:text-pee-amber">Lencana</a>
               <a href="#privasi" className="hover:text-pee-amber">Privasi</a>
-              <a href="#support" className="text-[#FFDD00] hover:underline">Traktir Kopi</a>
               <a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-pee-amber">GitHub</a>
             </div>
 
@@ -58,7 +57,7 @@ export const Footer: React.FC = () => {
             <strong>Disclaimer Medis:</strong> Poop Pee Log dirancang sebagai buku harian catatan pribadi mandiri. Aplikasi ini bukan perangkat medis dan tidak dimaksudkan untuk mendiagnosis, mengobati, atau mencegah penyakit apa pun. Konsultasikan dengan tenaga medis profesional jika Anda memiliki keluhan pencernaan atau saluran kemih.
           </p>
           <p className="flex items-center justify-center gap-1 text-peach-tint/60 pt-2">
-            Dibuat dengan <Heart className="w-3.5 h-3.5 text-emergency fill-emergency" /> oleh Tim Vibe Engineering © 2026 Poop Pee Log. Seluruh hak cipta dilindungi undang-undang.
+            Dibuat dengan <Heart className="w-3.5 h-3.5 text-emergency fill-emergency" /> oleh Tim Poop Pee Log © 2026. Seluruh hak cipta dilindungi undang-undang.
           </p>
         </div>
       </div>

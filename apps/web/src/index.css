@@ -34,3 +34,64 @@ body {
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(61, 53, 46, 0.8);
 }
+
+/* Mascot Kawaii Animations */
+@keyframes bounceWiggle {
+  0%, 100% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) scale(1.05) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(0) scale(0.97) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-5px) scale(1.03) rotate(3deg);
+  }
+}
+
+@keyframes eyeBlink {
+  0%, 92%, 100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes softFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.mascot-bounce-wiggle {
+  animation: bounceWiggle 2.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.mascot-float {
+  animation: softFloat 3s ease-in-out infinite;
+}
+
+.mascot-interactive {
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mascot-interactive:hover {
+  transform: scale(1.12) rotate(2deg);
+}
+
+.mascot-interactive:active {
+  transform: scale(0.92) rotate(-3deg);
+}
+
+.mascot-eyes {
+  transform-origin: center;
+  animation: eyeBlink 4s infinite;
+}

@@ -81,7 +81,7 @@ export const PrivacyManifesto: React.FC = () => {
             "Kami merancang Poop Pee Log agar Anda bisa tersenyum puas melihat jejak lega Anda tanpa perlu khawatir suatu hari data toilet Anda dijadikan target iklan pop-up."
           </p>
           <div className="mt-4 text-xs text-both-teal font-extrabold uppercase tracking-wider">
-            — Tim Vibe Engineering, Poop Pee Log
+            — Tim Poop Pee Log
           </div>
         </div>
       </div>

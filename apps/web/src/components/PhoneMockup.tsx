@@ -20,6 +20,7 @@ interface PhoneMockupProps {
   currentScreen?: MockupScreen;
   onScreenChange?: (screen: MockupScreen) => void;
   className?: string;
+  compact?: boolean;
 }
 
 interface MapPinItem {
@@ -39,6 +40,7 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({
   currentScreen,
   onScreenChange,
   className = '',
+  compact = false,
 }) => {
   const [internalScreen, setInternalScreen] = useState<MockupScreen>('map');
   const [mapFilter, setMapFilter] = useState<'all' | 'pee' | 'poop'>('all');
@@ -114,9 +116,13 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({
 
   const selectedPin = mapPins.find((p) => p.id === selectedPinId);
 
+  const sizeClasses = compact
+    ? 'w-[310px] sm:w-[350px] md:w-[365px] h-[690px] sm:h-[720px] rounded-[44px]'
+    : 'w-[320px] sm:w-[360px] md:w-[380px] h-[730px] rounded-[46px]';
+
   return (
     <div
-      className={`w-[340px] sm:w-[380px] md:w-[390px] h-[780px] bg-dark-bg rounded-[50px] phone-shadow relative overflow-hidden flex flex-col border border-dark-border ${className}`}
+      className={`${sizeClasses} bg-dark-bg phone-shadow relative overflow-hidden flex flex-col border border-dark-border transition-all duration-300 ${className}`}
     >
       {/* 1. TOP DYNAMIC ISLAND & STATUS BAR */}
       <div className="h-10 pt-3 px-7 flex items-center justify-between text-xs text-cream-bg select-none z-40 bg-dark-bg/85 backdrop-blur-sm">
