@@ -26,9 +26,9 @@ export async function getCurrentLocationWithAddress(): Promise<LocationResult> {
       return fallback;
     }
 
-    // Ambil koordinat GPS kilat (balanced accuracy untuk kecepatan < 500ms)
+    // Ambil koordinat GPS dengan akurasi tinggi (High accuracy)
     const position = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
+      accuracy: Location.Accuracy.High,
     });
 
     const lat = position.coords.latitude;

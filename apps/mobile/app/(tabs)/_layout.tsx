@@ -2,127 +2,181 @@ import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Colors } from '@/constants/Colors';
-import { Map, Calendar, BarChart2, Settings, Plus } from 'lucide-react-native';
+import { MapPin, Calendar, BarChart3, Lock } from 'lucide-react-native';
+import { SirFlushIcon } from '@/src/components/MascotIcons';
 import { QuickLogModal } from '@/src/components/QuickLogModal';
 
 export default function TabLayout() {
   const [quickLogVisible, setQuickLogVisible] = useState(false);
 
   return (
-    <>
+    <View style={styles.container}>
       <Tabs
         screenOptions={{
+          headerShown: false,
           tabBarActiveTintColor: Colors.peeAmber,
-          tabBarInactiveTintColor: Colors.dark.tabIconDefault,
+          tabBarInactiveTintColor: '#807266',
+          tabBarShowLabel: true,
+          tabBarLabelStyle: {
+            fontSize: 10,
+            fontWeight: '800',
+            marginTop: 2,
+          },
           tabBarStyle: {
             backgroundColor: Colors.darkBg,
             borderTopColor: Colors.darkBorder,
             borderTopWidth: 1,
-            height: Platform.OS === 'ios' ? 88 : 68,
-            paddingBottom: Platform.OS === 'ios' ? 28 : 10,
+            height: Platform.OS === 'ios' ? 88 : 72,
+            paddingBottom: Platform.OS === 'ios' ? 28 : 12,
             paddingTop: 8,
-          },
-          headerStyle: {
-            backgroundColor: Colors.darkBg,
-            borderBottomColor: Colors.darkBorder,
-            borderBottomWidth: 1,
-          },
-          headerTitleStyle: {
-            color: Colors.creamBg,
-            fontWeight: '900',
-            fontSize: 18,
+            paddingHorizontal: 8,
           },
         }}
       >
-        {/* Tab 1: Peta Pribadi */}
+        {/* Tab 1: Peta */}
         <Tabs.Screen
           name="index"
           options={{
             title: 'Peta',
-            tabBarIcon: ({ color }) => <Map size={22} color={color} />,
+            tabBarIcon: ({ color }) => <MapPin size={22} color={color} />,
           }}
         />
 
-        {/* Tab 2: Timeline Buku Harian */}
+        {/* Tab 2: Diary */}
         <Tabs.Screen
           name="timeline"
           options={{
-            title: 'Riwayat',
+            title: 'Diary',
             tabBarIcon: ({ color }) => <Calendar size={22} color={color} />,
+            tabBarItemStyle: {
+              marginRight: 80,
+            },
           }}
         />
 
-        {/* Placeholder Tab untuk FAB Tengah */}
+        {/* Tab Tengah: Spacer khusus agar Diary dan Stats tidak mepet dengan FAB */}
         <Tabs.Screen
-          name="fab-placeholder"
+          name="fab-spacer"
           options={{
             title: '',
-            tabBarButton: () => (
-              <View style={styles.fabWrapper}>
-                <TouchableOpacity
-                  style={styles.fabButton}
-                  onPress={() => setQuickLogVisible(true)}
-                  activeOpacity={0.85}
-                >
-                  <Plus size={28} color="#000" strokeWidth={3} />
-                </TouchableOpacity>
-              </View>
-            ),
+            tabBarButton: () => <View style={{ width: 84 }} />,
+          }}
+          listeners={{
+            tabPress: (e) => {
+              e.preventDefault();
+              setQuickLogVisible(true);
+            },
           }}
         />
 
-        {/* Tab 3: Statistik & Lencana */}
+        {/* Tab 3: Stats */}
         <Tabs.Screen
           name="stats"
           options={{
             title: 'Stats',
-            tabBarIcon: ({ color }) => <BarChart2 size={22} color={color} />,
+            tabBarIcon: ({ color }) => <BarChart3 size={22} color={color} />,
+            tabBarItemStyle: {
+              marginLeft: 10,
+            },
           }}
         />
 
-        {/* Tab 4: Pengaturan */}
+        {/* Tab 4: Kunci / Pengaturan */}
         <Tabs.Screen
           name="settings"
           options={{
-            title: 'Pengaturan',
-            tabBarIcon: ({ color }) => <Settings size={22} color={color} />,
-          }}
-        />
-
-        {/* Sembunyikan default template two.tsx jika masih ada */}
-        <Tabs.Screen
-          name="two"
-          options={{
-            href: null,
+            title: 'Kunci',
+            tabBarIcon: ({ color }) => <Lock size={22} color={color} />,
           }}
         />
       </Tabs>
 
-      {/* Modal Quick Log 2-Tap (Lil Drip / Mr Plop) */}
+      {/* FLOATING ACTION BUTTON (+ LOG) PERSIS SEPERTI MOCKUP */}
+      <View style={styles.fabContainer} pointerEvents="box-none">
+        <TouchableOpacity
+          style={styles.fabButton}
+          onPress={() => setQuickLogVisible(true)}
+          activeOpacity={0.88}
+          accessibilityLabel="Catat Buang Air Cepat"
+        >
+          <View style={styles.fabInner}>
+            <SirFlushIcon size={40} />
+            {/* Floating plus badge */}
+            <View style={styles.plusBadge}>
+              <Text style={styles.plusBadgeText}>+</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+        <Text style={styles.fabLabel}>+ LOG</Text>
+      </View>
+
+      {/* Modal Quick Log 2-Tap */}
       <QuickLogModal visible={quickLogVisible} onClose={() => setQuickLogVisible(false)} />
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  fabWrapper: {
-    top: -20,
-    justifyContent: 'center',
+  container: {
+    flex: 1,
+    backgroundColor: Colors.darkBg,
+  },
+  fabContainer: {
+    position: 'absolute',
+    bottom: Platform.OS === 'ios' ? 26 : 14,
+    left: 0,
+    right: 0,
     alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 99,
   },
   fabButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 66,
+    height: 66,
+    borderRadius: 33,
     backgroundColor: Colors.peeAmber,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: Colors.peeAmber,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 8,
+    padding: 3,
     borderWidth: 4,
     borderColor: Colors.darkBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: Colors.peeAmber,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.45,
+    shadowRadius: 10,
+    elevation: 12,
+  },
+  fabInner: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  plusBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: Colors.ink,
+    borderWidth: 1.5,
+    borderColor: Colors.peeAmber,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  plusBadgeText: {
+    color: Colors.peeAmber,
+    fontWeight: '900',
+    fontSize: 11,
+    lineHeight: 12,
+  },
+  fabLabel: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: Colors.peeAmber,
+    letterSpacing: 0.8,
+    marginTop: 2,
   },
 });

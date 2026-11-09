@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, SafeAreaView, Platform, StatusBar } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useAppStore } from '@/src/store/useAppStore';
 import { Trash2, MapPin, Clock } from 'lucide-react-native';
@@ -52,7 +52,14 @@ export default function TimelineScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.headerArea}>
+        <Text style={styles.pageTitle}>Buku Harian Lega</Text>
+        <Text style={styles.pageSubtitle}>
+          {logs.length > 0 ? `Total ${logs.length} jejak buang air tercatat` : 'Belum ada catatan aktivitas'}
+        </Text>
+      </View>
+
       {logs.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyEmoji}>📜</Text>
@@ -69,7 +76,7 @@ export default function TimelineScreen() {
           contentContainerStyle={styles.listContent}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -77,6 +84,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.darkBg,
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 28) + 8 : 10,
+  },
+  headerArea: {
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+  },
+  pageTitle: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: Colors.creamBg,
+    letterSpacing: -0.5,
+  },
+  pageSubtitle: {
+    fontSize: 12,
+    color: Colors.peachTint,
+    opacity: 0.7,
+    marginTop: 2,
   },
   listContent: {
     padding: 16,

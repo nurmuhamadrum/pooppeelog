@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, View, Text, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, SafeAreaView, Platform, StatusBar } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useAppStore } from '@/src/store/useAppStore';
 import { evaluateBadges } from '@/src/services/badgeEvaluator';
@@ -16,7 +16,13 @@ export default function StatsScreen() {
   const unlockedCount = badges.filter((b) => b.isUnlocked).length;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.headerArea}>
+        <Text style={styles.pageTitle}>Statistik & Lencana</Text>
+        <Text style={styles.pageSubtitle}>Pantau konsistensi dan koleksi pencapaianmu</Text>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.content}>
       {/* Streak Hero Banner */}
       <View style={styles.streakCard}>
         <View style={styles.streakIconWrapper}>
@@ -95,16 +101,35 @@ export default function StatsScreen() {
         </View>
       </View>
     </ScrollView>
-  );
+  </SafeAreaView>
+);
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.darkBg,
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 28) + 8 : 10,
+  },
+  headerArea: {
+    paddingHorizontal: 20,
+    paddingBottom: 8,
+  },
+  pageTitle: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: Colors.creamBg,
+    letterSpacing: -0.5,
+  },
+  pageSubtitle: {
+    fontSize: 12,
+    color: Colors.peachTint,
+    opacity: 0.7,
+    marginTop: 2,
   },
   content: {
     padding: 16,
+    paddingBottom: 100,
     gap: 16,
   },
   streakCard: {

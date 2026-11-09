@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, Switch, TouchableOpacity, Alert, Platform } from 'react-native';
+import { StyleSheet, View, Text, Switch, TouchableOpacity, Alert, Platform, SafeAreaView, StatusBar, ScrollView } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useAppStore } from '@/src/store/useAppStore';
 import { ShieldCheck, EyeOff, Lock, Trash2, Download, FileText, CheckCircle } from 'lucide-react-native';
@@ -73,8 +73,14 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Privacy Manifesto Card */}
+    <SafeAreaView style={styles.container}>
+      <View style={styles.headerArea}>
+        <Text style={styles.pageTitle}>Pengaturan & Privasi</Text>
+        <Text style={styles.pageSubtitle}>Kontrol penuh keamanan data biologis pribadi</Text>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Privacy Manifesto Card */}
       <View style={styles.card}>
         <View style={styles.cardRow}>
           <ShieldCheck size={20} color={Colors.bothTeal} />
@@ -145,7 +151,8 @@ export default function SettingsScreen() {
         <Text style={styles.footerText}>Poop Pee Log v1.0.0 (MVP) • Anonymous Guest ID:</Text>
         <Text style={styles.userIdText}>{userId || 'guest'}</Text>
       </View>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -153,7 +160,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.darkBg,
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 28) + 8 : 10,
+  },
+  headerArea: {
+    paddingHorizontal: 20,
+    paddingBottom: 8,
+  },
+  pageTitle: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: Colors.creamBg,
+    letterSpacing: -0.5,
+  },
+  pageSubtitle: {
+    fontSize: 12,
+    color: Colors.peachTint,
+    opacity: 0.7,
+    marginTop: 2,
+  },
+  scrollContent: {
     padding: 16,
+    paddingBottom: 110,
     gap: 16,
   },
   card: {

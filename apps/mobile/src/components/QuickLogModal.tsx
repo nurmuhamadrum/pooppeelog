@@ -7,13 +7,15 @@ import {
   Modal,
   ActivityIndicator,
   TextInput,
+  ScrollView,
+  Platform,
 } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from './MascotIcons';
 import { useAppStore } from '../store/useAppStore';
 import { getCurrentLocationWithAddress } from '../services/location';
-import { LogType, MoodPee, MoodPoop } from '@poop-pee-log/shared';
-import { X, Check } from 'lucide-react-native';
+import { LogType } from '@poop-pee-log/shared';
+import { X, Check, Smile, Sparkles } from 'lucide-react-native';
 
 interface QuickLogModalProps {
   visible: boolean;
@@ -24,9 +26,9 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
   const addLog = useAppStore((state: any) => state.addLog);
   const blurLocation = useAppStore((state: any) => state.blurLocation);
 
-  const [step, setStep] = useState<'SELECT' | 'MOOD_NOTE' | 'SAVED'>('SELECT');
+  const [step, setStep] = useState<'SELECT' | 'MOOD_NOTE'>('SELECT');
   const [selectedType, setSelectedType] = useState<LogType>('PEE');
-  const [selectedMood, setSelectedMood] = useState<string>('LEGA');
+  const [selectedMood, setSelectedMood] = useState<string>('Lega Banget');
   const [note, setNote] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,15 +37,13 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
     setSelectedType(type);
 
     try {
-      // 1. Ambil GPS & geocode di latar belakang (< 500ms)
       const loc = await getCurrentLocationWithAddress();
       const now = new Date().toISOString();
 
-      // Perhitungan blur 50 meter jika diaktifkan (mengacak offset ~0.00045 derajat)
       const randomOffsetLat = (Math.random() - 0.5) * 0.0009;
       const randomOffsetLng = (Math.random() - 0.5) * 0.0009;
 
-      const createdLog = await addLog({
+      await addLog({
         type,
         latitude: loc.latitude,
         longitude: loc.longitude,
@@ -52,7 +52,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
         district: loc.district,
         subdistrict: loc.subdistrict,
         country: loc.country,
-        mood: type === 'PEE' ? 'LEGA' : 'LEGA_BANGET',
+        mood: type === 'PEE' ? 'Lega Banget' : 'Plong Sekali',
         note: '',
         loggedAt: now,
         isBlurred: blurLocation,
@@ -61,12 +61,11 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
       });
 
       setIsSubmitting(false);
-      // Pindah ke step opsi mood & catatan (bisa langsung ditutup jika tidak mau diisi)
       setStep('MOOD_NOTE');
     } catch (error) {
       console.error('Error logging:', error);
       setIsSubmitting(false);
-      onClose();
+      handleFinish();
     }
   };
 
@@ -80,131 +79,156 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
     <Modal visible={visible} transparent animationType="slide" onRequestClose={handleFinish}>
       <View style={styles.overlay}>
         <View style={styles.sheetContainer}>
-          {/* Header Bar */}
-          <View style={styles.header}>
-            <View>
-              <Text style={styles.sheetTitle}>
-                {step === 'SELECT' ? 'Catat Kelegaan ⚡' : 'Mood & Cerita (Opsional)'}
-              </Text>
-              <Text style={styles.sheetSubtitle}>
-                {step === 'SELECT' ? '2-Ketukan Cepat • Maksimal 3 Detik' : 'Bisa langsung ditutup bila buru-buru'}
-              </Text>
-            </View>
-            <TouchableOpacity onPress={handleFinish} style={styles.closeBtn}>
-              <X size={20} color={Colors.creamBg} />
-            </TouchableOpacity>
-          </View>
+          {/* Grabber bar */}
+          <View style={styles.grabber} />
 
-          {/* STEP 1: PILIHAN CEPAT 2-TAP */}
+          {/* STEP 1: PILIHAN CEPAT 2-TAP (PERSIS MOCKUP) */}
           {step === 'SELECT' && (
-            <View style={styles.optionsContainer}>
-              {/* Lil' Drip (Kencing) */}
-              <TouchableOpacity
-                style={[styles.mascotCard, { borderColor: Colors.peeAmber }]}
-                onPress={() => handleQuickLog('PEE')}
-                disabled={isSubmitting}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.iconCircle, { backgroundColor: Colors.peeAmber }]}>
-                  <LilDripIcon size={52} />
+            <View>
+              <View style={styles.headerRow}>
+                <View>
+                  <Text style={styles.title}>Catat Kelegaan</Text>
+                  <Text style={styles.subtitle}>
+                    Pilih aksi cepat di bawah. Waktu & GPS terisi otomatis!
+                  </Text>
                 </View>
-                <Text style={styles.cardTitle}>Lil' Drip</Text>
-                <Text style={styles.cardSubtitle}>Kencing (Pee)</Text>
-                <View style={[styles.badgePill, { backgroundColor: 'rgba(245, 183, 0, 0.2)' }]}>
-                  <Text style={[styles.badgeText, { color: Colors.peeAmber }]}>Kuning Segar</Text>
+                <TouchableOpacity onPress={handleFinish} style={styles.closeBtn}>
+                  <X size={18} color={Colors.peachTint} />
+                </TouchableOpacity>
+              </View>
+
+              {/* 2 LARGE ACTION CARDS (LIL DRIP & MR PLOP) */}
+              <View style={styles.gridCards}>
+                {/* LIL' DRIP */}
+                <TouchableOpacity
+                  style={[styles.card, { borderColor: Colors.peeAmber, backgroundColor: 'rgba(245, 183, 0, 0.12)' }]}
+                  onPress={() => handleQuickLog('PEE')}
+                  activeOpacity={0.85}
+                  disabled={isSubmitting}
+                >
+                  <View style={[styles.avatarCircle, { backgroundColor: Colors.peeAmber }]}>
+                    <LilDripIcon size={58} />
+                  </View>
+                  <Text style={[styles.cardName, { color: Colors.peeAmber }]}>LIL' DRIP</Text>
+                  <Text style={styles.cardAction}>PEE (Kencing)</Text>
+                </TouchableOpacity>
+
+                {/* MR. PLOP */}
+                <TouchableOpacity
+                  style={[styles.card, { borderColor: Colors.poopBrown, backgroundColor: 'rgba(139, 94, 60, 0.16)' }]}
+                  onPress={() => handleQuickLog('POOP')}
+                  activeOpacity={0.85}
+                  disabled={isSubmitting}
+                >
+                  <View style={[styles.avatarCircle, { backgroundColor: Colors.poopBrown }]}>
+                    <MrPlopIcon size={58} />
+                  </View>
+                  <Text style={[styles.cardName, { color: Colors.poopLight }]}>MR. PLOP</Text>
+                  <Text style={styles.cardAction}>POOP (BAB)</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* SIR FLUSH (FULL WIDTH COMBO) */}
+              <TouchableOpacity
+                style={styles.comboButton}
+                onPress={() => handleQuickLog('PEE')}
+                activeOpacity={0.85}
+                disabled={isSubmitting}
+              >
+                <View style={styles.comboAvatar}>
+                  <SirFlushIcon size={36} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.comboTitle}>Sir Flush (Keduanya Sekaligus)</Text>
+                  <Text style={styles.comboSubtitle}>
+                    Paket kombo kencing & BAB dalam satu waktu
+                  </Text>
                 </View>
               </TouchableOpacity>
 
-              {/* Mr. Plop (BAB) */}
-              <TouchableOpacity
-                style={[styles.mascotCard, { borderColor: Colors.poopLight }]}
-                onPress={() => handleQuickLog('POOP')}
-                disabled={isSubmitting}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.iconCircle, { backgroundColor: Colors.poopBrown }]}>
-                  <MrPlopIcon size={52} />
-                </View>
-                <Text style={styles.cardTitle}>Mr. Plop</Text>
-                <Text style={styles.cardSubtitle}>BAB (Poop)</Text>
-                <View style={[styles.badgePill, { backgroundColor: 'rgba(201, 138, 88, 0.2)' }]}>
-                  <Text style={[styles.badgeText, { color: Colors.poopLight }]}>Plong Maksimal</Text>
-                </View>
+              <TouchableOpacity style={styles.cancelBtn} onPress={handleFinish}>
+                <Text style={styles.cancelBtnText}>Batal</Text>
               </TouchableOpacity>
             </View>
           )}
 
-          {/* STEP 2: MOOD & NOTE (OPSIONAL) */}
+          {/* STEP 2: MOOD & NOTE (PERSIS MOCKUP) */}
           {step === 'MOOD_NOTE' && (
-            <View style={styles.moodContainer}>
-              <Text style={styles.sectionLabel}>Level Kelegaan:</Text>
-              <View style={styles.moodPillsRow}>
-                {selectedType === 'PEE' ? (
-                  <>
-                    <TouchableOpacity
-                      style={[styles.moodPill, selectedMood === 'LEGA' && styles.moodPillActive]}
-                      onPress={() => setSelectedMood('LEGA')}
-                    >
-                      <Text style={styles.moodText}>Lega Banget 😊</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.moodPill, selectedMood === 'NAHAN_LAMA' && styles.moodPillActive]}
-                      onPress={() => setSelectedMood('NAHAN_LAMA')}
-                    >
-                      <Text style={styles.moodText}>Nahan Lama 🏃</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.moodPill, selectedMood === 'DARURAT' && styles.moodPillActive]}
-                      onPress={() => setSelectedMood('DARURAT')}
-                    >
-                      <Text style={styles.moodText}>Darurat! 🚨</Text>
-                    </TouchableOpacity>
-                  </>
-                ) : (
-                  <>
-                    <TouchableOpacity
-                      style={[styles.moodPill, selectedMood === 'LEGA_BANGET' && styles.moodPillActive]}
-                      onPress={() => setSelectedMood('LEGA_BANGET')}
-                    >
-                      <Text style={styles.moodText}>Plong Sekali 🍫</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.moodPill, selectedMood === 'BIASA_AJA' && styles.moodPillActive]}
-                      onPress={() => setSelectedMood('BIASA_AJA')}
-                    >
-                      <Text style={styles.moodText}>Biasa Saja 👍</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.moodPill, selectedMood === 'MASIH_GANJEL' && styles.moodPillActive]}
-                      onPress={() => setSelectedMood('MASIH_GANJEL')}
-                    >
-                      <Text style={styles.moodText}>Masih Ganjel 🤔</Text>
-                    </TouchableOpacity>
-                  </>
-                )}
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={styles.moodHeader}>
+                <View style={styles.avatarMini}>
+                  <SirFlushIcon size={34} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.moodTag}>LEGA TERCATAT! ⚡</Text>
+                  <Text style={styles.moodQuestion}>Bagaimana Suasana Hatimu?</Text>
+                </View>
+                <TouchableOpacity onPress={handleFinish}>
+                  <Text style={styles.skipText}>Lewati</Text>
+                </TouchableOpacity>
               </View>
 
-              <Text style={[styles.sectionLabel, { marginTop: 16 }]}>Catatan Singkat (Maks 100 karakter):</Text>
+              {/* Mood Grid */}
+              <Text style={styles.labelSection}>Pilih Mood:</Text>
+              <View style={styles.moodGrid}>
+                {[
+                  { text: 'Lega Banget', emoji: '😌', activeBg: 'rgba(47, 184, 172, 0.25)', border: Colors.bothTeal },
+                  { text: 'Nahan Lama', emoji: '⏱️', activeBg: 'rgba(245, 183, 0, 0.25)', border: Colors.peeAmber },
+                  { text: 'Momen Darurat', emoji: '🚨', activeBg: 'rgba(255, 90, 95, 0.25)', border: Colors.emergencyRed },
+                  { text: 'Tragedi Kloset', emoji: '💥', activeBg: 'rgba(201, 138, 88, 0.25)', border: Colors.poopLight },
+                ].map((m) => {
+                  const isSelected = selectedMood === m.text;
+                  return (
+                    <TouchableOpacity
+                      key={m.text}
+                      style={[
+                        styles.moodCard,
+                        isSelected && {
+                          backgroundColor: m.activeBg,
+                          borderColor: m.border,
+                        },
+                      ]}
+                      onPress={() => setSelectedMood(m.text)}
+                    >
+                      <Text style={{ fontSize: 16 }}>{m.emoji}</Text>
+                      <Text
+                        style={[
+                          styles.moodCardText,
+                          isSelected && { color: Colors.creamBg, fontWeight: '900' },
+                        ]}
+                      >
+                        {m.text}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {/* Catatan Bebas */}
+              <View style={styles.labelRow}>
+                <Text style={styles.labelSection}>Catatan Bebas (Opsional):</Text>
+                <Text style={styles.charCount}>{note.length}/100</Text>
+              </View>
               <TextInput
-                style={styles.inputNote}
-                placeholder="cth: Di rest area km 57, airnya bersih..."
+                style={styles.input}
+                placeholder="cth: Kopi susu di rest area km 57 juara!"
                 placeholderTextColor={Colors.darkBorder}
                 maxLength={100}
                 value={note}
                 onChangeText={setNote}
               />
 
-              <TouchableOpacity style={styles.saveBtn} onPress={handleFinish}>
-                <Check size={18} color="#000" />
-                <Text style={styles.saveBtnText}>Selesai & Tutup</Text>
+              <TouchableOpacity style={styles.submitBtn} onPress={handleFinish}>
+                <Text style={styles.submitBtnText}>Simpan & Buka Buku Harian</Text>
               </TouchableOpacity>
-            </View>
+            </ScrollView>
           )}
 
+          {/* Loading Indicator */}
           {isSubmitting && (
-            <View style={styles.loadingOverlay}>
+            <View style={styles.loadingBox}>
               <ActivityIndicator size="large" color={Colors.peeAmber} />
-              <Text style={styles.loadingText}>Menyimpan ke SQLite lokal...</Text>
+              <Text style={styles.loadingTxt}>Merekam koordinat & waktu...</Text>
             </View>
           )}
         </View>
@@ -216,157 +240,247 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    backgroundColor: 'rgba(0, 0, 0, 0.82)',
     justifyContent: 'flex-end',
   },
   sheetContainer: {
-    backgroundColor: Colors.darkBg,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
+    backgroundColor: Colors.darkSurface,
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
     borderWidth: 1,
     borderColor: Colors.darkBorder,
-    padding: 24,
-    paddingBottom: 40,
-    minHeight: 340,
+    padding: 22,
+    paddingBottom: Platform.OS === 'ios' ? 44 : 28,
   },
-  header: {
+  grabber: {
+    width: 48,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: Colors.darkBorder,
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
-  sheetTitle: {
-    fontSize: 20,
+  title: {
+    fontSize: 22,
     fontWeight: '900',
     color: Colors.creamBg,
+    letterSpacing: -0.5,
   },
-  sheetSubtitle: {
+  subtitle: {
     fontSize: 12,
     color: Colors.peachTint,
-    opacity: 0.7,
+    opacity: 0.75,
     marginTop: 2,
   },
   closeBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.darkSurface,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.darkBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  optionsContainer: {
+  gridCards: {
     flexDirection: 'row',
-    gap: 16,
-    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 12,
   },
-  mascotCard: {
+  card: {
     flex: 1,
-    backgroundColor: Colors.darkSurface,
-    borderRadius: 24,
+    borderRadius: 26,
     borderWidth: 2,
-    padding: 18,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconCircle: {
+  avatarCircle: {
     width: 72,
     height: 72,
     borderRadius: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: Colors.darkBg,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 6,
   },
-  cardTitle: {
-    fontSize: 16,
+  cardName: {
+    fontSize: 15,
     fontWeight: '900',
-    color: Colors.creamBg,
+    letterSpacing: 0.5,
   },
-  cardSubtitle: {
-    fontSize: 12,
+  cardAction: {
+    fontSize: 11,
+    fontWeight: '700',
     color: Colors.peachTint,
     opacity: 0.8,
     marginTop: 2,
   },
-  badgePill: {
-    marginTop: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+  comboButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: 'rgba(47, 184, 172, 0.14)',
+    borderWidth: 2,
+    borderColor: Colors.bothTeal,
+    borderRadius: 22,
+    padding: 12,
+    paddingHorizontal: 14,
   },
-  badgeText: {
+  comboAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.bothTeal,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: Colors.darkBg,
+  },
+  comboTitle: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: Colors.bothTeal,
+  },
+  comboSubtitle: {
     fontSize: 10,
-    fontWeight: '800',
+    color: Colors.peachTint,
+    opacity: 0.7,
+    marginTop: 2,
   },
-  moodContainer: {
-    paddingTop: 4,
+  cancelBtn: {
+    alignSelf: 'center',
+    paddingVertical: 12,
+    marginTop: 8,
   },
-  sectionLabel: {
+  cancelBtnText: {
     fontSize: 12,
     fontWeight: '700',
     color: Colors.peachTint,
+    opacity: 0.6,
+  },
+  moodHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 16,
+  },
+  avatarMini: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: Colors.bothTeal,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  moodTag: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: Colors.bothTeal,
+    letterSpacing: 0.8,
+  },
+  moodQuestion: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: Colors.creamBg,
+  },
+  skipText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: Colors.peeAmber,
+  },
+  labelSection: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Colors.peachTint,
+    opacity: 0.8,
     marginBottom: 8,
   },
-  moodPillsRow: {
+  moodGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
+    marginBottom: 14,
   },
-  moodPill: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+  moodCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    width: '48%',
+    backgroundColor: Colors.darkBg,
+    borderWidth: 1,
+    borderColor: Colors.darkBorder,
     borderRadius: 14,
-    backgroundColor: Colors.darkSurface,
-    borderWidth: 1,
-    borderColor: Colors.darkBorder,
-  },
-  moodPillActive: {
-    backgroundColor: 'rgba(245, 183, 0, 0.2)',
-    borderColor: Colors.peeAmber,
-  },
-  moodText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: Colors.creamBg,
-  },
-  inputNote: {
-    backgroundColor: Colors.darkSurface,
-    borderWidth: 1,
-    borderColor: Colors.darkBorder,
-    borderRadius: 16,
     padding: 12,
-    color: Colors.creamBg,
-    fontSize: 13,
   },
-  saveBtn: {
-    marginTop: 20,
+  moodCardText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.peachTint,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  charCount: {
+    fontSize: 10,
+    color: Colors.peachTint,
+    opacity: 0.5,
+  },
+  input: {
+    backgroundColor: Colors.darkBg,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.darkBorder,
+    color: Colors.creamBg,
+    padding: 12,
+    fontSize: 12,
+    marginBottom: 16,
+  },
+  submitBtn: {
     backgroundColor: Colors.peeAmber,
     borderRadius: 18,
     paddingVertical: 14,
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
+    shadowColor: Colors.peeAmber,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  saveBtnText: {
-    color: '#000',
+  submitBtnText: {
+    color: Colors.ink,
+    fontSize: 13,
     fontWeight: '900',
-    fontSize: 14,
   },
-  loadingOverlay: {
+  loadingBox: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(30, 26, 23, 0.9)',
+    backgroundColor: 'rgba(30, 26, 23, 0.94)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 32,
+    borderRadius: 36,
   },
-  loadingText: {
-    color: Colors.creamBg,
-    fontSize: 12,
-    fontWeight: '700',
+  loadingTxt: {
     marginTop: 10,
+    fontSize: 12,
+    fontWeight: '800',
+    color: Colors.creamBg,
   },
 });
