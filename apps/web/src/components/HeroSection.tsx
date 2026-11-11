@@ -166,7 +166,8 @@ export const HeroSection: React.FC = () => {
                     if (s === 'map') triggerBubble('Peta Pribadi kamu terbuka! 🗺️');
                     if (s === 'quick-log') triggerBubble('Layar Catat Kelegaan: Tap Lil\' Drip, Mr. Plop, atau Sir Flush! ⚡');
                     if (s === 'stats') triggerBubble('Layar Statistik & Tren Mingguan 📊');
-                    if (s === 'lock') triggerBubble('Layar Proteksi PIN & Biometrik 🔒');
+                    if (s === 'profile') triggerBubble('Layar Profil, Backup & Sinkron Cloud ☁️');
+                    if (s === 'auth') triggerBubble('Layar Masuk / Daftar Akun Cloud 🔐');
                     if (s === 'mood') triggerBubble('Pilih level kelegaanmu! 😊');
                     if (s === 'timeline') triggerBubble('Buku harian catatan buang air 📅');
                   }}

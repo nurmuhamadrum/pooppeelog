@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PhoneMockup, MockupScreen } from './PhoneMockup';
-import { MapPin, Calendar, BarChart3, Lock, Zap, Smile } from 'lucide-react';
+import { MapPin, Calendar, BarChart3, User, Zap, Smile, Cloud } from 'lucide-react';
 
 export const InteractiveMockup: React.FC = () => {
   const [activeScreen, setActiveScreen] = useState<MockupScreen>('map');
@@ -73,14 +73,24 @@ export const InteractiveMockup: React.FC = () => {
               <BarChart3 className="w-3.5 h-3.5" /> 5. Stats & Badges
             </button>
             <button
-              onClick={() => setActiveScreen('lock')}
+              onClick={() => setActiveScreen('profile')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                activeScreen === 'lock'
+                activeScreen === 'profile'
                   ? 'bg-pee-amber text-ink shadow-lg shadow-pee-amber/20'
                   : 'bg-dark-surface border border-dark-border text-peach-tint/80 hover:text-white'
               }`}
             >
-              <Lock className="w-3.5 h-3.5" /> 6. Kunci App Lock
+              <User className="w-3.5 h-3.5" /> 6. Profil & Sync
+            </button>
+            <button
+              onClick={() => setActiveScreen('auth')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                activeScreen === 'auth'
+                  ? 'bg-pee-amber text-ink shadow-lg shadow-pee-amber/20'
+                  : 'bg-dark-surface border border-dark-border text-peach-tint/80 hover:text-white'
+              }`}
+            >
+              <Cloud className="w-3.5 h-3.5" /> 7. Akun & Auth
             </button>
           </div>
         </div>

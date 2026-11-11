@@ -4,8 +4,7 @@ import {
   MapPin,
   Calendar,
   BarChart3,
-  Lock,
-  CheckCircle2,
+  User,
   ChevronRight,
   X,
   Compass,
@@ -14,7 +13,7 @@ import {
   Minus,
 } from 'lucide-react';
 
-export type MockupScreen = 'map' | 'quick-log' | 'mood' | 'timeline' | 'stats' | 'lock';
+export type MockupScreen = 'map' | 'quick-log' | 'mood' | 'timeline' | 'stats' | 'profile' | 'auth';
 
 interface PhoneMockupProps {
   currentScreen?: MockupScreen;
@@ -43,7 +42,7 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({
   compact = false,
 }) => {
   const [internalScreen, setInternalScreen] = useState<MockupScreen>('map');
-  const [mapFilter, setMapFilter] = useState<'all' | 'pee' | 'poop'>('all');
+  const [mapFilter, setMapFilter] = useState<'all' | 'pee' | 'poop' | 'combo'>('all');
   const [selectedPinId, setSelectedPinId] = useState<string | null>('pee-menteng');
 
   const activeScreen = currentScreen !== undefined ? currentScreen : internalScreen;
@@ -109,8 +108,9 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({
 
   const filteredPins = mapPins.filter((pin) => {
     if (mapFilter === 'all') return true;
-    if (mapFilter === 'pee') return pin.type === 'pee' || pin.type === 'combo';
-    if (mapFilter === 'poop') return pin.type === 'poop' || pin.type === 'combo';
+    if (mapFilter === 'pee') return pin.type === 'pee';
+    if (mapFilter === 'poop') return pin.type === 'poop';
+    if (mapFilter === 'combo') return pin.type === 'combo';
     return true;
   });
 
@@ -321,6 +321,14 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({
                   }`}
                 >
                   Poop
+                </button>
+                <button
+                  onClick={() => setMapFilter('combo')}
+                  className={`px-2.5 py-1 rounded-full transition-all ${
+                    mapFilter === 'combo' ? 'bg-both-teal text-white' : 'text-peach-tint/80 hover:text-white'
+                  }`}
+                >
+                  Combo
                 </button>
               </div>
             </div>
@@ -728,57 +736,162 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({
         )}
 
         {/* ============================== */}
-        {/* F. APP LOCK SCREEN */}
+        {/* F. PROFILE & SYNC SCREEN */}
         {/* ============================== */}
-        {activeScreen === 'lock' && (
-          <div className="flex-1 flex flex-col items-center justify-between bg-dark-bg p-6">
-            <div className="pt-8 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-dark-surface border border-dark-border p-2 flex items-center justify-center mx-auto mb-3 shadow-xl">
-                <SirFlushSVG />
-              </div>
-              <h3 className="text-lg font-black text-cream-bg">Buku Harian Terkunci</h3>
-              <p className="text-xs text-peach-tint/70 mt-1">Masukkan 4-digit PIN atau gunakan FaceID</p>
+        {activeScreen === 'profile' && (
+          <div className="flex-1 flex flex-col p-4 bg-dark-bg overflow-y-auto">
+            <div className="pt-2 mb-4">
+              <h3 className="text-base font-black text-cream-bg">Profil & Keamanan</h3>
+              <p className="text-[11px] text-peach-tint/60">Identitas privat, data biologis & cloud</p>
+            </div>
 
-              <div className="flex items-center justify-center gap-4 mt-6">
-                <div className="w-3.5 h-3.5 rounded-full bg-pee-amber shadow-lg shadow-pee-amber/50" />
-                <div className="w-3.5 h-3.5 rounded-full bg-pee-amber shadow-lg shadow-pee-amber/50" />
-                <div className="w-3.5 h-3.5 rounded-full bg-dark-border" />
-                <div className="w-3.5 h-3.5 rounded-full bg-dark-border" />
+            {/* Profile Card */}
+            <div className="bg-dark-surface border border-pee-amber/40 rounded-2xl p-4 mb-3 shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-both-teal p-1.5 flex items-center justify-center shadow">
+                  <SirFlushSVG />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-extrabold text-sm text-cream-bg">Penjelajah Toilet</span>
+                    <span className="text-[8px] font-black text-both-teal bg-both-teal/15 border border-both-teal/30 px-1.5 py-0.5 rounded">
+                      AKUN CLOUD
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-peach-tint/70 block mt-0.5">user@pooppeelog.app</span>
+                </div>
+              </div>
+
+              {/* Strip stats */}
+              <div className="grid grid-cols-4 gap-1 bg-dark-bg rounded-xl p-2 mt-3 text-center border border-dark-border">
+                <div>
+                  <span className="text-xs font-black text-cream-bg block">38</span>
+                  <span className="text-[8px] text-peach-tint/60 uppercase">Total</span>
+                </div>
+                <div>
+                  <span className="text-xs font-black text-pee-amber block">28</span>
+                  <span className="text-[8px] text-peach-tint/60 uppercase">Pee</span>
+                </div>
+                <div>
+                  <span className="text-xs font-black text-poop-brown block">9</span>
+                  <span className="text-[8px] text-peach-tint/60 uppercase">Poop</span>
+                </div>
+                <div>
+                  <span className="text-xs font-black text-both-teal block">1</span>
+                  <span className="text-[8px] text-peach-tint/60 uppercase">Combo</span>
+                </div>
               </div>
             </div>
 
-            <div className="w-full max-w-[280px] grid grid-cols-3 gap-3 mb-6">
-              {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
-                <button
-                  key={num}
-                  className="w-16 h-16 rounded-full bg-dark-surface border border-dark-border text-xl font-bold text-cream-bg mx-auto active:bg-pee-amber active:text-ink"
-                >
-                  {num}
-                </button>
-              ))}
+            {/* Cloud Sync Status */}
+            <div className="bg-dark-surface border border-dark-border rounded-xl p-3 mb-2 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-both-teal/15 border border-both-teal/30 flex items-center justify-center text-both-teal text-xs">
+                  ☁️
+                </div>
+                <div>
+                  <span className="text-xs font-extrabold text-cream-bg block">Sinkronisasi Cloud</span>
+                  <span className="text-[9px] text-both-teal">Tersinkronisasi otomatis (Supabase)</span>
+                </div>
+              </div>
+              <span className="text-[10px] font-bold text-pee-amber bg-pee-amber/10 px-2 py-1 rounded-lg">
+                Aktif
+              </span>
+            </div>
+
+            {/* App Lock Status */}
+            <div className="bg-dark-surface border border-dark-border rounded-xl p-3 mb-2 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-pee-amber/15 border border-pee-amber/30 flex items-center justify-center text-pee-amber text-xs">
+                  🔒
+                </div>
+                <div>
+                  <span className="text-xs font-extrabold text-cream-bg block">App Lock (Biometrik)</span>
+                  <span className="text-[9px] text-peach-tint/60">Face ID & Sidik Jari</span>
+                </div>
+              </div>
+              <div className="w-8 h-4 rounded-full bg-pee-amber flex items-center justify-end px-0.5">
+                <div className="w-3 h-3 rounded-full bg-cream-bg" />
+              </div>
+            </div>
+
+            {/* Auth Switcher */}
+            <button
+              onClick={() => setScreen('auth')}
+              className="mt-2 w-full py-2.5 rounded-xl bg-dark-surface border border-dark-border text-xs font-bold text-peach-tint hover:text-white flex items-center justify-center gap-2 transition"
+            >
+              <span>Ganti Akun / Masuk Google</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
+        {/* ============================== */}
+        {/* G. AUTH SCREEN (SIGN IN / GOOGLE) */}
+        {/* ============================== */}
+        {activeScreen === 'auth' && (
+          <div className="flex-1 flex flex-col items-center justify-center p-5 bg-dark-bg">
+            <div className="flex items-center gap-1.5 mb-2">
+              <div className="w-8 h-8 rounded-full bg-pee-amber p-1 flex items-center justify-center">
+                <LilDripSVG />
+              </div>
+              <div className="w-8 h-8 rounded-full bg-poop-brown p-1 flex items-center justify-center -ml-2">
+                <MrPlopSVG />
+              </div>
+              <div className="w-8 h-8 rounded-full bg-both-teal p-1 flex items-center justify-center -ml-2">
+                <SirFlushSVG />
+              </div>
+            </div>
+
+            <h3 className="text-base font-black text-cream-bg">POOP PEE LOG</h3>
+            <p className="text-[10px] text-peach-tint/60 mb-5 text-center">
+              Masuk untuk mencadangkan & sinkron riwayat biologis
+            </p>
+
+            <div className="w-full bg-dark-surface border border-dark-border rounded-2xl p-4 space-y-3 shadow-xl">
+              <div>
+                <label className="text-[9px] font-bold text-peach-tint/70 uppercase block mb-1">Email</label>
+                <div className="h-9 px-3 rounded-xl bg-dark-bg border border-dark-border flex items-center text-xs text-cream-bg">
+                  rian.traveler@gmail.com
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-[9px] font-bold text-peach-tint/70 uppercase">Kata Sandi</label>
+                  <span className="text-[9px] text-pee-amber font-bold">Lupa?</span>
+                </div>
+                <div className="h-9 px-3 rounded-xl bg-dark-bg border border-dark-border flex items-center text-xs text-peach-tint/40">
+                  ••••••••••••
+                </div>
+              </div>
+
               <button
-                onClick={() => setScreen('map')}
-                className="w-16 h-16 rounded-full flex items-center justify-center text-both-teal mx-auto"
-                title="FaceID"
+                onClick={() => setScreen('profile')}
+                className="w-full h-9 rounded-xl bg-pee-amber text-ink font-black text-xs flex items-center justify-center gap-1 shadow"
               >
-                <CheckCircle2 className="w-7 h-7" />
+                Masuk Akun
               </button>
-              <button className="w-16 h-16 rounded-full bg-dark-surface border border-dark-border text-xl font-bold text-cream-bg mx-auto">
-                0
-              </button>
+
+              <div className="flex items-center gap-2 my-2">
+                <div className="flex-1 h-px bg-dark-border" />
+                <span className="text-[8px] text-peach-tint/40 font-bold">ATAU</span>
+                <div className="flex-1 h-px bg-dark-border" />
+              </div>
+
               <button
-                onClick={() => setScreen('map')}
-                className="w-16 h-16 rounded-full flex items-center justify-center text-peach-tint/60 mx-auto"
+                onClick={() => setScreen('profile')}
+                className="w-full h-9 rounded-xl bg-cream-bg text-dark-bg font-bold text-xs flex items-center justify-center gap-2 shadow"
               >
-                <ChevronRight className="w-7 h-7" />
+                <span className="font-black text-blue-500">G</span>
+                <span>Lanjutkan dengan Google</span>
               </button>
             </div>
 
             <button
               onClick={() => setScreen('map')}
-              className="text-xs text-pee-amber font-bold mb-2"
+              className="mt-4 text-[10px] text-peach-tint/60 hover:text-white underline font-semibold"
             >
-              Buka Cepat (Demo Unlock)
+              Lewati, Lanjutkan sebagai Tamu (Offline)
             </button>
           </div>
         )}
@@ -839,15 +952,17 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({
           <span className="text-[10px]">Stats</span>
         </button>
 
-        {/* Tab Lock */}
+        {/* Tab Profil */}
         <button
-          onClick={() => setScreen('lock')}
+          onClick={() => setScreen('profile')}
           className={`flex flex-col items-center gap-1 ${
-            activeScreen === 'lock' ? 'text-pee-amber font-bold' : 'text-peach-tint/60 hover:text-white'
+            activeScreen === 'profile' || activeScreen === 'auth'
+              ? 'text-pee-amber font-bold'
+              : 'text-peach-tint/60 hover:text-white'
           }`}
         >
-          <Lock className="w-5 h-5" />
-          <span className="text-[10px]">Kunci</span>
+          <User className="w-5 h-5" />
+          <span className="text-[10px]">Profil</span>
         </button>
       </nav>
 
