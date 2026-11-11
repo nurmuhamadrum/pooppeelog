@@ -28,10 +28,21 @@ export async function ensureAuthSession(): Promise<string | null> {
       return session.user.id;
     }
 
-    // Coba sign in secara anonymous jika didukung atau return null jika belum dikonfigurasi
+    // Sign in secara anonymous agar mendapatkan auth.uid() resmi dari Supabase Auth
     const { data: anonData, error: anonError } = await supabase.auth.signInAnonymously();
     if (!anonError && anonData.user?.id) {
+      // Pastikan profile record juga ada
+      await supabase.from('profiles').upsert(
+        {
+          id: anonData.user.id,
+          is_anonymous: true,
+          display_name: 'Penjelajah Toilet',
+        },
+        { onConflict: 'id' }
+      );
       return anonData.user.id;
+    } else if (anonError) {
+      console.log('signInAnonymously error:', anonError.message);
     }
   } catch (err) {
     console.log('ensureAuthSession notice:', err);
@@ -52,6 +63,10 @@ export async function syncLogsWithCloud(currentUserId?: string): Promise<SyncRes
   };
 
   try {
+    // Helper validasi UUID
+    const isUUID = (val?: string) =>
+      Boolean(val && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(val));
+
     // 1. Cek ketersediaan URL Supabase yang valid
     const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
     if (!url || url.includes('placeholder-project')) {
@@ -63,27 +78,26 @@ export async function syncLogsWithCloud(currentUserId?: string): Promise<SyncRes
       };
     }
 
-    const authUserId = currentUserId || (await ensureAuthSession());
-    if (!authUserId) {
+    // Selalu pastikan menggunakan ID dari sesi resmi Supabase Auth
+    const activeAuthId = await ensureAuthSession();
+    const finalUserId = activeAuthId || (currentUserId && isUUID(currentUserId) ? currentUserId : null);
+
+    if (!finalUserId) {
       return {
         success: false,
         uploadedCount: 0,
         downloadedCount: 0,
-        error: 'Sesi akun Supabase tidak aktif.',
+        error: 'Sesi akun Supabase tidak aktif. Pastikan Anonymous Sign-In sudah aktif di Supabase.',
       };
     }
 
     // 2. PUSH: Upload pending local logs
     const pendingLogs = await getPendingLogs();
     if (pendingLogs.length > 0) {
-      // Helper validasi UUID
-      const isUUID = (val?: string) =>
-        Boolean(val && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(val));
-
       const recordsToUpsert = pendingLogs.map((log) => ({
         // Pastikan id log berupa UUID valid agar PostgreSQL tidak melempar error
         id: isUUID(log.id) ? log.id : Crypto.randomUUID(),
-        user_id: isUUID(authUserId) ? authUserId : Crypto.randomUUID(),
+        user_id: finalUserId,
         type: log.type,
         latitude: log.latitude,
         longitude: log.longitude,
@@ -118,7 +132,7 @@ export async function syncLogsWithCloud(currentUserId?: string): Promise<SyncRes
     const { data: remoteLogs, error: pullError } = await supabase
       .from('logs')
       .select('*')
-      .eq('user_id', authUserId)
+      .eq('user_id', finalUserId)
       .eq('is_deleted', false)
       .order('logged_at', { ascending: false });
 
