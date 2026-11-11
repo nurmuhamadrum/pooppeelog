@@ -6,6 +6,8 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { AnimatedSplashScreen } from '@/src/components/AnimatedSplashScreen';
+import NetInfo from '@react-native-community/netinfo';
+import { useAppStore } from '@/src/store/useAppStore';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -24,6 +26,7 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
   const [showSplash, setShowSplash] = useState(true);
+  const syncWithCloud = useAppStore((state) => state.syncWithCloud);
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
@@ -36,6 +39,17 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  // Listener Koneksi Internet: Saat online kembali, sinkronkan otomatis background logs
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      if (state.isConnected && state.isInternetReachable !== false) {
+        syncWithCloud().catch(() => {});
+      }
+    });
+
+    return () => unsubscribe();
+  }, [syncWithCloud]);
 
   if (!loaded) {
     return null;
