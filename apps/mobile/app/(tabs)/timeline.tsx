@@ -32,6 +32,7 @@ import {
   Info,
   Filter,
   Search,
+  AlertTriangle,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
@@ -41,12 +42,76 @@ export default function TimelineScreen() {
   const { logs, removeLog } = useAppStore();
   const { showToast } = useToast();
   const [selectedDetailLog, setSelectedDetailLog] = useState<Log | null>(null);
+  const [logToDelete, setLogToDelete] = useState<Log | null>(null);
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Modal detail popup animation
   const modalScale = useRef(new Animated.Value(0.88)).current;
   const modalFade = useRef(new Animated.Value(0)).current;
+
+  // Confirmation delete modal popup animation
+  const confirmScale = useRef(new Animated.Value(0.85)).current;
+  const confirmFade = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (logToDelete) {
+      Animated.parallel([
+        Animated.spring(confirmScale, {
+          toValue: 1,
+          friction: 6,
+          tension: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(confirmFade, {
+          toValue: 1,
+          duration: 180,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      confirmScale.setValue(0.85);
+      confirmFade.setValue(0);
+    }
+  }, [logToDelete]);
+
+  const handleCloseConfirmModal = () => {
+    Animated.parallel([
+      Animated.timing(confirmScale, {
+        toValue: 0.85,
+        duration: 140,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: true,
+      }),
+      Animated.timing(confirmFade, {
+        toValue: 0,
+        duration: 140,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setLogToDelete(null);
+    });
+  };
+
+  const handleConfirmDelete = () => {
+    if (!logToDelete) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
+    const idToDelete = logToDelete.id;
+    const typeName =
+      logToDelete.type === 'PEE'
+        ? "Lil' Drip"
+        : logToDelete.type === 'POOP'
+        ? 'Mr. Plop'
+        : 'Sir Flush';
+
+    handleCloseConfirmModal();
+    handleCloseDetailModal();
+    removeLog(idToDelete);
+    showToast({
+      message: `Catatan ${typeName} berhasil dihapus.`,
+      type: 'delete',
+    });
+  };
 
   useEffect(() => {
     if (selectedDetailLog) {
@@ -476,33 +541,8 @@ export default function TimelineScreen() {
                 <TouchableOpacity
                   style={styles.deleteModalBtn}
                   onPress={() => {
-                    Alert.alert(
-                      'Hapus Catatan Ini?',
-                      'Catatan ini akan dihapus permanen dari riwayat lokal perangkat.',
-                      [
-                        { text: 'Batal', style: 'cancel' },
-                        {
-                          text: 'Ya, Hapus',
-                          style: 'destructive',
-                          onPress: () => {
-                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
-                            const idToDelete = selectedDetailLog.id;
-                            const typeName =
-                              selectedDetailLog.type === 'PEE'
-                                ? "Lil' Drip"
-                                : selectedDetailLog.type === 'POOP'
-                                ? 'Mr. Plop'
-                                : 'Sir Flush';
-                            handleCloseDetailModal();
-                            removeLog(idToDelete);
-                            showToast({
-                              message: `Catatan ${typeName} berhasil dihapus.`,
-                              type: 'delete',
-                            });
-                          },
-                        },
-                      ]
-                    );
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+                    setLogToDelete(selectedDetailLog);
                   }}
                 >
                   <Trash2 size={16} color={Colors.emergencyRed} />
@@ -514,6 +554,69 @@ export default function TimelineScreen() {
                   onPress={handleCloseDetailModal}
                 >
                   <Text style={styles.closeModalBtnText}>Tutup</Text>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          </Animated.View>
+        </Modal>
+      )}
+
+      {/* POPUP CONFIRMATION HAPUS CATATAN BERGAYA CUSTOM POPUP */}
+      {logToDelete && (
+        <Modal
+          visible={true}
+          transparent
+          animationType="none"
+          onRequestClose={handleCloseConfirmModal}
+        >
+          <Animated.View style={[styles.confirmOverlay, { opacity: confirmFade }]}>
+            <Animated.View
+              style={[
+                styles.confirmCard,
+                {
+                  transform: [{ scale: confirmScale }],
+                },
+              ]}
+            >
+              {/* Icon Alert Bulat */}
+              <View style={styles.confirmIconRing}>
+                <Trash2 size={28} color={Colors.emergencyRed} />
+              </View>
+
+              <Text style={styles.confirmTitle}>Hapus Catatan Ini?</Text>
+              <Text style={styles.confirmDescription}>
+                Catatan{' '}
+                <Text style={{ fontWeight: '900', color: Colors.creamBg }}>
+                  {logToDelete.type === 'PEE'
+                    ? "Lil' Drip (Kencing)"
+                    : logToDelete.type === 'POOP'
+                    ? 'Mr. Plop (BAB)'
+                    : 'Sir Flush (Combo)'}
+                </Text>{' '}
+                di{' '}
+                <Text style={{ fontWeight: '700', color: Colors.peeAmber }}>
+                  {logToDelete.district || logToDelete.city || 'lokasi ini'}
+                </Text>{' '}
+                akan dihapus permanen dari riwayat perangkat Anda.
+              </Text>
+
+              {/* Action Buttons */}
+              <View style={styles.confirmButtonRow}>
+                <TouchableOpacity
+                  style={styles.confirmCancelBtn}
+                  onPress={handleCloseConfirmModal}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.confirmCancelText}>Batal</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.confirmDeleteBtn}
+                  onPress={handleConfirmDelete}
+                  activeOpacity={0.8}
+                >
+                  <Trash2 size={15} color="#FFFFFF" />
+                  <Text style={styles.confirmDeleteText}>Ya, Hapus</Text>
                 </TouchableOpacity>
               </View>
             </Animated.View>
@@ -852,5 +955,94 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
     color: Colors.creamBg,
+  },
+  // Custom Confirmation Delete Popup Styles
+  confirmOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.82)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  confirmCard: {
+    width: '100%',
+    maxWidth: 340,
+    backgroundColor: Colors.darkBg,
+    borderRadius: 26,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 90, 95, 0.45)',
+    padding: 22,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 16,
+    elevation: 14,
+  },
+  confirmIconRing: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: 'rgba(255, 90, 95, 0.14)',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 90, 95, 0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  confirmTitle: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: Colors.creamBg,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  confirmDescription: {
+    fontSize: 12,
+    color: Colors.peachTint,
+    opacity: 0.8,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: 20,
+  },
+  confirmButtonRow: {
+    flexDirection: 'row',
+    gap: 10,
+    width: '100%',
+  },
+  confirmCancelBtn: {
+    flex: 1,
+    backgroundColor: Colors.darkSurface,
+    borderWidth: 1,
+    borderColor: Colors.darkBorder,
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmCancelText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: Colors.peachTint,
+  },
+  confirmDeleteBtn: {
+    flex: 1,
+    backgroundColor: Colors.emergencyRed,
+    borderRadius: 14,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    shadowColor: Colors.emergencyRed,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  confirmDeleteText: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#FFFFFF',
   },
 });
