@@ -8,13 +8,15 @@ import {
   deleteLocalLog,
   getDatabase,
 } from '../db/sqlite';
-import { getOrCreateGuestUser } from '../services/supabase';
+import { getOrCreateGuestUser, supabase } from '../services/supabase';
 import { syncLogsWithCloud, SyncResult } from '../services/sync';
 import * as Crypto from 'expo-crypto';
 
 interface AppState {
   logs: Log[];
   userId: string | null;
+  userEmail: string | null;
+  isAnonymous: boolean;
   isLoading: boolean;
   isSyncing: boolean;
   lastSyncedAt: string | null;
@@ -23,6 +25,7 @@ interface AppState {
   appLockEnabled: boolean;
 
   initialize: () => Promise<void>;
+  setUser: (userId: string, email?: string | null, isAnonymous?: boolean) => void;
   syncWithCloud: () => Promise<SyncResult>;
   addLog: (logData: Omit<Log, 'id' | 'userId' | 'clientCreatedAt' | 'syncStatus'>) => Promise<Log>;
   importLogs: (importedLogs: Log[]) => Promise<number>;
@@ -35,21 +38,43 @@ interface AppState {
 export const useAppStore = create<AppState>((set, get) => ({
   logs: [],
   userId: null,
+  userEmail: null,
+  isAnonymous: true,
   isLoading: true,
   isSyncing: false,
   lastSyncedAt: null,
   mapFilter: 'ALL',
   appLockEnabled: false,
 
+  setUser: (userId: string, email?: string | null, isAnonymous: boolean = false) => {
+    set({ userId, userEmail: email ?? null, isAnonymous });
+  },
+
   initialize: async () => {
     try {
       set({ isLoading: true });
       await getDatabase();
-      const guestId = await getOrCreateGuestUser();
+
+      // Cek apakah ada sesi auth Supabase aktif
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      let activeUserId = session?.user?.id;
+      let activeEmail = session?.user?.email ?? null;
+      let isAnon = Boolean(session?.user?.is_anonymous);
+
+      if (!activeUserId) {
+        activeUserId = await getOrCreateGuestUser();
+        isAnon = true;
+      }
+
       const loadedLogs = await getLocalLogs();
 
       set({
-        userId: guestId,
+        userId: activeUserId,
+        userEmail: activeEmail,
+        isAnonymous: isAnon,
         logs: loadedLogs,
         isLoading: false,
       });

@@ -36,7 +36,12 @@ import {
   ExternalLink,
   RefreshCw,
   Cloud,
+  LogOut,
+  LogIn,
+  ChevronRight,
 } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { signOut } from '@/src/services/authService';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from '@/src/components/MascotIcons';
 import { clearAllLocalData } from '@/src/db/sqlite';
 import { authenticateWithBiometrics } from '@/src/services/auth';
@@ -46,16 +51,20 @@ import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 
 export default function ProfileSettingsScreen() {
+  const router = useRouter();
   const {
     appLockEnabled,
     toggleAppLock,
     userId,
+    userEmail,
+    isAnonymous,
     logs,
     initialize,
     importLogs,
     isSyncing,
     lastSyncedAt,
     syncWithCloud,
+    setUser,
   } = useAppStore();
 
   const [exportModalVisible, setExportModalVisible] = useState(false);
@@ -242,12 +251,28 @@ export default function ProfileSettingsScreen() {
 
             <View style={{ flex: 1 }}>
               <View style={styles.nameRow}>
-                <Text style={styles.profileName}>Penjelajah Toilet</Text>
-                <View style={styles.guestBadge}>
-                  <Text style={styles.guestBadgeText}>LOKAL OFFLINE</Text>
+                <Text style={styles.profileName}>
+                  {userEmail ? userEmail.split('@')[0] : 'Penjelajah Toilet'}
+                </Text>
+                <View
+                  style={[
+                    styles.guestBadge,
+                    !isAnonymous && { borderColor: 'rgba(245, 183, 0, 0.4)' },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.guestBadgeText,
+                      !isAnonymous && { color: Colors.peeAmber },
+                    ]}
+                  >
+                    {isAnonymous ? 'LOKAL OFFLINE' : 'AKUN CLOUD'}
+                  </Text>
                 </View>
               </View>
-              <Text style={styles.profileMemberSince}>Aktif sejak {memberSince}</Text>
+              <Text style={styles.profileMemberSince}>
+                {userEmail ? userEmail : `Aktif sejak ${memberSince}`}
+              </Text>
               <Text style={styles.profileId} numberOfLines={1}>
                 ID: {userId || 'guest-local'}
               </Text>
@@ -328,6 +353,68 @@ export default function ProfileSettingsScreen() {
             <Download size={16} color={Colors.bothTeal} />
             <Text style={styles.sectionHeading}>PORTABILITAS & SINKRONISASI DATA</Text>
           </View>
+
+          {/* AKUN & AUTENTIKASI */}
+          <TouchableOpacity
+            style={styles.actionRow}
+            onPress={async () => {
+              if (isAnonymous) {
+                router.push('/auth');
+              } else {
+                Alert.alert(
+                  'Keluar dari Akun',
+                  'Apakah Anda yakin ingin keluar? Catatan lokal tetap aman di perangkat.',
+                  [
+                    { text: 'Batal', style: 'cancel' },
+                    {
+                      text: 'Keluar',
+                      style: 'destructive',
+                      onPress: async () => {
+                        await signOut();
+                        setUser('guest-local', null, true);
+                        router.replace('/auth');
+                      },
+                    },
+                  ]
+                );
+              }
+            }}
+          >
+            <View style={styles.actionLeft}>
+              <View
+                style={[
+                  styles.settingIconBox,
+                  {
+                    backgroundColor: isAnonymous
+                      ? 'rgba(245, 183, 0, 0.15)'
+                      : 'rgba(255, 90, 95, 0.15)',
+                  },
+                ]}
+              >
+                {isAnonymous ? (
+                  <LogIn size={16} color={Colors.peeAmber} />
+                ) : (
+                  <LogOut size={16} color={Colors.emergencyRed} />
+                )}
+              </View>
+              <View>
+                <Text
+                  style={[
+                    styles.actionLabel,
+                    !isAnonymous && { color: Colors.emergencyRed },
+                  ]}
+                >
+                  {isAnonymous ? 'Masuk / Buat Akun Cloud' : 'Keluar dari Akun'}
+                </Text>
+                <Text style={styles.actionDesc}>
+                  {isAnonymous
+                    ? 'Hubungkan email atau Google untuk sinkron multi-perangkat'
+                    : `Sedang login sebagai ${userEmail || 'Pengguna'}`}
+                </Text>
+              </View>
+            </View>
+            <ChevronRight size={16} color={Colors.peachTint} />
+          </TouchableOpacity>
 
           {/* SINKRONISASI SUPABASE CLOUD */}
           <TouchableOpacity
