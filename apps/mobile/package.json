@@ -4,6 +4,7 @@
   "main": "expo-router/entry",
   "dependencies": {
     "@poop-pee-log/shared": "*",
+    "@react-native-community/datetimepicker": "^9.2.1",
     "@react-native-community/netinfo": "^12.0.1",
     "@supabase/supabase-js": "^2.119.0",
     "expo": "~58.0.23",

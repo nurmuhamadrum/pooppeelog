@@ -15,6 +15,7 @@ import {
   Animated,
   Easing,
 } from 'react-native';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { Colors } from '@/constants/Colors';
 import { useAppStore } from '@/src/store/useAppStore';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from '@/src/components/MascotIcons';
@@ -48,8 +49,10 @@ export default function TimelineScreen() {
 
   // State Rentang Tanggal Kalender (Custom Date Range)
   const [dateRangeModalVisible, setDateRangeModalVisible] = useState(false);
-  const [customStartDate, setCustomStartDate] = useState<string>('');
-  const [customEndDate, setCustomEndDate] = useState<string>('');
+  const [startDate, setStartDate] = useState<Date>(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+  const [endDate, setEndDate] = useState<Date>(new Date());
+  const [pickerTarget, setPickerTarget] = useState<'START' | 'END' | null>(null);
+  const [showNativePicker, setShowNativePicker] = useState<boolean>(false);
   const [activeDateFilterLabel, setActiveDateFilterLabel] = useState<string | null>(null);
 
   // Animasi modal kalender
@@ -92,29 +95,39 @@ export default function TimelineScreen() {
       }),
     ]).start(() => {
       setDateRangeModalVisible(false);
+      setPickerTarget(null);
+      setShowNativePicker(false);
     });
   };
 
+  const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowNativePicker(false);
+    }
+    if (event.type === 'dismissed' || !selectedDate) {
+      setPickerTarget(null);
+      return;
+    }
+
+    if (pickerTarget === 'START') {
+      setStartDate(selectedDate);
+      if (selectedDate > endDate) {
+        setEndDate(selectedDate);
+      }
+    } else if (pickerTarget === 'END') {
+      if (selectedDate < startDate) {
+        setStartDate(selectedDate);
+      }
+      setEndDate(selectedDate);
+    }
+
+    if (Platform.OS === 'android') {
+      setPickerTarget(null);
+    }
+  };
+
   const handleApplyCustomDateRange = () => {
-    if (!customStartDate || !customEndDate) {
-      showToast({
-        message: 'Mohon isi tanggal mulai dan tanggal akhir.',
-        type: 'info',
-      });
-      return;
-    }
-
-    const start = new Date(customStartDate);
-    const end = new Date(customEndDate);
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      showToast({
-        message: 'Format tanggal tidak valid (gunakan YYYY-MM-DD).',
-        type: 'error',
-      });
-      return;
-    }
-
-    if (start > end) {
+    if (startDate > endDate) {
       showToast({
         message: 'Tanggal mulai tidak boleh melebihi tanggal akhir.',
         type: 'error',
@@ -122,11 +135,14 @@ export default function TimelineScreen() {
       return;
     }
 
+    const startFmt = startDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    const endFmt = endDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+
     setTimeFilter('CUSTOM');
-    setActiveDateFilterLabel(`${customStartDate} s/d ${customEndDate}`);
+    setActiveDateFilterLabel(`${startFmt} - ${endFmt}`);
     handleCloseCalendarModal();
     showToast({
-      message: `Filter tanggal diterapkan (${customStartDate} - ${customEndDate})`,
+      message: `Filter tanggal aktif: ${startFmt} - ${endFmt}`,
       type: 'success',
     });
   };
@@ -270,16 +286,15 @@ export default function TimelineScreen() {
         return logDate.getFullYear() === now.getFullYear();
       }
       if (timeFilter === 'CUSTOM') {
-        if (!customStartDate || !customEndDate) return true;
-        const start = new Date(customStartDate);
+        const start = new Date(startDate);
         start.setHours(0, 0, 0, 0);
-        const end = new Date(customEndDate);
+        const end = new Date(endDate);
         end.setHours(23, 59, 59, 999);
         return logDate >= start && logDate <= end;
       }
       return true; // 'ALL'
     });
-  }, [logs, timeFilter, searchQuery, customStartDate, customEndDate]);
+  }, [logs, timeFilter, searchQuery, startDate, endDate]);
 
   // Grouping logs berdasarkan mode filter
   const sections = useMemo(() => {
@@ -485,20 +500,29 @@ export default function TimelineScreen() {
           {/* Tombol Kalender Rentang Tanggal Kustom */}
           <TouchableOpacity
             style={[
-              styles.filterPill,
-              timeFilter === 'CUSTOM' && styles.filterPillActiveCustom,
+              styles.calendarFilterButton,
+              timeFilter === 'CUSTOM' && styles.calendarFilterButtonActive,
             ]}
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
               setDateRangeModalVisible(true);
             }}
+            activeOpacity={0.8}
           >
-            <Calendar size={12} color={timeFilter === 'CUSTOM' ? '#000' : Colors.bothTeal} />
+            <View
+              style={[
+                styles.calendarIconBadge,
+                timeFilter === 'CUSTOM' && styles.calendarIconBadgeActive,
+              ]}
+            >
+              <Calendar size={13} color={timeFilter === 'CUSTOM' ? Colors.ink : Colors.bothTeal} />
+            </View>
             <Text
               style={[
-                styles.filterPillText,
-                timeFilter === 'CUSTOM' ? styles.filterPillTextActiveDark : { color: Colors.bothTeal },
+                styles.calendarFilterButtonText,
+                timeFilter === 'CUSTOM' && styles.calendarFilterButtonTextActive,
               ]}
+              numberOfLines={1}
             >
               {activeDateFilterLabel ? activeDateFilterLabel : 'Pilih Tanggal'}
             </Text>
@@ -751,7 +775,7 @@ export default function TimelineScreen() {
         </Modal>
       )}
 
-      {/* POPUP KALENDER RENTANG TANGGAL KUSTOM */}
+      {/* POPUP KALENDER RENTANG TANGGAL KUSTOM DENGAN DATE PICKER */}
       {dateRangeModalVisible && (
         <Modal
           visible={true}
@@ -774,31 +798,87 @@ export default function TimelineScreen() {
 
               <Text style={styles.confirmTitle}>Filter Rentang Tanggal</Text>
               <Text style={styles.confirmDescription}>
-                Tentukan rentang tanggal catatan yang ingin ditampilkan di buku harian:
+                Pilih tanggal mulai dan tanggal akhir untuk melihat riwayat aktivitas buang air:
               </Text>
 
-              {/* Input Tanggal Mulai & Akhir */}
-              <View style={styles.calendarInputGroup}>
-                <Text style={styles.calendarInputLabel}>Tanggal Mulai (YYYY-MM-DD):</Text>
-                <TextInput
-                  style={styles.calendarTextInput}
-                  placeholder="2026-11-01"
-                  placeholderTextColor={Colors.darkBorder}
-                  value={customStartDate}
-                  onChangeText={setCustomStartDate}
-                  maxLength={10}
-                />
+              {/* Selector Tanggal Mulai & Akhir dengan UI Interaktif */}
+              <View style={styles.datePickerCardRow}>
+                {/* Tanggal Mulai */}
+                <TouchableOpacity
+                  style={[
+                    styles.dateSelectBox,
+                    pickerTarget === 'START' && styles.dateSelectBoxActive,
+                  ]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+                    setPickerTarget('START');
+                    setShowNativePicker(true);
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.dateSelectLabel}>DARI TANGGAL</Text>
+                  <Text style={styles.dateSelectValue}>
+                    {startDate.toLocaleDateString('id-ID', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </Text>
+                  <Text style={styles.dateSelectHint}>Tap untuk ganti</Text>
+                </TouchableOpacity>
 
-                <Text style={[styles.calendarInputLabel, { marginTop: 10 }]}>Tanggal Akhir (YYYY-MM-DD):</Text>
-                <TextInput
-                  style={styles.calendarTextInput}
-                  placeholder="2026-11-15"
-                  placeholderTextColor={Colors.darkBorder}
-                  value={customEndDate}
-                  onChangeText={setCustomEndDate}
-                  maxLength={10}
-                />
+                {/* Arrow Divider */}
+                <View style={styles.dateDividerLine}>
+                  <Text style={{ color: Colors.peachTint, fontSize: 16 }}>→</Text>
+                </View>
+
+                {/* Tanggal Akhir */}
+                <TouchableOpacity
+                  style={[
+                    styles.dateSelectBox,
+                    pickerTarget === 'END' && styles.dateSelectBoxActive,
+                  ]}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+                    setPickerTarget('END');
+                    setShowNativePicker(true);
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.dateSelectLabel}>SAMPAI TANGGAL</Text>
+                  <Text style={styles.dateSelectValue}>
+                    {endDate.toLocaleDateString('id-ID', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </Text>
+                  <Text style={styles.dateSelectHint}>Tap untuk ganti</Text>
+                </TouchableOpacity>
               </View>
+
+              {/* DateTimePicker Component */}
+              {(showNativePicker || Platform.OS === 'ios') && pickerTarget && (
+                <View style={styles.inlinePickerWrapper}>
+                  <DateTimePicker
+                    value={pickerTarget === 'START' ? startDate : endDate}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={onDateChange}
+                    maximumDate={new Date()}
+                    textColor={Colors.creamBg}
+                    themeVariant="dark"
+                  />
+                  {Platform.OS === 'ios' && (
+                    <TouchableOpacity
+                      style={styles.pickerDoneBtn}
+                      onPress={() => setPickerTarget(null)}
+                    >
+                      <Text style={styles.pickerDoneBtnText}>Selesai Pilih</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
 
               {/* Action Buttons */}
               <View style={styles.confirmButtonRow}>
@@ -902,6 +982,48 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+  },
+  // Tombol Pilih Tanggal yang Menonjol & Estetik
+  calendarFilterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 5,
+    paddingLeft: 6,
+    paddingRight: 12,
+    borderRadius: 20,
+    backgroundColor: 'rgba(47, 184, 172, 0.12)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(47, 184, 172, 0.35)',
+    shadowColor: Colors.bothTeal,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  calendarFilterButtonActive: {
+    backgroundColor: Colors.bothTeal,
+    borderColor: Colors.bothTeal,
+  },
+  calendarIconBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(47, 184, 172, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calendarIconBadgeActive: {
+    backgroundColor: 'rgba(0, 0, 0, 0.15)',
+  },
+  calendarFilterButtonText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Colors.bothTeal,
+  },
+  calendarFilterButtonTextActive: {
+    color: Colors.ink,
+    fontWeight: '900',
   },
   filterPillText: {
     fontSize: 11,
@@ -1256,26 +1378,68 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#FFFFFF',
   },
-  // Custom Calendar Date Range Inputs
-  calendarInputGroup: {
+  // Custom Date Picker Selector Styles
+  datePickerCardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     width: '100%',
-    marginBottom: 20,
+    marginBottom: 16,
   },
-  calendarInputLabel: {
-    fontSize: 11,
+  dateSelectBox: {
+    flex: 1,
+    backgroundColor: Colors.darkSurface,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: Colors.darkBorder,
+    padding: 12,
+    alignItems: 'center',
+  },
+  dateSelectBoxActive: {
+    borderColor: Colors.bothTeal,
+    backgroundColor: 'rgba(47, 184, 172, 0.12)',
+  },
+  dateSelectLabel: {
+    fontSize: 9,
     fontWeight: '800',
     color: Colors.peachTint,
-    marginBottom: 6,
+    letterSpacing: 0.5,
+    marginBottom: 4,
   },
-  calendarTextInput: {
-    backgroundColor: Colors.darkSurface,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: Colors.darkBorder,
-    color: Colors.creamBg,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+  dateSelectValue: {
     fontSize: 13,
+    fontWeight: '900',
+    color: Colors.creamBg,
+    textAlign: 'center',
+  },
+  dateSelectHint: {
+    fontSize: 9,
+    color: Colors.bothTeal,
     fontWeight: '700',
+    marginTop: 4,
+  },
+  dateDividerLine: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inlinePickerWrapper: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 16,
+    backgroundColor: Colors.darkSurface,
+    borderRadius: 16,
+    padding: 8,
+  },
+  pickerDoneBtn: {
+    marginTop: 8,
+    backgroundColor: Colors.bothTeal,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+  },
+  pickerDoneBtnText: {
+    color: Colors.ink,
+    fontSize: 11,
+    fontWeight: '900',
   },
 });
