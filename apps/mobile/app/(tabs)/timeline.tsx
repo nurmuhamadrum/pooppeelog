@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -12,10 +12,13 @@ import {
   ScrollView,
   TextInput,
   Alert,
+  Animated,
+  Easing,
 } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useAppStore } from '@/src/store/useAppStore';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from '@/src/components/MascotIcons';
+import { useToast } from '@/src/context/ToastContext';
 import { Log } from '@poop-pee-log/shared';
 import {
   Trash2,
@@ -36,9 +39,53 @@ type TimeFilter = 'WEEK' | 'MONTH' | 'YEAR' | 'ALL';
 
 export default function TimelineScreen() {
   const { logs, removeLog } = useAppStore();
+  const { showToast } = useToast();
   const [selectedDetailLog, setSelectedDetailLog] = useState<Log | null>(null);
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Modal detail popup animation
+  const modalScale = useRef(new Animated.Value(0.88)).current;
+  const modalFade = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (selectedDetailLog) {
+      Animated.parallel([
+        Animated.spring(modalScale, {
+          toValue: 1,
+          friction: 7,
+          tension: 70,
+          useNativeDriver: true,
+        }),
+        Animated.timing(modalFade, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      modalScale.setValue(0.88);
+      modalFade.setValue(0);
+    }
+  }, [selectedDetailLog]);
+
+  const handleCloseDetailModal = () => {
+    Animated.parallel([
+      Animated.timing(modalScale, {
+        toValue: 0.88,
+        duration: 160,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: true,
+      }),
+      Animated.timing(modalFade, {
+        toValue: 0,
+        duration: 160,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setSelectedDetailLog(null);
+    });
+  };
 
   // Filter logs berdasarkan periode waktu dan kata kunci pencarian
   const filteredLogs = useMemo(() => {
@@ -304,11 +351,18 @@ export default function TimelineScreen() {
         <Modal
           visible={true}
           transparent
-          animationType="fade"
-          onRequestClose={() => setSelectedDetailLog(null)}
+          animationType="none"
+          onRequestClose={handleCloseDetailModal}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalCard}>
+          <Animated.View style={[styles.modalOverlay, { opacity: modalFade }]}>
+            <Animated.View
+              style={[
+                styles.modalCard,
+                {
+                  transform: [{ scale: modalScale }],
+                },
+              ]}
+            >
               {/* Header Modal */}
               <View style={styles.modalHeader}>
                 <View style={styles.modalAvatarRow}>
@@ -349,7 +403,7 @@ export default function TimelineScreen() {
                 </View>
 
                 <TouchableOpacity
-                  onPress={() => setSelectedDetailLog(null)}
+                  onPress={handleCloseDetailModal}
                   style={styles.modalCloseBtn}
                 >
                   <X size={18} color={Colors.peachTint} />
@@ -433,8 +487,18 @@ export default function TimelineScreen() {
                           onPress: () => {
                             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
                             const idToDelete = selectedDetailLog.id;
-                            setSelectedDetailLog(null);
+                            const typeName =
+                              selectedDetailLog.type === 'PEE'
+                                ? "Lil' Drip"
+                                : selectedDetailLog.type === 'POOP'
+                                ? 'Mr. Plop'
+                                : 'Sir Flush';
+                            handleCloseDetailModal();
                             removeLog(idToDelete);
+                            showToast({
+                              message: `Catatan ${typeName} berhasil dihapus.`,
+                              type: 'delete',
+                            });
                           },
                         },
                       ]
@@ -447,13 +511,13 @@ export default function TimelineScreen() {
 
                 <TouchableOpacity
                   style={styles.closeModalBtn}
-                  onPress={() => setSelectedDetailLog(null)}
+                  onPress={handleCloseDetailModal}
                 >
                   <Text style={styles.closeModalBtnText}>Tutup</Text>
                 </TouchableOpacity>
               </View>
-            </View>
-          </View>
+            </Animated.View>
+          </Animated.View>
         </Modal>
       )}
     </SafeAreaView>

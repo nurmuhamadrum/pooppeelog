@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Dimensions,
   Share,
+  Animated,
+  Easing,
 } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from './MascotIcons';
@@ -25,7 +27,49 @@ export const BadgeUnlockedModal: React.FC<BadgeUnlockedModalProps> = ({
   badge,
   onClose,
 }) => {
+  const scaleAnim = useRef(new Animated.Value(0.7)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible && badge) {
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 6,
+          tension: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 220,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      scaleAnim.setValue(0.7);
+      opacityAnim.setValue(0);
+    }
+  }, [visible, badge]);
+
   if (!badge) return null;
+
+  const handleClose = () => {
+    Animated.parallel([
+      Animated.timing(scaleAnim, {
+        toValue: 0.8,
+        duration: 150,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      onClose();
+    });
+  };
 
   const handleShare = async () => {
     try {
@@ -43,13 +87,20 @@ export const BadgeUnlockedModal: React.FC<BadgeUnlockedModalProps> = ({
     <Modal
       visible={visible}
       transparent
-      animationType="fade"
-      onRequestClose={onClose}
+      animationType="none"
+      onRequestClose={handleClose}
     >
-      <View style={styles.overlay}>
-        <View style={styles.card}>
+      <Animated.View style={[styles.overlay, { opacity: opacityAnim }]}>
+        <Animated.View
+          style={[
+            styles.card,
+            {
+              transform: [{ scale: scaleAnim }],
+            },
+          ]}
+        >
           {/* Close Icon Top Right */}
-          <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.8}>
+          <TouchableOpacity onPress={handleClose} style={styles.closeBtn} activeOpacity={0.8}>
             <X size={18} color={Colors.peachTint} />
           </TouchableOpacity>
 
@@ -92,15 +143,15 @@ export const BadgeUnlockedModal: React.FC<BadgeUnlockedModalProps> = ({
 
             <TouchableOpacity
               style={[styles.claimButton, { backgroundColor: badge.accentColor }]}
-              onPress={onClose}
+              onPress={handleClose}
               activeOpacity={0.85}
             >
               <Award size={16} color="#000" />
               <Text style={styles.claimButtonText}>Lega Banget!</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </View>
+        </Animated.View>
+      </Animated.View>
     </Modal>
   );
 };

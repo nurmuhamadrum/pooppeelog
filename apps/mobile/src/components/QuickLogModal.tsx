@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
@@ -9,11 +9,15 @@ import {
   TextInput,
   ScrollView,
   Platform,
+  Animated,
+  Easing,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from './MascotIcons';
 import { useAppStore } from '../store/useAppStore';
 import { getCurrentLocationWithAddress } from '../services/location';
+import { useToast } from '../context/ToastContext';
 import { LogType } from '@poop-pee-log/shared';
 import { X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -24,6 +28,8 @@ interface QuickLogModalProps {
 }
 
 export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }) => {
+  const router = useRouter();
+  const { showToast } = useToast();
   const addLog = useAppStore((state: any) => state.addLog);
   const updateLogMoodAndNote = useAppStore((state: any) => state.updateLogMoodAndNote);
 
@@ -33,6 +39,39 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
   const [selectedMood, setSelectedMood] = useState<string>('Lega Banget');
   const [note, setNote] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Popup & sheet animations
+  const slideAnim = useRef(new Animated.Value(300)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.92)).current;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          friction: 8,
+          tension: 65,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 7,
+          tension: 70,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      slideAnim.setValue(300);
+      fadeAnim.setValue(0);
+      scaleAnim.setValue(0.92);
+    }
+  }, [visible]);
 
   const handleQuickLog = async (type: LogType) => {
     // Memberikan haptic feedback responsif instan
@@ -67,11 +106,23 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       setCurrentCreatedLogId(createdLog.id);
       setIsSubmitting(false);
+
+      const typeLabel =
+        type === 'PEE' ? "Lil' Drip (Pee)" : type === 'POOP' ? 'Mr. Plop (Poop)' : 'Sir Flush (Combo)';
+      showToast({
+        message: `Berhasil mencatat ${typeLabel}!`,
+        type: 'success',
+      });
+
       setStep('MOOD_NOTE');
     } catch (error) {
       console.error('Error logging:', error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
       setIsSubmitting(false);
+      showToast({
+        message: 'Gagal mencatat lokasi atau waktu.',
+        type: 'error',
+      });
       handleFinish();
     }
   };
@@ -81,20 +132,52 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
     if (currentCreatedLogId) {
       await updateLogMoodAndNote(currentCreatedLogId, selectedMood, note);
     }
+    showToast({
+      message: 'Catatan & mood berhasil disimpan ke Diary!',
+      type: 'success',
+    });
     handleFinish();
+    // Navigasi langsung ke tab Diary (/timeline)
+    setTimeout(() => {
+      router.push('/(tabs)/timeline');
+    }, 150);
   };
 
   const handleFinish = () => {
-    setStep('SELECT');
-    setNote('');
-    setCurrentCreatedLogId(null);
-    onClose();
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: 350,
+        duration: 200,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setStep('SELECT');
+      setNote('');
+      setCurrentCreatedLogId(null);
+      onClose();
+    });
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={handleFinish}>
-      <View style={styles.overlay}>
-        <View style={styles.sheetContainer}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={handleFinish}>
+      <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
+        <Animated.View
+          style={[
+            styles.sheetContainer,
+            {
+              transform: [
+                { translateY: slideAnim },
+                { scale: scaleAnim },
+              ],
+            },
+          ]}
+        >
           {/* Grabber bar */}
           <View style={styles.grabber} />
 
@@ -249,8 +332,8 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
               <Text style={styles.loadingTxt}>Merekam koordinat & waktu...</Text>
             </View>
           )}
-        </View>
-      </View>
+        </Animated.View>
+      </Animated.View>
     </Modal>
   );
 };
