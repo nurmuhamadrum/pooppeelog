@@ -12,7 +12,7 @@ CREATE EXTENSION IF NOT EXISTS "postgis";
 
 -- 2. ENUM TYPES
 DO $$ BEGIN
-    CREATE TYPE log_type_enum AS ENUM ('PEE', 'POOP');
+    CREATE TYPE log_type_enum AS ENUM ('PEE', 'POOP', 'COMBO');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
