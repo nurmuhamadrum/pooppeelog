@@ -3,6 +3,7 @@ import { Log } from '@poop-pee-log/shared';
 import {
   getLocalLogs,
   insertLocalLog,
+  insertMultipleLocalLogs,
   updateLocalLogMoodAndNote,
   deleteLocalLog,
   getDatabase,
@@ -19,6 +20,7 @@ interface AppState {
 
   initialize: () => Promise<void>;
   addLog: (logData: Omit<Log, 'id' | 'userId' | 'clientCreatedAt' | 'syncStatus'>) => Promise<Log>;
+  importLogs: (importedLogs: Log[]) => Promise<number>;
   updateLogMoodAndNote: (id: string, mood: string, note: string) => Promise<void>;
   removeLog: (id: string) => Promise<void>;
   setMapFilter: (filter: 'ALL' | 'PEE' | 'POOP' | 'COMBO') => void;
@@ -72,6 +74,21 @@ export const useAppStore = create<AppState>((set, get) => ({
     }));
 
     return fullLog;
+  },
+
+  importLogs: async (importedLogs: Log[]) => {
+    // Validasi dan filter log yang valid
+    const validLogs = importedLogs.filter(
+      (l) => l && l.id && l.type && typeof l.latitude === 'number' && typeof l.longitude === 'number'
+    );
+
+    if (validLogs.length > 0) {
+      await insertMultipleLocalLogs(validLogs);
+      const reloadedLogs = await getLocalLogs();
+      set({ logs: reloadedLogs });
+    }
+
+    return validLogs.length;
   },
 
   updateLogMoodAndNote: async (id: string, mood: string, note: string) => {

@@ -16,6 +16,7 @@ import { useAppStore } from '../store/useAppStore';
 import { getCurrentLocationWithAddress } from '../services/location';
 import { LogType } from '@poop-pee-log/shared';
 import { X } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 
 interface QuickLogModalProps {
   visible: boolean;
@@ -34,6 +35,8 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleQuickLog = async (type: LogType) => {
+    // Memberikan haptic feedback responsif instan
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     setIsSubmitting(true);
     setSelectedType(type);
 
@@ -61,17 +64,20 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
         isBlurred: false,
       });
 
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       setCurrentCreatedLogId(createdLog.id);
       setIsSubmitting(false);
       setStep('MOOD_NOTE');
     } catch (error) {
       console.error('Error logging:', error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
       setIsSubmitting(false);
       handleFinish();
     }
   };
 
   const handleSaveMoodAndNote = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     if (currentCreatedLogId) {
       await updateLogMoodAndNote(currentCreatedLogId, selectedMood, note);
     }

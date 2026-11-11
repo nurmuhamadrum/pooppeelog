@@ -127,6 +127,40 @@ export async function deleteLocalLog(id: string): Promise<void> {
   await db.runAsync(`DELETE FROM local_logs WHERE id = ?`, [id]);
 }
 
+export async function insertMultipleLocalLogs(logs: Log[]): Promise<void> {
+  const db = await getDatabase();
+  for (const log of logs) {
+    await db.runAsync(
+      `INSERT OR REPLACE INTO local_logs (
+        id, user_id, type, latitude, longitude, altitude,
+        city, district, subdistrict, country, mood, note,
+        logged_at, is_blurred, blurred_latitude, blurred_longitude,
+        client_created_at, sync_status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        log.id,
+        log.userId,
+        log.type,
+        log.latitude,
+        log.longitude,
+        log.altitude ?? null,
+        log.city,
+        log.district,
+        log.subdistrict ?? null,
+        log.country || 'Indonesia',
+        log.mood ?? null,
+        log.note ?? null,
+        log.loggedAt,
+        log.isBlurred ? 1 : 0,
+        log.blurredLatitude ?? null,
+        log.blurredLongitude ?? null,
+        log.clientCreatedAt,
+        log.syncStatus || 'pending',
+      ]
+    );
+  }
+}
+
 export async function clearAllLocalData(): Promise<void> {
   const db = await getDatabase();
   await db.execAsync(`

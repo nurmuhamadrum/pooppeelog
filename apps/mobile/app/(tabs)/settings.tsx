@@ -11,6 +11,7 @@ import {
   ScrollView,
   Modal,
   Share,
+  Alert,
 } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useAppStore } from '@/src/store/useAppStore';
@@ -19,6 +20,7 @@ import {
   Lock,
   Trash2,
   Download,
+  Upload,
   FileText,
   CheckCircle,
   User,
@@ -37,6 +39,9 @@ import { MrPlopIcon, LilDripIcon, SirFlushIcon } from '@/src/components/MascotIc
 import { clearAllLocalData } from '@/src/db/sqlite';
 import { authenticateWithBiometrics } from '@/src/services/auth';
 import * as Linking from 'expo-linking';
+import * as DocumentPicker from 'expo-document-picker';
+import { File, Paths } from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 export default function ProfileSettingsScreen() {
   const {
@@ -45,12 +50,18 @@ export default function ProfileSettingsScreen() {
     userId,
     logs,
     initialize,
+    importLogs,
   } = useAppStore();
 
   const [exportModalVisible, setExportModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
+
+  // State untuk Import JSON
+  const [importModalVisible, setImportModalVisible] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{ count: number; error?: string } | null>(null);
 
   // Perhitungan statistik profil
   const totalLogs = logs.length;
@@ -94,15 +105,83 @@ export default function ProfileSettingsScreen() {
     try {
       setIsExporting(true);
       const dataStr = JSON.stringify(logs, null, 2);
-      await Share.share({
-        title: 'Poop Pee Log - Cadangan Riwayat',
-        message: dataStr,
-      });
+
+      // Coba bagikan via expo-sharing jika tersedia, atau fallback ke Share.share bawaan
+      const isSharingAvailable = await Sharing.isAvailableAsync().catch(() => false);
+      if (isSharingAvailable && Paths?.cache) {
+        const tempFile = new File(Paths.cache, `pooppeelog-backup-${Date.now()}.json`);
+        await tempFile.write(dataStr);
+        await Sharing.shareAsync(tempFile.uri, {
+          mimeType: 'application/json',
+          dialogTitle: 'Simpan / Bagikan Cadangan PoopPeeLog',
+          UTI: 'public.json',
+        });
+      } else {
+        await Share.share({
+          title: 'Poop Pee Log - Cadangan Riwayat',
+          message: dataStr,
+        });
+      }
       setExportSuccess(true);
     } catch (err) {
       console.log('Export share error:', err);
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const executePickAndImportJSON = async () => {
+    try {
+      setIsImporting(true);
+      setImportResult(null);
+
+      const res = await DocumentPicker.getDocumentAsync({
+        type: ['application/json', 'text/json', '*/*'],
+        copyToCacheDirectory: true,
+      });
+
+      if (res.canceled || !res.assets || res.assets.length === 0) {
+        setIsImporting(false);
+        return;
+      }
+
+      const selectedAsset = res.assets[0];
+      let jsonContent = '';
+
+      if (selectedAsset.uri) {
+        const fileRef = new File(selectedAsset.uri);
+        jsonContent = await fileRef.text();
+      }
+
+      if (!jsonContent) {
+        setImportResult({ count: 0, error: 'Berkas kosong atau tidak dapat dibaca.' });
+        setIsImporting(false);
+        return;
+      }
+
+      const parsed = JSON.parse(jsonContent);
+      let logsToImport: any[] = [];
+
+      if (Array.isArray(parsed)) {
+        logsToImport = parsed;
+      } else if (parsed && Array.isArray(parsed.logs)) {
+        logsToImport = parsed.logs;
+      } else {
+        setImportResult({ count: 0, error: 'Format berkas JSON tidak sesuai struktur riwayat log.' });
+        setIsImporting(false);
+        return;
+      }
+
+      const count = await importLogs(logsToImport);
+      setImportResult({ count });
+    } catch (err: any) {
+      console.log('Error importing logs:', err);
+      setImportResult({
+        count: 0,
+        error: err?.message || 'Gagal mengimpor berkas. Pastikan format valid JSON.',
+      });
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -226,6 +305,7 @@ export default function ProfileSettingsScreen() {
             <Text style={styles.sectionHeading}>PORTABILITAS DATA</Text>
           </View>
 
+          {/* Ekspor JSON */}
           <TouchableOpacity
             style={styles.actionRow}
             onPress={() => {
@@ -243,6 +323,26 @@ export default function ProfileSettingsScreen() {
               </View>
             </View>
             <Share2 size={16} color={Colors.peachTint} />
+          </TouchableOpacity>
+
+          {/* Impor JSON */}
+          <TouchableOpacity
+            style={styles.actionRow}
+            onPress={() => {
+              setImportResult(null);
+              setImportModalVisible(true);
+            }}
+          >
+            <View style={styles.actionLeft}>
+              <View style={[styles.settingIconBox, { backgroundColor: 'rgba(245, 183, 0, 0.15)' }]}>
+                <Upload size={16} color={Colors.peeAmber} />
+              </View>
+              <View>
+                <Text style={styles.actionLabel}>Pulihkan & Impor Data</Text>
+                <Text style={styles.actionDesc}>Muat riwayat catatan dari berkas JSON cadangan</Text>
+              </View>
+            </View>
+            <Download size={16} color={Colors.peachTint} />
           </TouchableOpacity>
         </View>
 
@@ -345,7 +445,97 @@ export default function ProfileSettingsScreen() {
         </View>
       </Modal>
 
-      {/* 2. MODAL KONFIRMASI HAPUS DATA LEBIH INFORMATIF */}
+      {/* 2. MODAL IMPOR DATA JSON */}
+      <Modal
+        visible={importModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setImportModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeaderRow}>
+              <View style={[styles.modalIconRing, { backgroundColor: 'rgba(245, 183, 0, 0.2)' }]}>
+                <Upload size={24} color={Colors.peeAmber} />
+              </View>
+              <TouchableOpacity onPress={() => setImportModalVisible(false)} style={styles.modalCloseIcon}>
+                <X size={18} color={Colors.peachTint} />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.modalHeading}>Impor Cadangan Data</Text>
+            <Text style={styles.modalDescription}>
+              Pilih berkas <Text style={{ fontWeight: '800', color: Colors.creamBg }}>JSON</Text> cadangan PoopPeeLog dari penyimpanan ponsel Anda. Catatan yang ada tidak akan terhapus, data baru akan digabungkan.
+            </Text>
+
+            {/* Kotak Info Format */}
+            <View style={styles.exportSummaryCard}>
+              <View style={styles.exportSummaryRow}>
+                <Text style={styles.exportSummaryKey}>Format Target:</Text>
+                <Text style={styles.exportSummaryVal}>JSON (.json)</Text>
+              </View>
+              <View style={styles.exportSummaryRow}>
+                <Text style={styles.exportSummaryKey}>Strategi:</Text>
+                <Text style={[styles.exportSummaryVal, { color: Colors.bothTeal }]}>Merge / Insert OR Replace</Text>
+              </View>
+              <View style={styles.exportSummaryRow}>
+                <Text style={styles.exportSummaryKey}>Jumlah Log Saat Ini:</Text>
+                <Text style={styles.exportSummaryVal}>{totalLogs} Catatan</Text>
+              </View>
+            </View>
+
+            {/* Notifikasi Hasil Import */}
+            {importResult && (
+              <View
+                style={[
+                  styles.successBadgeBox,
+                  importResult.error
+                    ? { backgroundColor: 'rgba(255, 90, 95, 0.15)' }
+                    : { backgroundColor: 'rgba(47, 184, 172, 0.15)' },
+                ]}
+              >
+                {importResult.error ? (
+                  <>
+                    <AlertTriangle size={15} color={Colors.emergencyRed} />
+                    <Text style={[styles.successBadgeText, { color: Colors.emergencyRed, flex: 1 }]}>
+                      {importResult.error}
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle size={15} color={Colors.bothTeal} />
+                    <Text style={[styles.successBadgeText, { color: Colors.bothTeal, flex: 1 }]}>
+                      Sukses mengimpor {importResult.count} catatan baru!
+                    </Text>
+                  </>
+                )}
+              </View>
+            )}
+
+            <View style={styles.modalButtonRow}>
+              <TouchableOpacity
+                style={styles.cancelModalBtn}
+                onPress={() => setImportModalVisible(false)}
+              >
+                <Text style={styles.cancelModalBtnText}>Tutup</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.confirmExportBtn, { backgroundColor: Colors.bothTeal }]}
+                onPress={executePickAndImportJSON}
+                disabled={isImporting}
+              >
+                <Upload size={16} color="#000" />
+                <Text style={styles.confirmExportBtnText}>
+                  {isImporting ? 'Membaca...' : 'Pilih Berkas JSON'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 3. MODAL KONFIRMASI HAPUS DATA LEBIH INFORMATIF */}
       <Modal
         visible={deleteModalVisible}
         transparent={true}

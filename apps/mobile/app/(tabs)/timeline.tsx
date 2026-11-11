@@ -10,6 +10,8 @@ import {
   StatusBar,
   Modal,
   ScrollView,
+  TextInput,
+  Alert,
 } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useAppStore } from '@/src/store/useAppStore';
@@ -26,7 +28,9 @@ import {
   Smile,
   Info,
   Filter,
+  Search,
 } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 
 type TimeFilter = 'WEEK' | 'MONTH' | 'YEAR' | 'ALL';
 
@@ -34,11 +38,26 @@ export default function TimelineScreen() {
   const { logs, removeLog } = useAppStore();
   const [selectedDetailLog, setSelectedDetailLog] = useState<Log | null>(null);
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Filter logs berdasarkan periode waktu
+  // Filter logs berdasarkan periode waktu dan kata kunci pencarian
   const filteredLogs = useMemo(() => {
     const now = new Date();
+    const query = searchQuery.trim().toLowerCase();
+
     return logs.filter((log) => {
+      // 1. Filter Pencarian Teks (Distrik, Kota, Mood, atau Catatan)
+      if (query) {
+        const matchDistrict = (log.district || '').toLowerCase().includes(query);
+        const matchCity = (log.city || '').toLowerCase().includes(query);
+        const matchMood = (log.mood || '').toLowerCase().includes(query);
+        const matchNote = (log.note || '').toLowerCase().includes(query);
+        if (!matchDistrict && !matchCity && !matchMood && !matchNote) {
+          return false;
+        }
+      }
+
+      // 2. Filter Periode Waktu
       const logDate = new Date(log.loggedAt);
       if (timeFilter === 'WEEK') {
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -55,7 +74,7 @@ export default function TimelineScreen() {
       }
       return true; // 'ALL'
     });
-  }, [logs, timeFilter]);
+  }, [logs, timeFilter, searchQuery]);
 
   // Grouping logs berdasarkan mode filter
   const sections = useMemo(() => {
@@ -196,6 +215,27 @@ export default function TimelineScreen() {
             ? `Menampilkan ${filteredLogs.length} dari ${logs.length} catatan aktivitas`
             : 'Belum ada catatan pada periode ini'}
         </Text>
+      </View>
+
+      {/* Search Bar Input */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <Search size={16} color={Colors.peachTint} opacity={0.6} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Cari lokasi, kota, mood, atau catatan..."
+            placeholderTextColor="rgba(245, 237, 227, 0.4)"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+            clearButtonMode="while-editing"
+          />
+          {Boolean(searchQuery) && (
+            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearSearchBtn}>
+              <X size={14} color={Colors.peachTint} />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* Filter Waktu: Minggu Ini, Bulan Ini, Tahun Ini, Semua */}
@@ -382,9 +422,23 @@ export default function TimelineScreen() {
                 <TouchableOpacity
                   style={styles.deleteModalBtn}
                   onPress={() => {
-                    const idToDelete = selectedDetailLog.id;
-                    setSelectedDetailLog(null);
-                    removeLog(idToDelete);
+                    Alert.alert(
+                      'Hapus Catatan Ini?',
+                      'Catatan ini akan dihapus permanen dari riwayat lokal perangkat.',
+                      [
+                        { text: 'Batal', style: 'cancel' },
+                        {
+                          text: 'Ya, Hapus',
+                          style: 'destructive',
+                          onPress: () => {
+                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
+                            const idToDelete = selectedDetailLog.id;
+                            setSelectedDetailLog(null);
+                            removeLog(idToDelete);
+                          },
+                        },
+                      ]
+                    );
                   }}
                 >
                   <Trash2 size={16} color={Colors.emergencyRed} />
@@ -427,6 +481,32 @@ const styles = StyleSheet.create({
     color: Colors.peachTint,
     opacity: 0.7,
     marginTop: 2,
+  },
+  searchContainer: {
+    paddingHorizontal: 20,
+    marginTop: 6,
+    marginBottom: 4,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.darkSurface,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: Platform.OS === 'ios' ? 10 : 6,
+    borderWidth: 1,
+    borderColor: Colors.darkBorder,
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    color: Colors.creamBg,
+    fontSize: 13,
+    fontWeight: '600',
+    padding: 0,
+  },
+  clearSearchBtn: {
+    padding: 4,
   },
   filterContainer: {
     marginTop: 6,

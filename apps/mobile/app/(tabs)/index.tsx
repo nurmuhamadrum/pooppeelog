@@ -30,6 +30,7 @@ import {
   Sparkles,
   Layers,
 } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -188,13 +189,33 @@ export default function MapScreen() {
       } else {
         const group = map.get(groupKey)!;
         group.logs.push(log);
+        // Pastikan latestLog adalah log yang lebih baru
+        if (new Date(log.loggedAt).getTime() > new Date(group.latestLog.loggedAt).getTime()) {
+          group.latestLog = log;
+        }
       }
     });
 
     return Array.from(map.values());
   }, [filteredLogs]);
 
+  const handleSelectGroup = (group: LocationGroup) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    setSelectedGroup(group);
+
+    // Animasi kamera memusatkan pin agak sedikit di atas agar tidak tertutup popup card
+    if (mapRef.current) {
+      mapRef.current.animateToRegion({
+        latitude: group.latitude - 0.0035,
+        longitude: group.longitude,
+        latitudeDelta: 0.012,
+        longitudeDelta: 0.012 * ASPECT_RATIO,
+      }, 350);
+    }
+  };
+
   const centerOnUser = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
     if (currentCoord && mapRef.current) {
       mapRef.current.animateToRegion({
         ...currentCoord,
@@ -228,7 +249,15 @@ export default function MapScreen() {
         toolbarEnabled={false}
       >
         {locationGroups.map((group) => {
-          const log = group.latestLog;
+          // Ketika filter aktif adalah COMBO, PEE, atau POOP, cari log yang cocok
+          const matchingLog =
+            mapFilter === 'ALL'
+              ? group.latestLog
+              : group.logs.find(
+                  (l) => String(l.type || '').toUpperCase() === mapFilter
+                ) || group.latestLog;
+
+          const log = matchingLog;
           const logType = String(log.type || '').toUpperCase();
           const isPee = logType === 'PEE';
           const isPoop = logType === 'POOP';
@@ -240,9 +269,9 @@ export default function MapScreen() {
 
           return (
             <Marker
-              key={group.key}
+              key={`${group.key}_${mapFilter}`}
               coordinate={{ latitude: group.latitude, longitude: group.longitude }}
-              onPress={() => setSelectedGroup(group)}
+              onPress={() => handleSelectGroup(group)}
               tracksViewChanges={true}
               anchor={{ x: 0.5, y: 0.88 }}
             >
@@ -364,77 +393,76 @@ export default function MapScreen() {
       </TouchableOpacity>
 
       {/* 4. BOTTOM POPUP CARD: SELECTED LOCATION PIN GROUP */}
-      {selectedGroup && (
-        <View style={styles.popupCard}>
-          <View style={styles.popupRow}>
-            <View
-              style={[
-                styles.popupAvatar,
-                {
-                  backgroundColor:
-                    String(selectedGroup.latestLog.type).toUpperCase() === 'PEE'
-                      ? Colors.peeAmber
-                      : String(selectedGroup.latestLog.type).toUpperCase() === 'POOP'
-                      ? Colors.poopBrown
-                      : Colors.bothTeal,
-                },
-              ]}
-            >
-              {String(selectedGroup.latestLog.type).toUpperCase() === 'PEE' && <LilDripIcon size={26} />}
-              {String(selectedGroup.latestLog.type).toUpperCase() === 'POOP' && <MrPlopIcon size={26} />}
-              {String(selectedGroup.latestLog.type).toUpperCase() === 'COMBO' && <SirFlushIcon size={26} />}
-            </View>
+      {selectedGroup && (() => {
+        const popupLog =
+          mapFilter === 'ALL'
+            ? selectedGroup.latestLog
+            : selectedGroup.logs.find(
+                (l) => String(l.type || '').toUpperCase() === mapFilter
+              ) || selectedGroup.latestLog;
+        const pType = String(popupLog.type || '').toUpperCase();
+        const pBg = pType === 'PEE' ? Colors.peeAmber : pType === 'POOP' ? Colors.poopBrown : Colors.bothTeal;
 
-            <View style={{ flex: 1 }}>
-              <View style={styles.popupTitleRow}>
-                <Text style={styles.popupTitle}>
-                  {String(selectedGroup.latestLog.type).toUpperCase() === 'PEE'
-                    ? "Lil' Drip • "
-                    : String(selectedGroup.latestLog.type).toUpperCase() === 'POOP'
-                    ? "Mr. Plop • "
-                    : "Sir Flush • "}
-                  {selectedGroup.latestLog.mood || 'Lega Banget'}
-                </Text>
-                <Text style={styles.popupTime}>
-                  {new Date(selectedGroup.latestLog.loggedAt).toLocaleTimeString('id-ID', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </Text>
+        return (
+          <View style={styles.popupCard}>
+            <View style={styles.popupRow}>
+              <View style={[styles.popupAvatar, { backgroundColor: pBg }]}>
+                {pType === 'PEE' && <LilDripIcon size={26} />}
+                {pType === 'POOP' && <MrPlopIcon size={26} />}
+                {pType === 'COMBO' && <SirFlushIcon size={26} />}
               </View>
 
-              <Text style={styles.popupLocation}>
-                {selectedGroup.district}, {selectedGroup.city}
-              </Text>
+              <View style={{ flex: 1 }}>
+                <View style={styles.popupTitleRow}>
+                  <Text style={styles.popupTitle}>
+                    {pType === 'PEE'
+                      ? "Lil' Drip • "
+                      : pType === 'POOP'
+                      ? "Mr. Plop • "
+                      : "Sir Flush • "}
+                    {popupLog.mood || 'Lega Banget'}
+                  </Text>
+                  <Text style={styles.popupTime}>
+                    {new Date(popupLog.loggedAt).toLocaleTimeString('id-ID', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </Text>
+                </View>
 
-              {Boolean(selectedGroup.latestLog.note) && (
-                <Text style={styles.popupNote} numberOfLines={2}>
-                  "{selectedGroup.latestLog.note}"
+                <Text style={styles.popupLocation}>
+                  {selectedGroup.district}, {selectedGroup.city}
                 </Text>
-              )}
+
+                {Boolean(popupLog.note) && (
+                  <Text style={styles.popupNote} numberOfLines={2}>
+                    "{popupLog.note}"
+                  </Text>
+                )}
+              </View>
+
+              <TouchableOpacity onPress={() => setSelectedGroup(null)} style={styles.popupCloseBtn}>
+                <X size={16} color={Colors.peachTint} />
+              </TouchableOpacity>
             </View>
 
-            <TouchableOpacity onPress={() => setSelectedGroup(null)} style={styles.popupCloseBtn}>
-              <X size={16} color={Colors.peachTint} />
-            </TouchableOpacity>
+            {/* Footer Pop-up Info & Lihat Detail Button */}
+            <View style={styles.popupFooter}>
+              <Text style={styles.popupLocationCount}>
+                📍 {selectedGroup.logs.length} kali buang air di titik ini
+              </Text>
+              <TouchableOpacity
+                style={styles.detailButton}
+                onPress={() => setDetailModalVisible(true)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.detailButtonText}>Lihat Detail</Text>
+                <ChevronRight size={14} color={Colors.peeAmber} />
+              </TouchableOpacity>
+            </View>
           </View>
-
-          {/* Footer Pop-up Info & Lihat Detail Button */}
-          <View style={styles.popupFooter}>
-            <Text style={styles.popupLocationCount}>
-              📍 {selectedGroup.logs.length} kali buang air di titik ini
-            </Text>
-            <TouchableOpacity
-              style={styles.detailButton}
-              onPress={() => setDetailModalVisible(true)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.detailButtonText}>Lihat Detail</Text>
-              <ChevronRight size={14} color={Colors.peeAmber} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
+        );
+      })()}
 
       {/* 5. MODAL DETAIL RIWAYAT LOKASI PIN */}
       {selectedGroup && (
