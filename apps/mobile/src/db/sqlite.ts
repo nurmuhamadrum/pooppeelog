@@ -46,6 +46,11 @@ async function initDatabase(db: SQLite.SQLiteDatabase) {
       key TEXT PRIMARY KEY NOT NULL,
       value TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS unlocked_badges (
+      badge_id TEXT PRIMARY KEY NOT NULL,
+      unlocked_at TEXT NOT NULL
+    );
   `);
 }
 
@@ -199,10 +204,28 @@ export async function insertMultipleLocalLogs(logs: Log[]): Promise<void> {
   }
 }
 
+export async function getUnlockedBadgeIds(): Promise<string[]> {
+  const db = await getDatabase();
+  const rows = await db.getAllAsync<{ badge_id: string }>(
+    `SELECT badge_id FROM unlocked_badges`
+  );
+  return rows.map((r) => r.badge_id);
+}
+
+export async function saveUnlockedBadge(badgeId: string): Promise<void> {
+  const db = await getDatabase();
+  const now = new Date().toISOString();
+  await db.runAsync(
+    `INSERT OR IGNORE INTO unlocked_badges (badge_id, unlocked_at) VALUES (?, ?)`,
+    [badgeId, now]
+  );
+}
+
 export async function clearAllLocalData(): Promise<void> {
   const db = await getDatabase();
   await db.execAsync(`
     DELETE FROM local_logs;
     DELETE FROM user_preferences;
+    DELETE FROM unlocked_badges;
   `);
 }

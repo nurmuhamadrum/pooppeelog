@@ -5,9 +5,14 @@ import { Colors } from '@/constants/Colors';
 import { MapPin, Calendar, BarChart3, User } from 'lucide-react-native';
 import { SirFlushIcon } from '@/src/components/MascotIcons';
 import { QuickLogModal } from '@/src/components/QuickLogModal';
+import { BadgeUnlockedModal } from '@/src/components/BadgeUnlockedModal';
+import { useAppStore } from '@/src/store/useAppStore';
 
 export default function TabLayout() {
   const [quickLogVisible, setQuickLogVisible] = useState(false);
+  const { unlockedBadgeQueue, dismissActiveBadgeModal } = useAppStore();
+
+  const activeBadge = unlockedBadgeQueue.length > 0 ? unlockedBadgeQueue[0] : null;
 
   return (
     <View style={styles.container}>
@@ -112,6 +117,13 @@ export default function TabLayout() {
 
       {/* Modal Quick Log 2-Tap */}
       <QuickLogModal visible={quickLogVisible} onClose={() => setQuickLogVisible(false)} />
+
+      {/* Modal Notifikasi Lencana Baru Terbuka */}
+      <BadgeUnlockedModal
+        visible={Boolean(activeBadge)}
+        badge={activeBadge}
+        onClose={dismissActiveBadgeModal}
+      />
     </View>
   );
 }

@@ -1,75 +1,141 @@
 import { Log } from '@poop-pee-log/shared';
+import { Colors } from '@/constants/Colors';
 
-export interface EvaluatedBadge {
+export interface BadgeDefinition {
   id: string;
-  name: string;
+  title: string;
+  category: string;
   description: string;
-  emoji: string;
-  category: 'MILESTONE' | 'HABIT' | 'EXPLORATION';
-  isUnlocked: boolean;
-  progressText: string;
+  mascot: 'drip' | 'plop' | 'flush';
+  accentColor: string;
 }
 
-export function evaluateBadges(logs: Log[]): EvaluatedBadge[] {
-  const totalPee = logs.filter((l) => l.type === 'PEE').length;
-  const totalPoop = logs.filter((l) => l.type === 'POOP').length;
+export const ALL_BADGES: BadgeDefinition[] = [
+  {
+    id: 'newbie',
+    title: 'Pendatang Baru',
+    category: 'Awal Perjalanan',
+    description: 'Mencatat buang air pertama kali dalam hidupmu di aplikasi!',
+    mascot: 'drip',
+    accentColor: Colors.peeAmber,
+  },
+  {
+    id: 'hydration-master',
+    title: 'Juara Hidrasi',
+    category: 'Konsistensi',
+    description: 'Mencapai total 10x catatan buang air kecil (Pee)',
+    mascot: 'drip',
+    accentColor: Colors.dripBlue,
+  },
+  {
+    id: 'urban-explorer',
+    title: 'Penjelajah Kota',
+    category: 'Eksplorasi',
+    description: 'Mencoba toilet di minimal 3 area / distrik berbeda',
+    mascot: 'plop',
+    accentColor: Colors.poopLight,
+  },
+  {
+    id: 'flush-royale',
+    title: 'Sir Flush Royale',
+    category: 'Master Kloset',
+    description: 'Melakukan paket kombo Pee & Poop (Sir Flush) 3 kali',
+    mascot: 'flush',
+    accentColor: Colors.bothTeal,
+  },
+  {
+    id: 'streak-warrior',
+    title: 'Lancar Jaya (Streak 3)',
+    category: 'Disiplin',
+    description: 'Menjaga streak mencatat buang air 3 hari berturut-turut tanpa putus',
+    mascot: 'plop',
+    accentColor: Colors.emergencyRed,
+  },
+  {
+    id: 'centurion',
+    title: 'Legenda Toilet',
+    category: 'Pencapaian Akbar',
+    description: 'Mencatat total 50 riwayat aktivitas biologis',
+    mascot: 'flush',
+    accentColor: '#A78BFA',
+  },
+];
+
+/**
+ * Menghitung streak hari aktif berturut-turut
+ */
+export function calculateStreakDays(logs: Log[]): number {
+  if (logs.length === 0) return 0;
+  const dates = Array.from(
+    new Set(logs.map((l) => new Date(l.loggedAt).toDateString()))
+  ).map((d) => new Date(d).getTime());
+  dates.sort((a, b) => b - a);
+
+  let streak = 0;
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  const today = new Date().setHours(0, 0, 0, 0);
+
+  const mostRecent = new Date(dates[0]).setHours(0, 0, 0, 0);
+  if (today - mostRecent > oneDayMs) {
+    return 0;
+  }
+
+  let expected = mostRecent;
+  for (const d of dates) {
+    const current = new Date(d).setHours(0, 0, 0, 0);
+    if (current === expected) {
+      streak++;
+      expected -= oneDayMs;
+    } else {
+      break;
+    }
+  }
+  return Math.max(streak, logs.length > 0 ? 1 : 0);
+}
+
+/**
+ * Evaluasi lencana yang berhasil dipenuhi berdasarkan riwayat log
+ */
+export function evaluateEarnedBadgeIds(logs: Log[]): Set<string> {
+  const earned = new Set<string>();
+
   const totalLogs = logs.length;
+  const totalPee = logs.filter((l) => l.type === 'PEE' || l.type === 'COMBO').length;
+  const totalFlush = logs.filter((l) => l.type === 'COMBO').length;
 
-  // Hitung jumlah kota unik
-  const uniqueCities = new Set(logs.map((l) => l.city.toLowerCase().trim())).size;
+  const districts = new Set<string>();
+  logs.forEach((l) => {
+    if (l.district) districts.add(l.district);
+  });
 
-  // Hitung log malam (22:00 - 05:00)
-  const nightLogs = logs.filter((l) => {
-    const hour = new Date(l.loggedAt).getHours();
-    return hour >= 22 || hour < 5;
-  }).length;
+  const streak = calculateStreakDays(logs);
 
-  return [
-    {
-      id: 'first_log',
-      name: 'Lega Perdana',
-      description: 'Mencatat buang air pertama kali di aplikasi',
-      emoji: '🎖️',
-      category: 'MILESTONE',
-      isUnlocked: totalLogs >= 1,
-      progressText: totalLogs >= 1 ? 'Terbuka' : '0/1 log',
-    },
-    {
-      id: 'drip_hydrated',
-      name: 'Hidrasi Terjaga',
-      description: 'Mencatat 5x buang air kecil bersama Lil\' Drip',
-      emoji: '🌊',
-      category: 'HABIT',
-      isUnlocked: totalPee >= 5,
-      progressText: `${Math.min(totalPee, 5)}/5 pee`,
-    },
-    {
-      id: 'plop_king',
-      name: 'Raja Kloset',
-      description: 'Mencatat 3x buang air besar bersama Mr. Plop',
-      emoji: '👑',
-      category: 'HABIT',
-      isUnlocked: totalPoop >= 3,
-      progressText: `${Math.min(totalPoop, 3)}/3 poop`,
-    },
-    {
-      id: 'toilet_explorer',
-      name: 'Penjelajah Toilet',
-      description: 'Menandai jejak buang air di 3 kota/kabupaten berbeda',
-      emoji: '🧭',
-      category: 'EXPLORATION',
-      isUnlocked: uniqueCities >= 3,
-      progressText: `${Math.min(uniqueCities, 3)}/3 kota`,
-    },
-    {
-      id: 'night_owl',
-      name: 'Pahlawan Malam',
-      description: 'Mencatat buang air saat tengah malam (22:00 - 05:00)',
-      emoji: '🦉',
-      category: 'MILESTONE',
-      isUnlocked: nightLogs >= 1,
-      progressText: nightLogs >= 1 ? 'Terbuka' : '0/1 malam',
-    },
-  ];
+  if (totalLogs >= 1) earned.add('newbie');
+  if (totalPee >= 10) earned.add('hydration-master');
+  if (districts.size >= 3) earned.add('urban-explorer');
+  if (totalFlush >= 3) earned.add('flush-royale');
+  if (streak >= 3) earned.add('streak-warrior');
+  if (totalLogs >= 50) earned.add('centurion');
+
+  return earned;
 }
 
+/**
+ * Cari lencana BARU yang belum pernah dibuka sebelumnya
+ */
+export function findNewlyUnlockedBadges(
+  logs: Log[],
+  alreadyUnlockedBadgeIds: string[]
+): BadgeDefinition[] {
+  const earned = evaluateEarnedBadgeIds(logs);
+  const alreadySet = new Set(alreadyUnlockedBadgeIds);
+
+  const newBadges: BadgeDefinition[] = [];
+  for (const badge of ALL_BADGES) {
+    if (earned.has(badge.id) && !alreadySet.has(badge.id)) {
+      newBadges.push(badge);
+    }
+  }
+
+  return newBadges;
+}

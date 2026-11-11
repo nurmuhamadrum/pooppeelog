@@ -7,9 +7,12 @@ import {
   updateLocalLogMoodAndNote,
   deleteLocalLog,
   getDatabase,
+  getUnlockedBadgeIds,
+  saveUnlockedBadge,
 } from '../db/sqlite';
 import { getOrCreateGuestUser, supabase } from '../services/supabase';
 import { syncLogsWithCloud, SyncResult } from '../services/sync';
+import { BadgeDefinition, findNewlyUnlockedBadges } from '../services/badgeEvaluator';
 import * as Crypto from 'expo-crypto';
 
 interface AppState {
@@ -20,6 +23,10 @@ interface AppState {
   isLoading: boolean;
   isSyncing: boolean;
   lastSyncedAt: string | null;
+
+  // Lencana Baru yang Perlu Ditampilkan di Modal
+  unlockedBadgeQueue: BadgeDefinition[];
+  dismissActiveBadgeModal: () => void;
 
   mapFilter: 'ALL' | 'PEE' | 'POOP' | 'COMBO';
   appLockEnabled: boolean;
@@ -43,8 +50,15 @@ export const useAppStore = create<AppState>((set, get) => ({
   isLoading: true,
   isSyncing: false,
   lastSyncedAt: null,
+  unlockedBadgeQueue: [],
   mapFilter: 'ALL',
   appLockEnabled: false,
+
+  dismissActiveBadgeModal: () => {
+    set((state) => ({
+      unlockedBadgeQueue: state.unlockedBadgeQueue.slice(1),
+    }));
+  },
 
   setUser: (userId: string, email?: string | null, isAnonymous: boolean = false) => {
     set({ userId, userEmail: email ?? null, isAnonymous });
@@ -135,10 +149,28 @@ export const useAppStore = create<AppState>((set, get) => ({
     // Simpan ke SQLite
     await insertLocalLog(fullLog);
 
-    // Update state lokal
-    set((state) => ({
-      logs: [fullLog, ...state.logs],
-    }));
+    const updatedLogs = [fullLog, ...get().logs];
+
+    // Evaluasi apakah ada lencana baru yang berhasil diraih
+    try {
+      const alreadyUnlocked = await getUnlockedBadgeIds();
+      const newlyEarned = findNewlyUnlockedBadges(updatedLogs, alreadyUnlocked);
+
+      if (newlyEarned.length > 0) {
+        for (const b of newlyEarned) {
+          await saveUnlockedBadge(b.id);
+        }
+        set((state) => ({
+          logs: updatedLogs,
+          unlockedBadgeQueue: [...state.unlockedBadgeQueue, ...newlyEarned],
+        }));
+      } else {
+        set({ logs: updatedLogs });
+      }
+    } catch (e) {
+      console.log('Badge evaluation error:', e);
+      set({ logs: updatedLogs });
+    }
 
     return fullLog;
   },
