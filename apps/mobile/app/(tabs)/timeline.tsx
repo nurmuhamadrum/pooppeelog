@@ -36,7 +36,7 @@ import {
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
-type TimeFilter = 'WEEK' | 'MONTH' | 'YEAR' | 'ALL';
+type TimeFilter = 'WEEK' | 'MONTH' | 'YEAR' | 'CUSTOM' | 'ALL';
 
 export default function TimelineScreen() {
   const { logs, removeLog } = useAppStore();
@@ -45,6 +45,91 @@ export default function TimelineScreen() {
   const [logToDelete, setLogToDelete] = useState<Log | null>(null);
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // State Rentang Tanggal Kalender (Custom Date Range)
+  const [dateRangeModalVisible, setDateRangeModalVisible] = useState(false);
+  const [customStartDate, setCustomStartDate] = useState<string>('');
+  const [customEndDate, setCustomEndDate] = useState<string>('');
+  const [activeDateFilterLabel, setActiveDateFilterLabel] = useState<string | null>(null);
+
+  // Animasi modal kalender
+  const calendarScale = useRef(new Animated.Value(0.85)).current;
+  const calendarFade = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (dateRangeModalVisible) {
+      Animated.parallel([
+        Animated.spring(calendarScale, {
+          toValue: 1,
+          friction: 6,
+          tension: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(calendarFade, {
+          toValue: 1,
+          duration: 180,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      calendarScale.setValue(0.85);
+      calendarFade.setValue(0);
+    }
+  }, [dateRangeModalVisible]);
+
+  const handleCloseCalendarModal = () => {
+    Animated.parallel([
+      Animated.timing(calendarScale, {
+        toValue: 0.85,
+        duration: 140,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: true,
+      }),
+      Animated.timing(calendarFade, {
+        toValue: 0,
+        duration: 140,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setDateRangeModalVisible(false);
+    });
+  };
+
+  const handleApplyCustomDateRange = () => {
+    if (!customStartDate || !customEndDate) {
+      showToast({
+        message: 'Mohon isi tanggal mulai dan tanggal akhir.',
+        type: 'info',
+      });
+      return;
+    }
+
+    const start = new Date(customStartDate);
+    const end = new Date(customEndDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      showToast({
+        message: 'Format tanggal tidak valid (gunakan YYYY-MM-DD).',
+        type: 'error',
+      });
+      return;
+    }
+
+    if (start > end) {
+      showToast({
+        message: 'Tanggal mulai tidak boleh melebihi tanggal akhir.',
+        type: 'error',
+      });
+      return;
+    }
+
+    setTimeFilter('CUSTOM');
+    setActiveDateFilterLabel(`${customStartDate} s/d ${customEndDate}`);
+    handleCloseCalendarModal();
+    showToast({
+      message: `Filter tanggal diterapkan (${customStartDate} - ${customEndDate})`,
+      type: 'success',
+    });
+  };
 
   // Modal detail popup animation
   const modalScale = useRef(new Animated.Value(0.88)).current;
@@ -184,9 +269,17 @@ export default function TimelineScreen() {
       if (timeFilter === 'YEAR') {
         return logDate.getFullYear() === now.getFullYear();
       }
+      if (timeFilter === 'CUSTOM') {
+        if (!customStartDate || !customEndDate) return true;
+        const start = new Date(customStartDate);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(customEndDate);
+        end.setHours(23, 59, 59, 999);
+        return logDate >= start && logDate <= end;
+      }
       return true; // 'ALL'
     });
-  }, [logs, timeFilter, searchQuery]);
+  }, [logs, timeFilter, searchQuery, customStartDate, customEndDate]);
 
   // Grouping logs berdasarkan mode filter
   const sections = useMemo(() => {
@@ -350,12 +443,15 @@ export default function TimelineScreen() {
         </View>
       </View>
 
-      {/* Filter Waktu: Minggu Ini, Bulan Ini, Tahun Ini, Semua */}
+      {/* Filter Waktu: Minggu Ini, Bulan Ini, Tahun Ini, Kalender, Semua */}
       <View style={styles.filterContainer}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
           <TouchableOpacity
             style={[styles.filterPill, timeFilter === 'WEEK' && styles.filterPillActive]}
-            onPress={() => setTimeFilter('WEEK')}
+            onPress={() => {
+              setTimeFilter('WEEK');
+              setActiveDateFilterLabel(null);
+            }}
           >
             <Text style={[styles.filterPillText, timeFilter === 'WEEK' && styles.filterPillTextActive]}>
               7 Hari Terakhir
@@ -364,7 +460,10 @@ export default function TimelineScreen() {
 
           <TouchableOpacity
             style={[styles.filterPill, timeFilter === 'MONTH' && styles.filterPillActive]}
-            onPress={() => setTimeFilter('MONTH')}
+            onPress={() => {
+              setTimeFilter('MONTH');
+              setActiveDateFilterLabel(null);
+            }}
           >
             <Text style={[styles.filterPillText, timeFilter === 'MONTH' && styles.filterPillTextActive]}>
               Bulan Ini
@@ -373,16 +472,44 @@ export default function TimelineScreen() {
 
           <TouchableOpacity
             style={[styles.filterPill, timeFilter === 'YEAR' && styles.filterPillActive]}
-            onPress={() => setTimeFilter('YEAR')}
+            onPress={() => {
+              setTimeFilter('YEAR');
+              setActiveDateFilterLabel(null);
+            }}
           >
             <Text style={[styles.filterPillText, timeFilter === 'YEAR' && styles.filterPillTextActive]}>
               Tahun Ini
             </Text>
           </TouchableOpacity>
 
+          {/* Tombol Kalender Rentang Tanggal Kustom */}
+          <TouchableOpacity
+            style={[
+              styles.filterPill,
+              timeFilter === 'CUSTOM' && styles.filterPillActiveCustom,
+            ]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+              setDateRangeModalVisible(true);
+            }}
+          >
+            <Calendar size={12} color={timeFilter === 'CUSTOM' ? '#000' : Colors.bothTeal} />
+            <Text
+              style={[
+                styles.filterPillText,
+                timeFilter === 'CUSTOM' ? styles.filterPillTextActiveDark : { color: Colors.bothTeal },
+              ]}
+            >
+              {activeDateFilterLabel ? activeDateFilterLabel : 'Pilih Tanggal'}
+            </Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={[styles.filterPill, timeFilter === 'ALL' && styles.filterPillActive]}
-            onPress={() => setTimeFilter('ALL')}
+            onPress={() => {
+              setTimeFilter('ALL');
+              setActiveDateFilterLabel(null);
+            }}
           >
             <Text style={[styles.filterPillText, timeFilter === 'ALL' && styles.filterPillTextActive]}>
               Semua Waktu ({logs.length})
@@ -623,6 +750,79 @@ export default function TimelineScreen() {
           </Animated.View>
         </Modal>
       )}
+
+      {/* POPUP KALENDER RENTANG TANGGAL KUSTOM */}
+      {dateRangeModalVisible && (
+        <Modal
+          visible={true}
+          transparent
+          animationType="none"
+          onRequestClose={handleCloseCalendarModal}
+        >
+          <Animated.View style={[styles.confirmOverlay, { opacity: calendarFade }]}>
+            <Animated.View
+              style={[
+                styles.confirmCard,
+                {
+                  transform: [{ scale: calendarScale }],
+                },
+              ]}
+            >
+              <View style={[styles.confirmIconRing, { backgroundColor: 'rgba(47, 184, 172, 0.15)', borderColor: Colors.bothTeal }]}>
+                <Calendar size={26} color={Colors.bothTeal} />
+              </View>
+
+              <Text style={styles.confirmTitle}>Filter Rentang Tanggal</Text>
+              <Text style={styles.confirmDescription}>
+                Tentukan rentang tanggal catatan yang ingin ditampilkan di buku harian:
+              </Text>
+
+              {/* Input Tanggal Mulai & Akhir */}
+              <View style={styles.calendarInputGroup}>
+                <Text style={styles.calendarInputLabel}>Tanggal Mulai (YYYY-MM-DD):</Text>
+                <TextInput
+                  style={styles.calendarTextInput}
+                  placeholder="2026-11-01"
+                  placeholderTextColor={Colors.darkBorder}
+                  value={customStartDate}
+                  onChangeText={setCustomStartDate}
+                  maxLength={10}
+                />
+
+                <Text style={[styles.calendarInputLabel, { marginTop: 10 }]}>Tanggal Akhir (YYYY-MM-DD):</Text>
+                <TextInput
+                  style={styles.calendarTextInput}
+                  placeholder="2026-11-15"
+                  placeholderTextColor={Colors.darkBorder}
+                  value={customEndDate}
+                  onChangeText={setCustomEndDate}
+                  maxLength={10}
+                />
+              </View>
+
+              {/* Action Buttons */}
+              <View style={styles.confirmButtonRow}>
+                <TouchableOpacity
+                  style={styles.confirmCancelBtn}
+                  onPress={handleCloseCalendarModal}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.confirmCancelText}>Batal</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.confirmDeleteBtn, { backgroundColor: Colors.bothTeal }]}
+                  onPress={handleApplyCustomDateRange}
+                  activeOpacity={0.8}
+                >
+                  <Filter size={15} color="#000" />
+                  <Text style={[styles.confirmDeleteText, { color: '#000' }]}>Terapkan</Text>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          </Animated.View>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
@@ -696,12 +896,23 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.peeAmber,
     borderColor: Colors.peeAmber,
   },
+  filterPillActiveCustom: {
+    backgroundColor: Colors.bothTeal,
+    borderColor: Colors.bothTeal,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   filterPillText: {
     fontSize: 11,
     fontWeight: '700',
     color: Colors.peachTint,
   },
   filterPillTextActive: {
+    color: '#000',
+    fontWeight: '900',
+  },
+  filterPillTextActiveDark: {
     color: '#000',
     fontWeight: '900',
   },
@@ -1044,5 +1255,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '900',
     color: '#FFFFFF',
+  },
+  // Custom Calendar Date Range Inputs
+  calendarInputGroup: {
+    width: '100%',
+    marginBottom: 20,
+  },
+  calendarInputLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Colors.peachTint,
+    marginBottom: 6,
+  },
+  calendarTextInput: {
+    backgroundColor: Colors.darkSurface,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.darkBorder,
+    color: Colors.creamBg,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

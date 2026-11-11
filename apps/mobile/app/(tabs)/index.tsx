@@ -16,7 +16,7 @@ import {
 import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Colors } from '@/constants/Colors';
-import { darkMapStyle } from '@/constants/MapStyle';
+import { darkMapStyle, retroMapStyle } from '@/constants/MapStyle';
 import { useAppStore } from '@/src/store/useAppStore';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from '@/src/components/MascotIcons';
 import { Log } from '@poop-pee-log/shared';
@@ -98,7 +98,7 @@ interface LocationGroup {
 }
 
 export default function MapScreen() {
-  const { logs, mapFilter, setMapFilter, initialize } = useAppStore();
+  const { logs, mapFilter, setMapFilter, initialize, mapTheme, gpsRadiusMeter } = useAppStore();
 
   const mapRef = useRef<MapView>(null);
   const [selectedGroup, setSelectedGroup] = useState<LocationGroup | null>(null);
@@ -283,13 +283,19 @@ export default function MapScreen() {
           latitudeDelta: LATITUDE_DELTA,
           longitudeDelta: LONGITUDE_DELTA,
         }}
-        customMapStyle={darkMapStyle}
+        customMapStyle={
+          mapTheme === 'DARK'
+            ? darkMapStyle
+            : mapTheme === 'RETRO'
+            ? retroMapStyle
+            : undefined
+        }
         showsUserLocation={false}
         showsMyLocationButton={false}
         showsCompass={false}
         toolbarEnabled={false}
       >
-        {/* Pulsing Live User GPS Marker (sesuai Mockup) */}
+        {/* Pulsing Live User GPS Marker (sesuai Mockup & Radius Terpilih) */}
         {currentCoord && (
           <Marker
             coordinate={currentCoord}
@@ -297,12 +303,23 @@ export default function MapScreen() {
             tracksViewChanges={true}
             zIndex={999}
           >
-            <View style={styles.userLocationMarkerContainer}>
+            <View
+              style={[
+                styles.userLocationMarkerContainer,
+                {
+                  width: Math.max(50, gpsRadiusMeter * 1.5),
+                  height: Math.max(50, gpsRadiusMeter * 1.5),
+                },
+              ]}
+            >
               {/* Animated Radar Pulse Ring */}
               <Animated.View
                 style={[
                   styles.userLocationRadar,
                   {
+                    width: Math.max(36, gpsRadiusMeter * 1.1),
+                    height: Math.max(36, gpsRadiusMeter * 1.1),
+                    borderRadius: Math.max(18, (gpsRadiusMeter * 1.1) / 2),
                     transform: [
                       {
                         scale: pulseAnim.interpolate({
@@ -319,7 +336,16 @@ export default function MapScreen() {
                 ]}
               />
               {/* Outer Dashed Halo Ring */}
-              <View style={styles.userLocationHalo} />
+              <View
+                style={[
+                  styles.userLocationHalo,
+                  {
+                    width: Math.max(46, gpsRadiusMeter * 1.3),
+                    height: Math.max(46, gpsRadiusMeter * 1.3),
+                    borderRadius: Math.max(23, (gpsRadiusMeter * 1.3) / 2),
+                  },
+                ]}
+              />
               {/* Inner Glowing Center Dot */}
               <View style={styles.userLocationDot}>
                 <View style={styles.userLocationDotInner} />

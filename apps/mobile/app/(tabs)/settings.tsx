@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -12,6 +12,8 @@ import {
   Modal,
   Share,
   Alert,
+  Animated,
+  Easing,
 } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useAppStore } from '@/src/store/useAppStore';
@@ -39,9 +41,13 @@ import {
   LogOut,
   LogIn,
   ChevronRight,
+  Compass,
+  Palette,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { signOut } from '@/src/services/authService';
+import { useToast } from '@/src/context/ToastContext';
+import * as Haptics from 'expo-haptics';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from '@/src/components/MascotIcons';
 import { clearAllLocalData } from '@/src/db/sqlite';
 import { authenticateWithBiometrics } from '@/src/services/auth';
@@ -52,6 +58,7 @@ import * as Sharing from 'expo-sharing';
 
 export default function ProfileSettingsScreen() {
   const router = useRouter();
+  const { showToast } = useToast();
   const {
     appLockEnabled,
     toggleAppLock,
@@ -65,10 +72,15 @@ export default function ProfileSettingsScreen() {
     lastSyncedAt,
     syncWithCloud,
     setUser,
+    mapTheme,
+    setMapTheme,
+    gpsRadiusMeter,
+    setGpsRadiusMeter,
   } = useAppStore();
 
   const [exportModalVisible, setExportModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
 
@@ -79,6 +91,69 @@ export default function ProfileSettingsScreen() {
   const [importModalVisible, setImportModalVisible] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importResult, setImportResult] = useState<{ count: number; error?: string } | null>(null);
+
+  // Animasi modal logout
+  const logoutScale = useRef(new Animated.Value(0.85)).current;
+  const logoutFade = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (logoutModalVisible) {
+      Animated.parallel([
+        Animated.spring(logoutScale, {
+          toValue: 1,
+          friction: 6,
+          tension: 75,
+          useNativeDriver: true,
+        }),
+        Animated.timing(logoutFade, {
+          toValue: 1,
+          duration: 180,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      logoutScale.setValue(0.85);
+      logoutFade.setValue(0);
+    }
+  }, [logoutModalVisible]);
+
+  const handleCloseLogoutModal = () => {
+    Animated.parallel([
+      Animated.timing(logoutScale, {
+        toValue: 0.85,
+        duration: 140,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: true,
+      }),
+      Animated.timing(logoutFade, {
+        toValue: 0,
+        duration: 140,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setLogoutModalVisible(false);
+    });
+  };
+
+  const handleExecuteLogout = async () => {
+    try {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      handleCloseLogoutModal();
+      await signOut();
+      setUser('guest-local', null, true);
+      showToast({
+        message: 'Berhasil keluar dari akun.',
+        type: 'info',
+      });
+      router.replace('/auth');
+    } catch (err) {
+      console.log('Error logging out:', err);
+      showToast({
+        message: 'Gagal keluar dari sesi.',
+        type: 'error',
+      });
+    }
+  };
 
   // Perhitungan statistik profil
   const totalLogs = logs.length;
@@ -347,6 +422,88 @@ export default function ProfileSettingsScreen() {
           </View>
         </View>
 
+        {/* KUSTOMISASI PETA & LOKASI GPS */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderRow}>
+            <Compass size={16} color={Colors.peeAmber} />
+            <Text style={styles.sectionHeading}>TEMA PETA & RADIUS GPS</Text>
+          </View>
+
+          {/* Pemilihan Tema Peta */}
+          <View style={styles.customSubSection}>
+            <Text style={styles.customSubLabel}>Pilihan Tema Peta:</Text>
+            <View style={styles.themeSelectorRow}>
+              {[
+                { id: 'DARK', label: 'Dark Mode', desc: 'Kontras malam' },
+                { id: 'RETRO', label: 'Vintage Cream', desc: 'Hangat & estetik' },
+                { id: 'STANDARD', label: 'Standar OS', desc: 'Peta bawaan' },
+              ].map((t) => {
+                const isActive = mapTheme === t.id;
+                return (
+                  <TouchableOpacity
+                    key={t.id}
+                    style={[
+                      styles.themeCardOption,
+                      isActive && styles.themeCardActive,
+                    ]}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+                      setMapTheme(t.id as any);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text
+                      style={[
+                        styles.themeOptionTitle,
+                        isActive && { color: Colors.creamBg, fontWeight: '900' },
+                      ]}
+                    >
+                      {t.label}
+                    </Text>
+                    <Text style={styles.themeOptionDesc}>{t.desc}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
+          {/* Pengaturan Radius GPS */}
+          <View style={styles.customSubSection}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={styles.customSubLabel}>Radius Deteksi Lingkar Radar:</Text>
+              <Text style={styles.radiusMeterBadge}>{gpsRadiusMeter} Meter</Text>
+            </View>
+            <View style={styles.radiusButtonRow}>
+              {[15, 30, 50, 100].map((r) => {
+                const isSelected = gpsRadiusMeter === r;
+                return (
+                  <TouchableOpacity
+                    key={r}
+                    style={[
+                      styles.radiusChip,
+                      isSelected && styles.radiusChipActive,
+                    ]}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+                      setGpsRadiusMeter(r);
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <Text
+                      style={[
+                        styles.radiusChipText,
+                        isSelected && styles.radiusChipTextActive,
+                      ]}
+                    >
+                      {r}m
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+
         {/* PORTABILITAS & CADANGAN DATA */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
@@ -357,26 +514,12 @@ export default function ProfileSettingsScreen() {
           {/* AKUN & AUTENTIKASI */}
           <TouchableOpacity
             style={styles.actionRow}
-            onPress={async () => {
+            onPress={() => {
               if (isAnonymous) {
                 router.push('/auth');
               } else {
-                Alert.alert(
-                  'Keluar dari Akun',
-                  'Apakah Anda yakin ingin keluar? Catatan lokal tetap aman di perangkat.',
-                  [
-                    { text: 'Batal', style: 'cancel' },
-                    {
-                      text: 'Keluar',
-                      style: 'destructive',
-                      onPress: async () => {
-                        await signOut();
-                        setUser('guest-local', null, true);
-                        router.replace('/auth');
-                      },
-                    },
-                  ]
-                );
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+                setLogoutModalVisible(true);
               }
             }}
           >
@@ -397,18 +540,19 @@ export default function ProfileSettingsScreen() {
                   <LogOut size={16} color={Colors.emergencyRed} />
                 )}
               </View>
-              <View>
+              <View style={{ flex: 1, paddingRight: 4 }}>
                 <Text
                   style={[
                     styles.actionLabel,
                     !isAnonymous && { color: Colors.emergencyRed },
                   ]}
+                  numberOfLines={1}
                 >
                   {isAnonymous ? 'Masuk / Buat Akun Cloud' : 'Keluar dari Akun'}
                 </Text>
-                <Text style={styles.actionDesc}>
+                <Text style={styles.actionDesc} numberOfLines={2}>
                   {isAnonymous
-                    ? 'Hubungkan email atau Google untuk sinkron multi-perangkat'
+                    ? 'Hubungkan email / Google untuk sinkron data'
                     : `Sedang login sebagai ${userEmail || 'Pengguna'}`}
                 </Text>
               </View>
@@ -730,6 +874,71 @@ export default function ProfileSettingsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* 4. MODAL KONFIRMASI LOGOUT DENGAN SPRING ANIMATION */}
+      {logoutModalVisible && (
+        <Modal
+          visible={true}
+          transparent={true}
+          animationType="none"
+          onRequestClose={handleCloseLogoutModal}
+        >
+          <Animated.View style={[styles.modalOverlay, { opacity: logoutFade }]}>
+            <Animated.View
+              style={[
+                styles.modalContainer,
+                {
+                  transform: [{ scale: logoutScale }],
+                },
+              ]}
+            >
+              <View style={styles.modalHeaderRow}>
+                <View style={[styles.modalIconRing, { backgroundColor: 'rgba(255, 90, 95, 0.2)' }]}>
+                  <LogOut size={22} color={Colors.emergencyRed} />
+                </View>
+                <TouchableOpacity onPress={handleCloseLogoutModal} style={styles.modalCloseIcon}>
+                  <X size={18} color={Colors.peachTint} />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.modalHeading}>Keluar dari Akun?</Text>
+              <Text style={styles.modalDescription}>
+                Anda sedang terhubung sebagai{' '}
+                <Text style={{ fontWeight: '900', color: Colors.creamBg }}>
+                  {userEmail || 'Pengguna Cloud'}
+                </Text>
+                . Seluruh catatan di perangkat ini tetap aman dan tidak akan terhapus.
+              </Text>
+
+              <View style={styles.logoutInfoBox}>
+                <ShieldCheck size={14} color={Colors.bothTeal} />
+                <Text style={styles.logoutInfoText}>
+                  Anda dapat masuk kembali kapan saja untuk melanjutkan sinkronisasi otomatis.
+                </Text>
+              </View>
+
+              <View style={styles.modalButtonRow}>
+                <TouchableOpacity
+                  style={styles.cancelModalBtn}
+                  onPress={handleCloseLogoutModal}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.cancelModalBtnText}>Batal</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.confirmDeleteBtn, { backgroundColor: Colors.emergencyRed }]}
+                  onPress={handleExecuteLogout}
+                  activeOpacity={0.8}
+                >
+                  <LogOut size={16} color="#FFF" />
+                  <Text style={styles.confirmDeleteBtnText}>Ya, Keluar</Text>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          </Animated.View>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
@@ -1157,5 +1366,93 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '900',
     color: '#FFF',
+  },
+  // Custom Map Customization & Radius Styles
+  customSubSection: {
+    marginBottom: 14,
+  },
+  customSubLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Colors.peachTint,
+    marginBottom: 8,
+  },
+  themeSelectorRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  themeCardOption: {
+    flex: 1,
+    backgroundColor: Colors.darkBg,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.darkBorder,
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  themeCardActive: {
+    borderColor: Colors.peeAmber,
+    backgroundColor: 'rgba(245, 183, 0, 0.12)',
+  },
+  themeOptionTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.peachTint,
+    textAlign: 'center',
+  },
+  themeOptionDesc: {
+    fontSize: 9,
+    color: Colors.peachTint,
+    opacity: 0.6,
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  radiusMeterBadge: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: Colors.bothTeal,
+  },
+  radiusButtonRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  radiusChip: {
+    flex: 1,
+    backgroundColor: Colors.darkBg,
+    borderWidth: 1.5,
+    borderColor: Colors.darkBorder,
+    borderRadius: 12,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radiusChipActive: {
+    backgroundColor: 'rgba(47, 184, 172, 0.15)',
+    borderColor: Colors.bothTeal,
+  },
+  radiusChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.peachTint,
+  },
+  radiusChipTextActive: {
+    color: Colors.bothTeal,
+    fontWeight: '900',
+  },
+  logoutInfoBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(47, 184, 172, 0.12)',
+    padding: 10,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  logoutInfoText: {
+    fontSize: 11,
+    color: Colors.bothTeal,
+    fontWeight: '700',
+    flex: 1,
   },
 });

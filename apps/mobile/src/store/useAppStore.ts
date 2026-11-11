@@ -29,6 +29,8 @@ interface AppState {
   dismissActiveBadgeModal: () => void;
 
   mapFilter: 'ALL' | 'PEE' | 'POOP' | 'COMBO';
+  mapTheme: 'DARK' | 'RETRO' | 'STANDARD';
+  gpsRadiusMeter: number;
   appLockEnabled: boolean;
 
   initialize: () => Promise<void>;
@@ -39,6 +41,8 @@ interface AppState {
   updateLogMoodAndNote: (id: string, mood: string, note: string) => Promise<void>;
   removeLog: (id: string) => Promise<void>;
   setMapFilter: (filter: 'ALL' | 'PEE' | 'POOP' | 'COMBO') => void;
+  setMapTheme: (theme: 'DARK' | 'RETRO' | 'STANDARD') => void;
+  setGpsRadiusMeter: (radius: number) => void;
   toggleAppLock: () => void;
 }
 
@@ -52,6 +56,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   lastSyncedAt: null,
   unlockedBadgeQueue: [],
   mapFilter: 'ALL',
+  mapTheme: 'DARK',
+  gpsRadiusMeter: 30,
   appLockEnabled: false,
 
   dismissActiveBadgeModal: () => {
@@ -206,5 +212,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   setMapFilter: (filter) => set({ mapFilter: filter }),
+  setMapTheme: (theme) => set({ mapTheme: theme }),
+  setGpsRadiusMeter: (radius) => set({ gpsRadiusMeter: radius }),
   toggleAppLock: () => set((state) => ({ appLockEnabled: !state.appLockEnabled })),
 }));
