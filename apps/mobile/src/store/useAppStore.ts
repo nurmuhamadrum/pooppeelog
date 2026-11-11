@@ -9,16 +9,20 @@ import {
   getDatabase,
 } from '../db/sqlite';
 import { getOrCreateGuestUser } from '../services/supabase';
+import { syncLogsWithCloud, SyncResult } from '../services/sync';
 
 interface AppState {
   logs: Log[];
   userId: string | null;
   isLoading: boolean;
+  isSyncing: boolean;
+  lastSyncedAt: string | null;
 
   mapFilter: 'ALL' | 'PEE' | 'POOP' | 'COMBO';
   appLockEnabled: boolean;
 
   initialize: () => Promise<void>;
+  syncWithCloud: () => Promise<SyncResult>;
   addLog: (logData: Omit<Log, 'id' | 'userId' | 'clientCreatedAt' | 'syncStatus'>) => Promise<Log>;
   importLogs: (importedLogs: Log[]) => Promise<number>;
   updateLogMoodAndNote: (id: string, mood: string, note: string) => Promise<void>;
@@ -31,6 +35,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   logs: [],
   userId: null,
   isLoading: true,
+  isSyncing: false,
+  lastSyncedAt: null,
   mapFilter: 'ALL',
   appLockEnabled: false,
 
@@ -46,9 +52,39 @@ export const useAppStore = create<AppState>((set, get) => ({
         logs: loadedLogs,
         isLoading: false,
       });
+
+      // Jalankan sinkronisasi background secara halus saat start
+      get().syncWithCloud().catch(() => {});
     } catch (error) {
       console.error('Failed to initialize local store:', error);
       set({ isLoading: false });
+    }
+  },
+
+  syncWithCloud: async () => {
+    const currentUserId = get().userId || undefined;
+    set({ isSyncing: true });
+    try {
+      const result = await syncLogsWithCloud(currentUserId);
+      if (result.success) {
+        const reloaded = await getLocalLogs();
+        set({
+          logs: reloaded,
+          isSyncing: false,
+          lastSyncedAt: new Date().toISOString(),
+        });
+      } else {
+        set({ isSyncing: false });
+      }
+      return result;
+    } catch (err: any) {
+      set({ isSyncing: false });
+      return {
+        success: false,
+        uploadedCount: 0,
+        downloadedCount: 0,
+        error: err?.message || 'Sync failed',
+      };
     }
   },
 

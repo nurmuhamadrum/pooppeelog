@@ -122,6 +122,44 @@ export async function getLocalLogs(limit = 100): Promise<Log[]> {
   }));
 }
 
+export async function getPendingLogs(): Promise<Log[]> {
+  const db = await getDatabase();
+  const rows = await db.getAllAsync<any>(
+    `SELECT * FROM local_logs WHERE sync_status = 'pending' ORDER BY logged_at ASC`
+  );
+
+  return rows.map((r) => ({
+    id: r.id,
+    userId: r.user_id,
+    type: r.type,
+    latitude: r.latitude,
+    longitude: r.longitude,
+    altitude: r.altitude ?? undefined,
+    city: r.city,
+    district: r.district,
+    subdistrict: r.subdistrict ?? undefined,
+    country: r.country,
+    mood: r.mood ?? undefined,
+    note: r.note ?? undefined,
+    loggedAt: r.logged_at,
+    isBlurred: Boolean(r.is_blurred),
+    blurredLatitude: r.blurred_latitude ?? undefined,
+    blurredLongitude: r.blurred_longitude ?? undefined,
+    clientCreatedAt: r.client_created_at,
+    syncStatus: r.sync_status,
+  }));
+}
+
+export async function markLogsAsSynced(ids: string[]): Promise<void> {
+  if (ids.length === 0) return;
+  const db = await getDatabase();
+  const placeholders = ids.map(() => '?').join(',');
+  await db.runAsync(
+    `UPDATE local_logs SET sync_status = 'synced' WHERE id IN (${placeholders})`,
+    ids
+  );
+}
+
 export async function deleteLocalLog(id: string): Promise<void> {
   const db = await getDatabase();
   await db.runAsync(`DELETE FROM local_logs WHERE id = ?`, [id]);

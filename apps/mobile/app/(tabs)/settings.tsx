@@ -34,6 +34,8 @@ import {
   AlertTriangle,
   X,
   ExternalLink,
+  RefreshCw,
+  Cloud,
 } from 'lucide-react-native';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from '@/src/components/MascotIcons';
 import { clearAllLocalData } from '@/src/db/sqlite';
@@ -51,12 +53,18 @@ export default function ProfileSettingsScreen() {
     logs,
     initialize,
     importLogs,
+    isSyncing,
+    lastSyncedAt,
+    syncWithCloud,
   } = useAppStore();
 
   const [exportModalVisible, setExportModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
+
+  // State untuk Cloud Sync Info
+  const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
 
   // State untuk Import JSON
   const [importModalVisible, setImportModalVisible] = useState(false);
@@ -89,6 +97,22 @@ export default function ProfileSettingsScreen() {
       year: 'numeric',
     });
   }, [logs]);
+
+  const handleManualSync = async () => {
+    setSyncFeedback('Sedang menyinkronkan...');
+    const result = await syncWithCloud();
+    if (result.success) {
+      setSyncFeedback(
+        `Sukses! Diunggah: ${result.uploadedCount}, Diunduh: ${result.downloadedCount}`
+      );
+    } else {
+      setSyncFeedback(result.error || 'Gagal tersambung ke cloud');
+    }
+
+    setTimeout(() => {
+      setSyncFeedback(null);
+    }, 4000);
+  };
 
   const handleToggleAppLock = async () => {
     if (!appLockEnabled) {
@@ -302,8 +326,44 @@ export default function ProfileSettingsScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <Download size={16} color={Colors.bothTeal} />
-            <Text style={styles.sectionHeading}>PORTABILITAS DATA</Text>
+            <Text style={styles.sectionHeading}>PORTABILITAS & SINKRONISASI DATA</Text>
           </View>
+
+          {/* SINKRONISASI SUPABASE CLOUD */}
+          <TouchableOpacity
+            style={styles.actionRow}
+            onPress={handleManualSync}
+            disabled={isSyncing}
+          >
+            <View style={styles.actionLeft}>
+              <View style={[styles.settingIconBox, { backgroundColor: 'rgba(47, 184, 172, 0.15)' }]}>
+                <Cloud size={16} color={Colors.bothTeal} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.actionLabel}>Sinkronisasi Cloud (Supabase)</Text>
+                <Text style={styles.actionDesc}>
+                  {lastSyncedAt
+                    ? `Terakhir sinkron: ${new Date(lastSyncedAt).toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}`
+                    : 'Sinkronkan data offline ke server'}
+                </Text>
+              </View>
+            </View>
+            <RefreshCw
+              size={16}
+              color={Colors.peachTint}
+              style={isSyncing ? { opacity: 0.5 } : {}}
+            />
+          </TouchableOpacity>
+
+          {/* Feedback hasil sync */}
+          {syncFeedback && (
+            <View style={styles.syncFeedbackBox}>
+              <Text style={styles.syncFeedbackText}>{syncFeedback}</Text>
+            </View>
+          )}
 
           {/* Ekspor JSON */}
           <TouchableOpacity
@@ -830,6 +890,19 @@ const styles = StyleSheet.create({
     color: Colors.peachTint,
     opacity: 0.6,
     marginTop: 1,
+  },
+  syncFeedbackBox: {
+    backgroundColor: 'rgba(47, 184, 172, 0.12)',
+    borderRadius: 10,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(47, 184, 172, 0.3)',
+  },
+  syncFeedbackText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.bothTeal,
+    textAlign: 'center',
   },
   footer: {
     alignItems: 'center',
