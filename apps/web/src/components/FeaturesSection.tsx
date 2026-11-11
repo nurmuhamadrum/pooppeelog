@@ -73,8 +73,8 @@ export const FeaturesSection: React.FC = () => {
                 <MrPlopSVG />
               </div>
               <div className="text-xs">
-                <span className="font-bold text-cream-bg block">Blur Lokasi 50 Meter</span>
-                <span className="text-peach-tint/60 text-[11px]">Privasi terjaga: koordinat pin digeser acak saat dilihat orang lain.</span>
+                <span className="font-bold text-cream-bg block">Live GPS & Pemetaan Akurat</span>
+                <span className="text-peach-tint/60 text-[11px]">Pin tersimpan presisi di perangkat Anda tanpa pelacakan pihak ketiga.</span>
               </div>
             </div>
           </div>

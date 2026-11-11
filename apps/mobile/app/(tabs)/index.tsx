@@ -10,6 +10,8 @@ import {
   StatusBar,
   Modal,
   ScrollView,
+  Animated,
+  Easing,
 } from 'react-native';
 import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -104,6 +106,28 @@ export default function MapScreen() {
   const [currentCoord, setCurrentCoord] = useState<{ latitude: number; longitude: number } | null>(
     null
   );
+  const [currentAddress, setCurrentAddress] = useState<string>('Mencari lokasi...');
+
+  // Animasi pulsing radar untuk current location
+  const pulseAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1800,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0,
+          duration: 0,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [pulseAnim]);
 
   useEffect(() => {
     initialize();
@@ -125,6 +149,20 @@ export default function MapScreen() {
 
         setCurrentCoord(targetCoord);
 
+        // Reverse geocode untuk mendapatkan nama kota/kabupaten
+        try {
+          const rev = await Location.reverseGeocodeAsync(targetCoord);
+          if (rev && rev.length > 0) {
+            const loc = rev[0];
+            const name = loc.subregion || loc.city || loc.district || loc.region || 'Sekitar Sini';
+            setCurrentAddress(name);
+          } else {
+            setCurrentAddress('Lokasi Anda');
+          }
+        } catch {
+          setCurrentAddress('Lokasi Anda');
+        }
+
         if (mapRef.current) {
           mapRef.current.animateToRegion({
             ...targetCoord,
@@ -132,9 +170,12 @@ export default function MapScreen() {
             longitudeDelta: 0.02 * ASPECT_RATIO,
           });
         }
+      } else {
+        setCurrentAddress('Izin lokasi mati');
       }
     } catch (err) {
       console.log('Location fetch error:', err);
+      setCurrentAddress('Gagal ambil GPS');
     }
   };
 
@@ -243,11 +284,50 @@ export default function MapScreen() {
           longitudeDelta: LONGITUDE_DELTA,
         }}
         customMapStyle={darkMapStyle}
-        showsUserLocation
+        showsUserLocation={false}
         showsMyLocationButton={false}
         showsCompass={false}
         toolbarEnabled={false}
       >
+        {/* Pulsing Live User GPS Marker (sesuai Mockup) */}
+        {currentCoord && (
+          <Marker
+            coordinate={currentCoord}
+            anchor={{ x: 0.5, y: 0.5 }}
+            tracksViewChanges={true}
+            zIndex={999}
+          >
+            <View style={styles.userLocationMarkerContainer}>
+              {/* Animated Radar Pulse Ring */}
+              <Animated.View
+                style={[
+                  styles.userLocationRadar,
+                  {
+                    transform: [
+                      {
+                        scale: pulseAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0.6, 2.2],
+                        }),
+                      },
+                    ],
+                    opacity: pulseAnim.interpolate({
+                      inputRange: [0, 0.5, 1],
+                      outputRange: [0.6, 0.3, 0],
+                    }),
+                  },
+                ]}
+              />
+              {/* Outer Dashed Halo Ring */}
+              <View style={styles.userLocationHalo} />
+              {/* Inner Glowing Center Dot */}
+              <View style={styles.userLocationDot}>
+                <View style={styles.userLocationDotInner} />
+              </View>
+            </View>
+          </Marker>
+        )}
+
         {locationGroups.map((group) => {
           // Ketika filter aktif adalah COMBO, PEE, atau POOP, cari log yang cocok
           const matchingLog =
@@ -371,17 +451,27 @@ export default function MapScreen() {
           </ScrollView>
         </View>
 
-        {/* Top Floating Stats Pill (Informatif: Total titik & total log aktif) */}
+        {/* Top Floating Area & Stats Pill (Sesuai Mockup) */}
         <View style={styles.mapInfoPillRow} pointerEvents="none">
+          <View style={styles.locationAreaPill}>
+            <View style={styles.liveIndicatorDot} />
+            <Text style={styles.locationAreaText} numberOfLines={1}>
+              {currentAddress}
+            </Text>
+            <View style={styles.liveBadge}>
+              <Text style={styles.liveBadgeText}>Live GPS</Text>
+            </View>
+          </View>
+
           <View style={styles.mapInfoPill}>
-            <MapPin size={12} color={Colors.peeAmber} />
+            <MapPin size={11} color={Colors.peeAmber} />
             <Text style={styles.mapInfoPillText}>
-              <Text style={{ fontWeight: '900', color: Colors.creamBg }}>{locationGroups.length}</Text> Titik Terpetakan
+              <Text style={{ fontWeight: '900', color: Colors.creamBg }}>{locationGroups.length}</Text> Titik
             </Text>
             <View style={styles.infoPillDivider} />
-            <Layers size={12} color={Colors.bothTeal} />
+            <Layers size={11} color={Colors.bothTeal} />
             <Text style={styles.mapInfoPillText}>
-              <Text style={{ fontWeight: '900', color: Colors.creamBg }}>{filteredLogs.length}</Text> Catatan
+              <Text style={{ fontWeight: '900', color: Colors.creamBg }}>{filteredLogs.length}</Text> Log
             </Text>
           </View>
         </View>
@@ -646,17 +736,61 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   mapInfoPillRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: 16,
     marginTop: 8,
+  },
+  locationAreaPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(30, 26, 23, 0.94)',
+    borderRadius: 20,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(61, 53, 46, 0.9)',
+    maxWidth: '55%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  liveIndicatorDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: Colors.bothTeal,
+  },
+  locationAreaText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Colors.creamBg,
+    flexShrink: 1,
+  },
+  liveBadge: {
+    backgroundColor: 'rgba(56, 178, 172, 0.18)',
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+    borderRadius: 6,
+  },
+  liveBadgeText: {
+    color: Colors.bothTeal,
+    fontSize: 8.5,
+    fontWeight: '900',
+    textTransform: 'uppercase',
   },
   mapInfoPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     backgroundColor: 'rgba(30, 26, 23, 0.88)',
     borderRadius: 20,
     paddingVertical: 4,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     borderWidth: 1,
     borderColor: 'rgba(61, 53, 46, 0.8)',
     shadowColor: '#000',
@@ -692,6 +826,51 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 8,
     elevation: 8,
+  },
+  // User Location Radar & Dot Styles
+  userLocationMarkerContainer: {
+    width: 70,
+    height: 70,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  userLocationRadar: {
+    position: 'absolute',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#3BA3E8',
+  },
+  userLocationHalo: {
+    position: 'absolute',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 1.5,
+    borderColor: 'rgba(59, 163, 232, 0.35)',
+    borderStyle: 'dashed',
+    backgroundColor: 'rgba(59, 163, 232, 0.08)',
+  },
+  userLocationDot: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#3BA3E8',
+    borderWidth: 2.5,
+    borderColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#3BA3E8',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  userLocationDotInner: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#FFFFFF',
   },
   markerAnchorWrapper: {
     width: 60,

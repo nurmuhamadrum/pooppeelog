@@ -43,9 +43,9 @@ export const PrivacyManifesto: React.FC = () => {
               <EyeOff className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-base text-cream-bg">Fitur Pengaburan Lokasi 50 Meter</h3>
+              <h3 className="font-bold text-base text-cream-bg">Kontrol Penuh Koordinat Lokasi</h3>
               <p className="text-xs text-peach-tint/70 mt-1 leading-relaxed">
-                Khawatir titik rumah Anda terlihat saat memamerkan peta? Aktifkan fitur Blur Lokasi untuk menggeser koordinat pin sejauh 20–50 meter secara acak.
+                Data koordinat GPS Anda hanya disimpan di perangkat dan akun pribadi Anda yang terenkripsi. Tidak ada pelacak pihak ketiga atau iklan yang mengintai lokasi Anda.
               </p>
             </div>
           </div>

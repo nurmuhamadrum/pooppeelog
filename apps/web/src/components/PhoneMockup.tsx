@@ -263,16 +263,16 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({
                 </text>
               </g>
 
-              {/* User Live GPS Pulse & 50m Blur Zone */}
+              {/* User Live GPS Pulse Marker */}
               <g>
                 <circle
                   cx="165"
                   cy="360"
-                  r="34"
+                  r="30"
                   fill="#3BA3E8"
-                  fillOpacity="0.08"
+                  fillOpacity="0.12"
                   stroke="#3BA3E8"
-                  strokeWidth="1"
+                  strokeWidth="1.5"
                   strokeDasharray="3 3"
                 />
                 <circle
@@ -280,20 +280,20 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({
                   cy="360"
                   r="16"
                   fill="#3BA3E8"
-                  fillOpacity="0.25"
+                  fillOpacity="0.3"
                   className="animate-ping"
                 />
-                <circle cx="165" cy="360" r="5" fill="#3BA3E8" stroke="#FFFFFF" strokeWidth="2" />
+                <circle cx="165" cy="360" r="6" fill="#3BA3E8" stroke="#FFFFFF" strokeWidth="2.5" />
               </g>
             </svg>
 
             {/* Top Floating Area Info & Layer Filter */}
             <div className="absolute top-3 inset-x-3 z-20 flex items-center justify-between">
               <div className="bg-dark-surface/95 backdrop-blur border border-dark-border px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg">
-                <span className="w-2 h-2 rounded-full bg-both-teal" />
+                <span className="w-2 h-2 rounded-full bg-both-teal animate-pulse" />
                 <span className="text-[11px] font-bold text-cream-bg">Jakarta Pusat</span>
-                <span className="text-[9px] bg-dark-bg text-peach-tint/70 px-1.5 py-0.5 rounded font-bold">
-                  Blur 50m
+                <span className="text-[9px] bg-both-teal/15 text-both-teal px-1.5 py-0.5 rounded font-bold">
+                  Live GPS
                 </span>
               </div>
 
@@ -454,7 +454,7 @@ export const PhoneMockup: React.FC<PhoneMockupProps> = ({
                   </div>
                   <div className="mt-2.5 pt-2 border-t border-dark-border/70 flex items-center justify-between text-[10px]">
                     <span className="text-both-teal font-bold flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-both-teal" /> Lokasi terenkripsi & blur 50m
+                      <span className="w-1.5 h-1.5 rounded-full bg-both-teal" /> Lokasi terenkripsi & privat
                     </span>
                     <button
                       onClick={() => setScreen('timeline')}
