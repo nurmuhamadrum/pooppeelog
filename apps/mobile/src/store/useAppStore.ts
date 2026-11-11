@@ -10,6 +10,7 @@ import {
 } from '../db/sqlite';
 import { getOrCreateGuestUser } from '../services/supabase';
 import { syncLogsWithCloud, SyncResult } from '../services/sync';
+import * as Crypto from 'expo-crypto';
 
 interface AppState {
   logs: Log[];
@@ -89,9 +90,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   addLog: async (logData) => {
-    const currentUserId = get().userId || 'guest_user';
+    let currentUserId = get().userId;
+    if (!currentUserId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(currentUserId)) {
+      currentUserId = await getOrCreateGuestUser();
+      set({ userId: currentUserId });
+    }
+
     const now = new Date().toISOString();
-    const newId = 'log_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+    const newId = Crypto.randomUUID();
 
     const fullLog: Log = {
       ...logData,

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
+import * as Crypto from 'expo-crypto';
 
 // Placeholder Supabase config (dapat dikonfigurasi via process.env / app.json)
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://placeholder-project.supabase.co';
@@ -23,18 +24,23 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 /**
  * Anonymous Onboarding:
- * Memungkinkan pengguna langsung menggunakan app tanpa ketik email/password.
+ * Memastikan ID guest adalah format UUID standar yang valid untuk database PostgreSQL.
  */
 export async function getOrCreateGuestUser(): Promise<string> {
   const GUEST_ID_KEY = 'pooppeelog_guest_user_id';
   let guestId = await SecureStore.getItemAsync(GUEST_ID_KEY);
 
-  if (!guestId) {
-    // Generate UUID v4 sederhana untuk identitas lokal
-    guestId = 'guest_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+  // Validasi format UUID standar (36 karakter dengan 4 tanda '-')
+  const isValidUUID =
+    guestId &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(guestId);
+
+  if (!isValidUUID) {
+    // Generate UUID v4 standar
+    guestId = Crypto.randomUUID();
     await SecureStore.setItemAsync(GUEST_ID_KEY, guestId);
   }
 
-  return guestId;
+  return guestId!;
 }
 

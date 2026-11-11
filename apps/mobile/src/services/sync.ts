@@ -6,6 +6,7 @@ import {
   getLocalLogs,
 } from '../db/sqlite';
 import { Log } from '@poop-pee-log/shared';
+import * as Crypto from 'expo-crypto';
 
 export interface SyncResult {
   success: boolean;
@@ -75,9 +76,14 @@ export async function syncLogsWithCloud(currentUserId?: string): Promise<SyncRes
     // 2. PUSH: Upload pending local logs
     const pendingLogs = await getPendingLogs();
     if (pendingLogs.length > 0) {
+      // Helper validasi UUID
+      const isUUID = (val?: string) =>
+        Boolean(val && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(val));
+
       const recordsToUpsert = pendingLogs.map((log) => ({
-        id: log.id,
-        user_id: authUserId,
+        // Pastikan id log berupa UUID valid agar PostgreSQL tidak melempar error
+        id: isUUID(log.id) ? log.id : Crypto.randomUUID(),
+        user_id: isUUID(authUserId) ? authUserId : Crypto.randomUUID(),
         type: log.type,
         latitude: log.latitude,
         longitude: log.longitude,
