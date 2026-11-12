@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Search, UserCircle2, Ghost, Award, ListChecks, RefreshCw, AlertCircle } from 'lucide-react';
-import { INITIAL_USERS, INITIAL_ACTIVITY_LOGS } from '../../data/mockAdminData';
 import { AdminActivityLogItem, AdminUserItem } from '../../types/admin';
 import { fetchAdminRecentLogs, fetchAdminUsers } from '../../services/adminApi';
 
@@ -10,20 +9,15 @@ const TYPE_STYLE: Record<string, string> = {
   COMBO: 'bg-both-teal/15 text-both-teal border-both-teal/40',
 };
 
-interface UsersTabProps {
-  isLiveMode: boolean;
-}
-
-export const UsersTab: React.FC<UsersTabProps> = ({ isLiveMode }) => {
-  const [rawUsers, setRawUsers] = useState<AdminUserItem[]>(isLiveMode ? [] : INITIAL_USERS);
-  const [recentLogs, setRecentLogs] = useState<AdminActivityLogItem[]>(isLiveMode ? [] : INITIAL_ACTIVITY_LOGS);
-  const [loading, setLoading] = useState(isLiveMode);
+export const UsersTab: React.FC = () => {
+  const [rawUsers, setRawUsers] = useState<AdminUserItem[]>([]);
+  const [recentLogs, setRecentLogs] = useState<AdminActivityLogItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [accountFilter, setAccountFilter] = useState<'ALL' | 'CLOUD' | 'GUEST'>('ALL');
 
   const load = useCallback(async () => {
-    if (!isLiveMode) return;
     setLoading(true);
     setError(null);
     try {
@@ -35,7 +29,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({ isLiveMode }) => {
     } finally {
       setLoading(false);
     }
-  }, [isLiveMode]);
+  }, []);
 
   useEffect(() => {
     load();
@@ -53,21 +47,19 @@ export const UsersTab: React.FC<UsersTabProps> = ({ isLiveMode }) => {
 
   return (
     <div className="space-y-6">
-      {isLiveMode && (
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-both-teal flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-both-teal animate-pulse" />
-            Data Real dari Supabase
-          </span>
-          <button
-            onClick={load}
-            disabled={loading}
-            className="px-3 py-1.5 rounded-xl bg-dark-surface border border-dark-border text-xs font-bold text-peach-tint/80 hover:text-cream-bg flex items-center gap-1.5 disabled:opacity-50"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Segarkan
-          </button>
-        </div>
-      )}
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-bold text-both-teal flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-both-teal animate-pulse" />
+          Data Real dari Supabase
+        </span>
+        <button
+          onClick={load}
+          disabled={loading}
+          className="px-3 py-1.5 rounded-xl bg-dark-surface border border-dark-border text-xs font-bold text-peach-tint/80 hover:text-cream-bg flex items-center gap-1.5 disabled:opacity-50"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Segarkan
+        </button>
+      </div>
 
       {error && (
         <div className="flex items-center gap-2 bg-emergency/15 border border-emergency/40 rounded-xl px-4 py-3 text-xs font-bold text-emergency">

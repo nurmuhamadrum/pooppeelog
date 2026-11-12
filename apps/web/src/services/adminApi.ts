@@ -195,3 +195,4 @@ export async function deleteBadgeFromSupabase(id: string): Promise<void> {
   const { error } = await supabase.from('badges').delete().eq('id', id);
   if (error) throw new Error(error.message);
 }
+

@@ -1,25 +1,29 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Users, Activity, Droplet, Flame, MapPin, TrendingUp, RefreshCw, AlertCircle } from 'lucide-react';
-import { INITIAL_ADMIN_STATS, INITIAL_CITY_DISTRIBUTION, INITIAL_DAILY_STATS } from '../../data/mockAdminData';
 import { fetchAdminOverview, OverviewResponse } from '../../services/adminApi';
 
 const fmt = (n: number) => n.toLocaleString('id-ID');
 
-interface StatsTabProps {
-  isLiveMode: boolean;
-}
+const EMPTY_OVERVIEW: OverviewResponse = {
+  totalUsers: 0,
+  activeUsersToday: 0,
+  totalLogs: 0,
+  logsToday: 0,
+  totalPee: 0,
+  totalPoop: 0,
+  totalCombo: 0,
+  streakRecordDays: 0,
+  citiesCovered: 0,
+  cityDistribution: [],
+  dailyStats: [],
+};
 
-export const StatsTab: React.FC<StatsTabProps> = ({ isLiveMode }) => {
-  const [data, setData] = useState<OverviewResponse>({
-    ...INITIAL_ADMIN_STATS,
-    cityDistribution: INITIAL_CITY_DISTRIBUTION,
-    dailyStats: INITIAL_DAILY_STATS,
-  });
-  const [loading, setLoading] = useState(isLiveMode);
+export const StatsTab: React.FC = () => {
+  const [data, setData] = useState<OverviewResponse>(EMPTY_OVERVIEW);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!isLiveMode) return;
     setLoading(true);
     setError(null);
     try {
@@ -30,7 +34,7 @@ export const StatsTab: React.FC<StatsTabProps> = ({ isLiveMode }) => {
     } finally {
       setLoading(false);
     }
-  }, [isLiveMode]);
+  }, []);
 
   useEffect(() => {
     load();
@@ -53,21 +57,19 @@ export const StatsTab: React.FC<StatsTabProps> = ({ isLiveMode }) => {
 
   return (
     <div className="space-y-6">
-      {isLiveMode && (
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-both-teal flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-both-teal animate-pulse" />
-            Terhubung ke Data Real Supabase
-          </span>
-          <button
-            onClick={load}
-            disabled={loading}
-            className="px-3 py-1.5 rounded-xl bg-dark-surface border border-dark-border text-xs font-bold text-peach-tint/80 hover:text-cream-bg flex items-center gap-1.5 disabled:opacity-50"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Segarkan
-          </button>
-        </div>
-      )}
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-bold text-both-teal flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-both-teal animate-pulse" />
+          Terhubung ke Data Real Supabase
+        </span>
+        <button
+          onClick={load}
+          disabled={loading}
+          className="px-3 py-1.5 rounded-xl bg-dark-surface border border-dark-border text-xs font-bold text-peach-tint/80 hover:text-cream-bg flex items-center gap-1.5 disabled:opacity-50"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Segarkan
+        </button>
+      </div>
 
       {error && (
         <div className="flex items-center gap-2 bg-emergency/15 border border-emergency/40 rounded-xl px-4 py-3 text-xs font-bold text-emergency">

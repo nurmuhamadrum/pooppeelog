@@ -1,14 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BarChart3, Users, HelpCircle, Award, LogOut, ExternalLink, RotateCcw, CheckCircle2, Info, Loader2 } from 'lucide-react';
+import { BarChart3, Users, HelpCircle, Award, LogOut, ExternalLink, CheckCircle2, Loader2 } from 'lucide-react';
 import { SirFlushSVG } from '../MascotSVGs';
-import { AdminLogin, isAdminSessionActive, clearAdminSession } from './AdminLogin';
+import { AdminLogin } from './AdminLogin';
 import { StatsTab } from './StatsTab';
 import { UsersTab } from './UsersTab';
 import { FaqTab } from './FaqTab';
 import { BadgesTab } from './BadgesTab';
-import { resetContent } from '../../data/contentStore';
 import { checkCurrentAdminSession, signOutAdmin } from '../../services/adminApi';
-import { isSupabaseConfigured } from '../../lib/supabase';
 
 type TabId = 'stats' | 'users' | 'faq' | 'badges';
 
@@ -20,24 +18,19 @@ const TABS: { id: TabId; label: string; icon: React.ElementType; desc: string }[
 ];
 
 export const AdminDashboard: React.FC = () => {
-  const [checkingSession, setCheckingSession] = useState(isSupabaseConfigured);
-  const [authMode, setAuthMode] = useState<'none' | 'supabase' | 'local'>(() =>
-    isAdminSessionActive() ? 'local' : 'none'
-  );
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
   const [adminEmail, setAdminEmail] = useState<string | null>(null);
   const [tab, setTab] = useState<TabId>('stats');
   const [toast, setToast] = useState<string | null>(null);
-  const [contentVersion, setContentVersion] = useState(0);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     document.title = 'Admin · Poop Pee Log';
-    if (!isSupabaseConfigured) return;
-
     checkCurrentAdminSession()
       .then((res) => {
         if (res.authenticated) {
-          setAuthMode('supabase');
+          setAuthenticated(true);
           setAdminEmail(res.email ?? null);
         }
       })
@@ -51,9 +44,8 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const handleLogout = async () => {
-    clearAdminSession();
     await signOutAdmin();
-    setAuthMode('none');
+    setAuthenticated(false);
     setAdminEmail(null);
   };
 
@@ -65,22 +57,18 @@ export const AdminDashboard: React.FC = () => {
     );
   }
 
-  if (authMode === 'none') {
+  if (!authenticated) {
     return (
       <AdminLogin
-        onSuccess={(mode) => {
-          setAuthMode(mode);
-          if (mode === 'supabase') {
-            checkCurrentAdminSession().then((res) => setAdminEmail(res.email ?? null));
-          }
+        onSuccess={() => {
+          setAuthenticated(true);
+          checkCurrentAdminSession().then((res) => setAdminEmail(res.email ?? null));
         }}
       />
     );
   }
 
-  const isLiveMode = authMode === 'supabase';
   const active = TABS.find((t) => t.id === tab)!;
-  const showsMockNotice = !isLiveMode && (tab === 'stats' || tab === 'users');
 
   return (
     <div className="min-h-screen bg-dark-bg text-cream-bg flex flex-col lg:flex-row">
@@ -93,7 +81,7 @@ export const AdminDashboard: React.FC = () => {
           <div className="min-w-0">
             <div className="font-black text-sm">Poop Pee Log</div>
             <div className="text-[10px] font-bold text-both-teal uppercase tracking-wider truncate">
-              {isLiveMode ? adminEmail || 'Admin Supabase' : 'Demo Mode'}
+              {adminEmail || 'Admin Supabase'}
             </div>
           </div>
         </div>
@@ -132,45 +120,20 @@ export const AdminDashboard: React.FC = () => {
             <h1 className="text-xl font-black tracking-tight">{active.label}</h1>
             <p className="text-[11px] text-peach-tint/60 font-semibold">{active.desc}</p>
           </div>
-          <div className="flex items-center gap-2">
-            {!isLiveMode && (tab === 'faq' || tab === 'badges') && (
-              <button
-                onClick={() => {
-                  if (window.confirm('Kembalikan seluruh FAQ & lencana ke konten bawaan?')) {
-                    resetContent();
-                    setContentVersion((v) => v + 1);
-                    notify('Konten dikembalikan ke bawaan.');
-                  }
-                }}
-                className="px-3 py-2 rounded-xl text-[11px] font-bold border border-dark-border text-peach-tint/70 hover:text-cream-bg flex items-center gap-1.5"
-              >
-                <RotateCcw className="w-3.5 h-3.5" /> Reset Konten
-              </button>
-            )}
-            <button
-              onClick={handleLogout}
-              className="lg:hidden p-2 rounded-xl text-emergency border border-dark-border"
-              title="Keluar"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
+          <button
+            onClick={handleLogout}
+            className="lg:hidden p-2 rounded-xl text-emergency border border-dark-border"
+            title="Keluar"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </header>
 
         <div className="p-6 space-y-5">
-          {showsMockNotice && (
-            <div className="flex items-start gap-2.5 bg-drip-blue/10 border border-drip-blue/30 rounded-xl px-4 py-3 text-[11px] text-drip-blue font-semibold">
-              <Info className="w-4 h-4 flex-shrink-0 mt-px" />
-              <span>
-                Anda sedang di <b>Mode Demo Lokal</b> (data contoh). Untuk melihat data real dari Supabase, keluar dan login menggunakan akun Admin Supabase Anda.
-              </span>
-            </div>
-          )}
-
-          {tab === 'stats' && <StatsTab isLiveMode={isLiveMode} />}
-          {tab === 'users' && <UsersTab isLiveMode={isLiveMode} />}
-          {tab === 'faq' && <FaqTab key={`faq-${contentVersion}`} isLiveMode={isLiveMode} notify={notify} />}
-          {tab === 'badges' && <BadgesTab key={`badges-${contentVersion}`} isLiveMode={isLiveMode} notify={notify} />}
+          {tab === 'stats' && <StatsTab />}
+          {tab === 'users' && <UsersTab />}
+          {tab === 'faq' && <FaqTab notify={notify} />}
+          {tab === 'badges' && <BadgesTab notify={notify} />}
         </div>
       </main>
 

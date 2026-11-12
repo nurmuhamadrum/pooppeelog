@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, Save, X, Award, Loader2 } from 'lucide-react';
 import { EditableBadge } from '../../types/admin';
-import { getBadges, saveBadges } from '../../data/contentStore';
+import { saveBadges } from '../../data/contentStore';
 import { MrPlopSVG, LilDripSVG, SirFlushSVG } from '../MascotSVGs';
 import {
   deleteBadgeFromSupabase,
@@ -10,7 +10,6 @@ import {
 } from '../../services/adminApi';
 
 interface BadgesTabProps {
-  isLiveMode: boolean;
   notify: (msg: string) => void;
 }
 
@@ -40,26 +39,23 @@ const blankBadge = (): EditableBadge => ({
 const inputCls =
   'w-full bg-dark-surface border border-dark-border rounded-xl px-3 py-2.5 text-xs outline-none focus:border-both-teal';
 
-export const BadgesTab: React.FC<BadgesTabProps> = ({ isLiveMode, notify }) => {
-  const [badges, setBadges] = useState<EditableBadge[]>(getBadges);
-  const [loading, setLoading] = useState(isLiveMode);
+export const BadgesTab: React.FC<BadgesTabProps> = ({ notify }) => {
+  const [badges, setBadges] = useState<EditableBadge[]>([]);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState<EditableBadge | null>(null);
   const [isNew, setIsNew] = useState(false);
 
   useEffect(() => {
-    if (!isLiveMode) return;
     setLoading(true);
     fetchBadgesFromSupabase()
       .then((remote) => {
-        if (remote.length > 0) {
-          setBadges(remote);
-          saveBadges(remote);
-        }
+        setBadges(remote);
+        saveBadges(remote);
       })
       .catch((e) => notify(`Gagal memuat Lencana Supabase: ${e.message}`))
       .finally(() => setLoading(false));
-  }, [isLiveMode]);
+  }, []);
 
   const handleSave = async () => {
     if (!draft) return;
@@ -74,17 +70,15 @@ export const BadgesTab: React.FC<BadgesTabProps> = ({ isLiveMode, notify }) => {
     }
     const clean = { ...draft, code };
 
-    if (isLiveMode) {
-      setSaving(true);
-      try {
-        await upsertBadgeToSupabase(clean);
-      } catch (e) {
-        notify(`Gagal simpan lencana ke Supabase: ${e instanceof Error ? e.message : 'Error'}`);
-        setSaving(false);
-        return;
-      }
+    setSaving(true);
+    try {
+      await upsertBadgeToSupabase(clean);
+    } catch (e) {
+      notify(`Gagal simpan lencana ke Supabase: ${e instanceof Error ? e.message : 'Error'}`);
       setSaving(false);
+      return;
     }
+    setSaving(false);
 
     const next = isNew ? [...badges, clean] : badges.map((b) => (b.id === clean.id ? clean : b));
     setBadges(next);
@@ -95,13 +89,11 @@ export const BadgesTab: React.FC<BadgesTabProps> = ({ isLiveMode, notify }) => {
 
   const handleDelete = async (b: EditableBadge) => {
     if (!window.confirm(`Hapus lencana "${b.title}"?`)) return;
-    if (isLiveMode) {
-      try {
-        await deleteBadgeFromSupabase(b.id);
-      } catch (e) {
-        notify(`Gagal hapus dari Supabase: ${e instanceof Error ? e.message : 'Error'}`);
-        return;
-      }
+    try {
+      await deleteBadgeFromSupabase(b.id);
+    } catch (e) {
+      notify(`Gagal hapus dari Supabase: ${e instanceof Error ? e.message : 'Error'}`);
+      return;
     }
     const next = badges.filter((x) => x.id !== b.id);
     setBadges(next);
@@ -120,7 +112,7 @@ export const BadgesTab: React.FC<BadgesTabProps> = ({ isLiveMode, notify }) => {
               <Award className="w-4 h-4 text-pee-amber" /> Master Lencana ({badges.length})
             </h3>
             <p className="text-[11px] text-peach-tint/60 mt-0.5">
-              {isLiveMode ? 'Tersimpan langsung di tabel badges Supabase.' : 'Tampil di bagian “Koleksi Lencana” landing page.'}
+              Tersimpan langsung di tabel badges Supabase.
             </p>
           </div>
           <button
@@ -137,6 +129,10 @@ export const BadgesTab: React.FC<BadgesTabProps> = ({ isLiveMode, notify }) => {
         {loading ? (
           <div className="py-12 text-center text-xs text-peach-tint/50 flex items-center justify-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" /> Memuat Lencana dari Supabase...
+          </div>
+        ) : badges.length === 0 ? (
+          <div className="py-12 text-center text-xs text-peach-tint/50">
+            Belum ada lencana di Supabase. Klik "Tambah Lencana" untuk membuat baru.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, Eye, EyeOff, ArrowUp, ArrowDown, Save, X, HelpCircle, Loader2 } from 'lucide-react';
 import { EditableFAQ } from '../../types/admin';
-import { getFaqs, saveFaqs } from '../../data/contentStore';
+import { saveFaqs } from '../../data/contentStore';
 import {
   deleteFaqFromSupabase,
   fetchFaqsFromSupabase,
@@ -10,32 +10,28 @@ import {
 } from '../../services/adminApi';
 
 interface FaqTabProps {
-  isLiveMode: boolean;
   notify: (msg: string) => void;
 }
 
 const emptyDraft = { q: '', a: '' };
 
-export const FaqTab: React.FC<FaqTabProps> = ({ isLiveMode, notify }) => {
-  const [faqs, setFaqs] = useState<EditableFAQ[]>(() => [...getFaqs()].sort((a, b) => a.order - b.order));
-  const [loading, setLoading] = useState(isLiveMode);
+export const FaqTab: React.FC<FaqTabProps> = ({ notify }) => {
+  const [faqs, setFaqs] = useState<EditableFAQ[]>([]);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | 'NEW' | null>(null);
   const [draft, setDraft] = useState(emptyDraft);
 
   useEffect(() => {
-    if (!isLiveMode) return;
     setLoading(true);
     fetchFaqsFromSupabase(false)
       .then((remote) => {
-        if (remote.length > 0) {
-          setFaqs(remote);
-          saveFaqs(remote);
-        }
+        setFaqs(remote);
+        saveFaqs(remote);
       })
       .catch((e) => notify(`Gagal memuat FAQ Supabase: ${e.message}`))
       .finally(() => setLoading(false));
-  }, [isLiveMode]);
+  }, []);
 
   const startEdit = (faq?: EditableFAQ) => {
     setEditingId(faq ? faq.id : 'NEW');
@@ -58,17 +54,15 @@ export const FaqTab: React.FC<FaqTabProps> = ({ isLiveMode, notify }) => {
       order: i + 1,
     }));
 
-    if (isLiveMode) {
-      setSaving(true);
-      try {
-        await upsertFaqToSupabase(target);
-      } catch (e) {
-        notify(`Gagal simpan ke Supabase: ${e instanceof Error ? e.message : 'Error'}`);
-        setSaving(false);
-        return;
-      }
+    setSaving(true);
+    try {
+      await upsertFaqToSupabase(target);
+    } catch (e) {
+      notify(`Gagal simpan ke Supabase: ${e instanceof Error ? e.message : 'Error'}`);
       setSaving(false);
+      return;
     }
+    setSaving(false);
 
     setFaqs(next);
     saveFaqs(next);
@@ -84,13 +78,11 @@ export const FaqTab: React.FC<FaqTabProps> = ({ isLiveMode, notify }) => {
     [next[index], next[target]] = [next[target], next[index]];
     const normalized = next.map((f, i) => ({ ...f, order: i + 1 }));
 
-    if (isLiveMode) {
-      try {
-        await saveFaqOrdersToSupabase(normalized);
-      } catch (e) {
-        notify(`Gagal ubah urutan di Supabase: ${e instanceof Error ? e.message : 'Error'}`);
-        return;
-      }
+    try {
+      await saveFaqOrdersToSupabase(normalized);
+    } catch (e) {
+      notify(`Gagal ubah urutan di Supabase: ${e instanceof Error ? e.message : 'Error'}`);
+      return;
     }
 
     setFaqs(normalized);
@@ -100,13 +92,11 @@ export const FaqTab: React.FC<FaqTabProps> = ({ isLiveMode, notify }) => {
 
   const toggleVisibility = async (faq: EditableFAQ) => {
     const updated = { ...faq, isActive: !faq.isActive };
-    if (isLiveMode) {
-      try {
-        await upsertFaqToSupabase(updated);
-      } catch (e) {
-        notify(`Gagal update visibilitas: ${e instanceof Error ? e.message : 'Error'}`);
-        return;
-      }
+    try {
+      await upsertFaqToSupabase(updated);
+    } catch (e) {
+      notify(`Gagal update visibilitas: ${e instanceof Error ? e.message : 'Error'}`);
+      return;
     }
     const next = faqs.map((f) => (f.id === faq.id ? updated : f));
     setFaqs(next);
@@ -116,13 +106,11 @@ export const FaqTab: React.FC<FaqTabProps> = ({ isLiveMode, notify }) => {
 
   const handleDelete = async (faq: EditableFAQ) => {
     if (!window.confirm(`Hapus FAQ "${faq.q}"?`)) return;
-    if (isLiveMode) {
-      try {
-        await deleteFaqFromSupabase(faq.id);
-      } catch (e) {
-        notify(`Gagal hapus dari Supabase: ${e instanceof Error ? e.message : 'Error'}`);
-        return;
-      }
+    try {
+      await deleteFaqFromSupabase(faq.id);
+    } catch (e) {
+      notify(`Gagal hapus dari Supabase: ${e instanceof Error ? e.message : 'Error'}`);
+      return;
     }
     const next = faqs.filter((f) => f.id !== faq.id).map((f, i) => ({ ...f, order: i + 1 }));
     setFaqs(next);
@@ -171,7 +159,7 @@ export const FaqTab: React.FC<FaqTabProps> = ({ isLiveMode, notify }) => {
             <HelpCircle className="w-4 h-4 text-pee-amber" /> Manajemen FAQ Landing Page
           </h3>
           <p className="text-[11px] text-peach-tint/60 mt-0.5">
-            {isLiveMode ? 'Tersimpan langsung di tabel site_faqs Supabase.' : 'Tersimpan lokal di browser.'}
+            Tersimpan langsung di tabel site_faqs Supabase.
           </p>
         </div>
         <button
@@ -187,6 +175,10 @@ export const FaqTab: React.FC<FaqTabProps> = ({ isLiveMode, notify }) => {
       {loading ? (
         <div className="py-10 text-center text-xs text-peach-tint/50 flex items-center justify-center gap-2">
           <Loader2 className="w-4 h-4 animate-spin" /> Memuat FAQ dari Supabase...
+        </div>
+      ) : faqs.length === 0 ? (
+        <div className="py-10 text-center text-xs text-peach-tint/50">
+          Belum ada FAQ di Supabase. Klik "Tambah FAQ" untuk membuat baru.
         </div>
       ) : (
         <div className="space-y-2.5">
