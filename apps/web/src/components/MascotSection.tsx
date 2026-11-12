@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MrPlopSVG, LilDripSVG, SirFlushSVG } from './MascotSVGs';
 import { Sparkles, MessageCircle, Volume2 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { playMascotSound } from '../utils/mascotSound';
 
 export const MascotSection: React.FC = () => {
   const { lang } = useLanguage();
@@ -22,6 +23,7 @@ export const MascotSection: React.FC = () => {
   };
 
   const handleTap = (mascot: 'plop' | 'drip' | 'flush') => {
+    playMascotSound(mascot);
     setTappedMascot(mascot);
     setTimeout(() => setTappedMascot(null), 1200);
 

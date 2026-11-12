@@ -3,6 +3,7 @@ import { Zap, ShieldCheck, Cloud, Sparkles, HeartHandshake, MapPin, Flame } from
 import { MrPlopSVG, LilDripSVG, SirFlushSVG } from './MascotSVGs';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useWebCopy } from '../i18n/translations';
+import { playMascotSound } from '../utils/mascotSound';
 
 type ActiveMascot = 'plop' | 'drip' | 'flush';
 
@@ -16,7 +17,10 @@ export const HeroSection: React.FC = () => {
 
   const triggerBubble = (text: string, mascot?: ActiveMascot) => {
     setCustomBubble(text);
-    if (mascot) setActiveMascot(mascot);
+    if (mascot) {
+      setActiveMascot(mascot);
+      playMascotSound(mascot);
+    }
     setPoopWiggle(true);
     setTimeout(() => setPoopWiggle(false), 800);
   };
