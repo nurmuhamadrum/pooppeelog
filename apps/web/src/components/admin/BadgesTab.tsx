@@ -30,10 +30,13 @@ const blankBadge = (): EditableBadge => ({
   code: '',
   title: '',
   description: '',
+  titleEn: '',
+  descriptionEn: '',
   iconName: 'award',
   mascot: 'LIL_DRIP',
   category: 'MILESTONE',
   requirementText: '',
+  requirementTextEn: '',
 });
 
 const inputCls =
@@ -45,6 +48,7 @@ export const BadgesTab: React.FC<BadgesTabProps> = ({ notify }) => {
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState<EditableBadge | null>(null);
   const [isNew, setIsNew] = useState(false);
+  const [editorLang, setEditorLang] = useState<'id' | 'en'>('id');
 
   useEffect(() => {
     setLoading(true);
@@ -60,7 +64,7 @@ export const BadgesTab: React.FC<BadgesTabProps> = ({ notify }) => {
   const handleSave = async () => {
     if (!draft) return;
     if (!draft.title.trim() || !draft.code.trim() || !draft.description.trim()) {
-      notify('Kode, judul, dan deskripsi wajib diisi.');
+      notify('Kode, judul (ID), dan deskripsi (ID) wajib diisi.');
       return;
     }
     const code = draft.code.trim().toUpperCase().replace(/\s+/g, '_');
@@ -83,7 +87,7 @@ export const BadgesTab: React.FC<BadgesTabProps> = ({ notify }) => {
     const next = isNew ? [...badges, clean] : badges.map((b) => (b.id === clean.id ? clean : b));
     setBadges(next);
     saveBadges(next);
-    notify(isNew ? 'Lencana baru disimpan ke Supabase.' : 'Lencana diperbarui di Supabase.');
+    notify(isNew ? 'Lencana bilingual disimpan ke Supabase.' : 'Lencana bilingual diperbarui di Supabase.');
     setDraft(null);
   };
 
@@ -112,13 +116,14 @@ export const BadgesTab: React.FC<BadgesTabProps> = ({ notify }) => {
               <Award className="w-4 h-4 text-pee-amber" /> Master Lencana ({badges.length})
             </h3>
             <p className="text-[11px] text-peach-tint/60 mt-0.5">
-              Tersimpan langsung di tabel badges Supabase.
+              Tersimpan bilingual (ID &amp; EN) langsung di tabel badges Supabase.
             </p>
           </div>
           <button
             onClick={() => {
               setDraft(blankBadge());
               setIsNew(true);
+              setEditorLang('id');
             }}
             className="px-3.5 py-2 rounded-xl bg-pee-amber text-ink text-xs font-black flex items-center gap-1.5 hover:brightness-110"
           >
@@ -147,11 +152,19 @@ export const BadgesTab: React.FC<BadgesTabProps> = ({ notify }) => {
                   {mascotSvg(b.mascot)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-black truncate">{b.title}</div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-black truncate">{b.title}</span>
+                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border ${b.titleEn ? 'border-both-teal/40 text-both-teal bg-both-teal/10' : 'border-dark-border text-peach-tint/40'}`}>
+                      {b.titleEn ? 'ID+EN' : 'ID'}
+                    </span>
+                  </div>
                   <div className="text-[10px] font-bold text-peach-tint/50">
                     {b.code} · {b.category}
                   </div>
                   <p className="text-[11px] text-peach-tint/70 mt-1 line-clamp-2">{b.description}</p>
+                  {b.titleEn && (
+                    <p className="text-[10px] text-both-teal/80 italic mt-0.5 truncate">EN: {b.titleEn}</p>
+                  )}
                   <div className="text-[10px] text-both-teal font-bold mt-1.5">🎯 {b.requirementText || '—'}</div>
                 </div>
                 <div className="flex flex-col gap-1">
@@ -183,21 +196,93 @@ export const BadgesTab: React.FC<BadgesTabProps> = ({ notify }) => {
       <div className="bg-dark-surface border border-dark-border rounded-2xl p-5 h-fit xl:sticky xl:top-6">
         {draft ? (
           <div className="space-y-3 animate-fadeIn">
-            <h3 className="font-black text-sm">{isNew ? 'Lencana Baru' : 'Edit Lencana'}</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="font-black text-sm">{isNew ? 'Lencana Baru' : 'Edit Lencana'}</h3>
+              <div className="flex bg-dark-bg border border-dark-border p-0.5 rounded-lg text-[10px] font-black">
+                <button
+                  type="button"
+                  onClick={() => setEditorLang('id')}
+                  className={`px-2.5 py-1 rounded-md transition-all ${editorLang === 'id' ? 'bg-pee-amber text-ink' : 'text-peach-tint/60'}`}
+                >
+                  🇮🇩 ID
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditorLang('en')}
+                  className={`px-2.5 py-1 rounded-md transition-all ${editorLang === 'en' ? 'bg-both-teal text-ink' : 'text-peach-tint/60'}`}
+                >
+                  🇬🇧 EN
+                </button>
+              </div>
+            </div>
 
-            {/* Live preview */}
+            {/* Live preview matching selected editor language */}
             <div className="bg-dark-bg border border-dark-border rounded-2xl p-4 text-center">
               <div className={`w-14 h-14 rounded-full ${mascotBg(draft.mascot)} p-2 mx-auto mb-2 flex items-center justify-center`}>
                 {mascotSvg(draft.mascot)}
               </div>
-              <div className="text-sm font-black">{draft.title || 'Judul Lencana'}</div>
-              <div className="text-[10px] text-peach-tint/60 mt-0.5">{draft.description || 'Deskripsi lencana...'}</div>
+              <div className="text-sm font-black">
+                {editorLang === 'en' ? draft.titleEn || draft.title || 'Badge Title' : draft.title || 'Judul Lencana'}
+              </div>
+              <div className="text-[10px] text-peach-tint/60 mt-0.5">
+                {editorLang === 'en'
+                  ? draft.descriptionEn || draft.description || 'Badge description...'
+                  : draft.description || 'Deskripsi lencana...'}
+              </div>
             </div>
 
-            <input className={inputCls} placeholder="Kode (mis. RAJA_KLOSET)" value={draft.code} onChange={(e) => setDraft({ ...draft, code: e.target.value })} />
-            <input className={inputCls} placeholder="Judul" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
-            <textarea className={`${inputCls} resize-y`} rows={3} placeholder="Deskripsi" value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
-            <input className={inputCls} placeholder="Teks syarat (mis. 100 log tercatat)" value={draft.requirementText} onChange={(e) => setDraft({ ...draft, requirementText: e.target.value })} />
+            <input
+              className={inputCls}
+              placeholder="Kode (mis. RAJA_KLOSET)"
+              value={draft.code}
+              onChange={(e) => setDraft({ ...draft, code: e.target.value })}
+            />
+
+            {editorLang === 'id' ? (
+              <>
+                <input
+                  className={inputCls}
+                  placeholder="Judul (Bahasa Indonesia)"
+                  value={draft.title}
+                  onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+                />
+                <textarea
+                  className={`${inputCls} resize-y`}
+                  rows={3}
+                  placeholder="Deskripsi (Bahasa Indonesia)"
+                  value={draft.description}
+                  onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+                />
+                <input
+                  className={inputCls}
+                  placeholder="Teks syarat ID (mis. 100 log tercatat)"
+                  value={draft.requirementText}
+                  onChange={(e) => setDraft({ ...draft, requirementText: e.target.value })}
+                />
+              </>
+            ) : (
+              <>
+                <input
+                  className={inputCls}
+                  placeholder="Title (English)"
+                  value={draft.titleEn}
+                  onChange={(e) => setDraft({ ...draft, titleEn: e.target.value })}
+                />
+                <textarea
+                  className={`${inputCls} resize-y`}
+                  rows={3}
+                  placeholder="Description (English)"
+                  value={draft.descriptionEn}
+                  onChange={(e) => setDraft({ ...draft, descriptionEn: e.target.value })}
+                />
+                <input
+                  className={inputCls}
+                  placeholder="Requirement EN (e.g. 100 logs recorded)"
+                  value={draft.requirementTextEn}
+                  onChange={(e) => setDraft({ ...draft, requirementTextEn: e.target.value })}
+                />
+              </>
+            )}
 
             <div className="grid grid-cols-2 gap-2">
               <select className={inputCls} value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value as EditableBadge['category'] })}>
@@ -238,7 +323,7 @@ export const BadgesTab: React.FC<BadgesTabProps> = ({ notify }) => {
         ) : (
           <div className="text-center py-10 text-peach-tint/50">
             <Award className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p className="text-xs font-semibold">Pilih lencana untuk diedit, atau tambahkan lencana baru.</p>
+            <p className="text-xs font-semibold">Pilih lencana untuk diedit (ID &amp; EN), atau tambahkan lencana baru.</p>
           </div>
         )}
       </div>

@@ -113,16 +113,16 @@ export const BadgesSection: React.FC = () => {
                 </div>
 
                 <h3 className="font-black text-base text-cream-bg mb-1.5">
-                  {badge.title}
+                  {lang === 'en' && badge.titleEn ? badge.titleEn : badge.title}
                 </h3>
                 <p className="text-peach-tint/70 text-xs leading-relaxed">
-                  {badge.description}
+                  {lang === 'en' && badge.descriptionEn ? badge.descriptionEn : badge.description}
                 </p>
               </div>
 
               <div className="mt-5 pt-3 border-t border-dark-border/60">
                 <span className="text-[10px] text-both-teal font-extrabold bg-both-teal/10 px-2 py-1 rounded-md block">
-                  🎯 {badge.requirementText}
+                  🎯 {lang === 'en' && badge.requirementTextEn ? badge.requirementTextEn : badge.requirementText}
                 </span>
               </div>
             </div>

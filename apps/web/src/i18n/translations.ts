@@ -258,3 +258,4 @@ export const WEB_COPY = {
 export function useWebCopy(lang: AppLanguage) {
   return WEB_COPY[lang];
 }
+

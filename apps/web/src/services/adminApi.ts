@@ -102,7 +102,10 @@ export async function fetchAdminRecentLogs(limitCount = 30): Promise<AdminActivi
 // ==========================================
 export async function fetchFaqsFromSupabase(onlyActive = false): Promise<EditableFAQ[]> {
   if (!supabase) throw new Error('Supabase tidak tersedia');
-  let query = supabase.from('site_faqs').select('id, q, a, sort_order, is_active').order('sort_order', { ascending: true });
+  let query = supabase
+    .from('site_faqs')
+    .select('id, q, a, q_en, a_en, sort_order, is_active')
+    .order('sort_order', { ascending: true });
   if (onlyActive) {
     query = query.eq('is_active', true);
   }
@@ -113,6 +116,8 @@ export async function fetchFaqsFromSupabase(onlyActive = false): Promise<Editabl
     id: row.id,
     q: row.q,
     a: row.a,
+    qEn: row.q_en || '',
+    aEn: row.a_en || '',
     order: row.sort_order,
     isActive: row.is_active,
   }));
@@ -124,6 +129,8 @@ export async function upsertFaqToSupabase(faq: EditableFAQ): Promise<void> {
     id: faq.id,
     q: faq.q,
     a: faq.a,
+    q_en: faq.qEn,
+    a_en: faq.aEn,
     sort_order: faq.order,
     is_active: faq.isActive,
     updated_at: new Date().toISOString(),
@@ -137,6 +144,8 @@ export async function saveFaqOrdersToSupabase(faqs: EditableFAQ[]): Promise<void
     id: f.id,
     q: f.q,
     a: f.a,
+    q_en: f.qEn,
+    a_en: f.aEn,
     sort_order: idx + 1,
     is_active: f.isActive,
     updated_at: new Date().toISOString(),
@@ -158,7 +167,7 @@ export async function fetchBadgesFromSupabase(): Promise<EditableBadge[]> {
   if (!supabase) throw new Error('Supabase tidak tersedia');
   const { data, error } = await supabase
     .from('badges')
-    .select('id, code, title, description, icon_name, mascot, category, requirement_text')
+    .select('id, code, title, description, title_en, description_en, icon_name, mascot, category, requirement_text, requirement_text_en')
     .order('id', { ascending: true });
   if (error) throw new Error(error.message);
 
@@ -167,10 +176,13 @@ export async function fetchBadgesFromSupabase(): Promise<EditableBadge[]> {
     code: b.code,
     title: b.title,
     description: b.description,
+    titleEn: b.title_en || '',
+    descriptionEn: b.description_en || '',
     iconName: b.icon_name || 'award',
     mascot: (b.mascot as EditableBadge['mascot']) || 'LIL_DRIP',
     category: (b.category as EditableBadge['category']) || 'MILESTONE',
     requirementText: b.requirement_text || '',
+    requirementTextEn: b.requirement_text_en || '',
   }));
 }
 
@@ -181,10 +193,13 @@ export async function upsertBadgeToSupabase(badge: EditableBadge): Promise<void>
     code: badge.code,
     title: badge.title,
     description: badge.description,
+    title_en: badge.titleEn,
+    description_en: badge.descriptionEn,
     icon_name: badge.iconName,
     mascot: badge.mascot,
     category: badge.category,
     requirement_text: badge.requirementText,
+    requirement_text_en: badge.requirementTextEn,
     requirement_criteria: { label: badge.requirementText },
   });
   if (error) throw new Error(error.message);

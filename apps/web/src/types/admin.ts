@@ -50,6 +50,8 @@ export interface EditableFAQ {
   id: string;
   q: string;
   a: string;
+  qEn: string;
+  aEn: string;
   order: number;
   isActive: boolean;
 }
@@ -59,9 +61,12 @@ export interface EditableBadge {
   code: string;
   title: string;
   description: string;
+  titleEn: string;
+  descriptionEn: string;
   iconName: string;
   mascot: 'LIL_DRIP' | 'MR_PLOP' | 'SIR_FLUSH';
   category: 'MILESTONE' | 'EXPLORATION' | 'STREAK' | 'ELEVATION';
   requirementText: string;
+  requirementTextEn: string;
 }
 

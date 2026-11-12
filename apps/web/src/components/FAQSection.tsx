@@ -57,7 +57,9 @@ export const FAQSection: React.FC = () => {
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-cream-bg hover:text-pee-amber transition-colors"
                 >
-                  <span className="text-sm sm:text-base">{faq.q}</span>
+                  <span className="text-sm sm:text-base">
+                    {lang === 'en' && faq.qEn ? faq.qEn : faq.q}
+                  </span>
                   <ChevronDown
                     className={`w-5 h-5 flex-shrink-0 text-peach-tint/60 transition-transform duration-200 ${
                       isOpen ? 'rotate-180 text-pee-amber' : ''
@@ -66,7 +68,7 @@ export const FAQSection: React.FC = () => {
                 </button>
                 {isOpen && (
                   <div className="px-6 pb-6 text-xs sm:text-sm text-peach-tint/80 leading-relaxed border-t border-dark-border/40 pt-4 animate-fadeIn">
-                    {faq.a}
+                    {lang === 'en' && faq.aEn ? faq.aEn : faq.a}
                   </div>
                 )}
               </div>

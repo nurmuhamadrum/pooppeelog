@@ -23,17 +23,54 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
 
--- 2. Lengkapi kolom pada public.badges agar sinkron dengan Web & Admin
+-- 2. Lengkapi kolom pada public.badges agar sinkron dengan Web & Admin (termasuk bilingual EN/ID)
 ALTER TABLE public.badges
 ADD COLUMN IF NOT EXISTS mascot VARCHAR(30) NOT NULL DEFAULT 'LIL_DRIP',
-ADD COLUMN IF NOT EXISTS requirement_text TEXT NOT NULL DEFAULT '';
+ADD COLUMN IF NOT EXISTS requirement_text TEXT NOT NULL DEFAULT '',
+ADD COLUMN IF NOT EXISTS title_en VARCHAR(100) NOT NULL DEFAULT '',
+ADD COLUMN IF NOT EXISTS description_en TEXT NOT NULL DEFAULT '',
+ADD COLUMN IF NOT EXISTS requirement_text_en TEXT NOT NULL DEFAULT '';
 
--- Update seed data badges dengan mascot & requirement_text
-UPDATE public.badges SET mascot = 'LIL_DRIP', requirement_text = 'Log pertama berhasil' WHERE id = 'badge_01';
-UPDATE public.badges SET mascot = 'MR_PLOP', requirement_text = '3 kecamatan berbeda' WHERE id = 'badge_02';
-UPDATE public.badges SET mascot = 'SIR_FLUSH', requirement_text = 'Streak 7 hari beruntun' WHERE id = 'badge_03';
-UPDATE public.badges SET mascot = 'LIL_DRIP', requirement_text = '2 kota berbeda' WHERE id = 'badge_04';
-UPDATE public.badges SET mascot = 'SIR_FLUSH', requirement_text = 'Ketinggian > 1.000m' WHERE id = 'badge_05';
+-- Update seed data badges dengan mascot, requirement_text, dan terjemahan EN
+UPDATE public.badges SET
+    mascot = 'LIL_DRIP',
+    requirement_text = 'Log pertama berhasil',
+    title_en = 'First Timer',
+    description_en = 'Recorded your very first bathroom log in history.',
+    requirement_text_en = '1st log recorded'
+WHERE id = 'badge_01';
+
+UPDATE public.badges SET
+    mascot = 'MR_PLOP',
+    requirement_text = '3 kecamatan berbeda',
+    title_en = 'City Explorer',
+    description_en = 'Successfully logged relief in at least 3 different districts.',
+    requirement_text_en = '3 different districts'
+WHERE id = 'badge_02';
+
+UPDATE public.badges SET
+    mascot = 'SIR_FLUSH',
+    requirement_text = 'Streak 7 hari beruntun',
+    title_en = 'Smooth Flow',
+    description_en = 'Maintained a daily logging streak for 7 consecutive days.',
+    requirement_text_en = '7-day streak'
+WHERE id = 'badge_03';
+
+UPDATE public.badges SET
+    mascot = 'LIL_DRIP',
+    requirement_text = '2 kota berbeda',
+    title_en = 'Traveler',
+    description_en = 'Marked your relief trail in at least 2 different cities.',
+    requirement_text_en = '2 different cities'
+WHERE id = 'badge_04';
+
+UPDATE public.badges SET
+    mascot = 'SIR_FLUSH',
+    requirement_text = 'Ketinggian > 1.000m',
+    title_en = 'Peak Relief',
+    description_en = 'Completed a relief session at an altitude above 1,000 meters.',
+    requirement_text_en = 'Altitude > 1,000m'
+WHERE id = 'badge_05';
 
 -- RLS Badges: Publik dapat membaca master badges (untuk landing page & app), hanya admin yang bisa ubah
 DROP POLICY IF EXISTS "Authenticated users can read master badges" ON public.badges;
@@ -48,16 +85,22 @@ CREATE POLICY "Admins can manage badges"
     USING (public.is_current_user_admin())
     WITH CHECK (public.is_current_user_admin());
 
--- 3. Tabel SITE_FAQS (Manajemen Konten FAQ Landing Page)
+-- 3. Tabel SITE_FAQS (Manajemen Konten FAQ Landing Page - Bilingual ID & EN)
 CREATE TABLE IF NOT EXISTS public.site_faqs (
     id TEXT PRIMARY KEY,
     q TEXT NOT NULL,
     a TEXT NOT NULL,
+    q_en TEXT NOT NULL DEFAULT '',
+    a_en TEXT NOT NULL DEFAULT '',
     sort_order INTEGER NOT NULL DEFAULT 1,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
+
+ALTER TABLE public.site_faqs
+ADD COLUMN IF NOT EXISTS q_en TEXT NOT NULL DEFAULT '',
+ADD COLUMN IF NOT EXISTS a_en TEXT NOT NULL DEFAULT '';
 
 ALTER TABLE public.site_faqs ENABLE ROW LEVEL SECURITY;
 
@@ -72,13 +115,15 @@ CREATE POLICY "Admins can manage faqs"
     USING (public.is_current_user_admin())
     WITH CHECK (public.is_current_user_admin());
 
--- Seed data FAQ awal
-INSERT INTO public.site_faqs (id, q, a, sort_order, is_active)
+-- Seed data FAQ awal (ID & EN)
+INSERT INTO public.site_faqs (id, q, a, q_en, a_en, sort_order, is_active)
 VALUES
 (
     'faq_1',
     'Apakah aplikasi ini bisa mencari toilet umum terdekat?',
     'Tidak. Poop Pee Log BUKAN aplikasi pencari toilet umum. Aplikasi ini adalah buku harian pribadi (personal diary & tracker) untuk mendokumentasikan tempat dan waktu di mana Anda sendiri buang air, layaknya aplikasi Strava untuk aktivitas biologis.',
+    'Can this app find the nearest public toilet?',
+    'No. Poop Pee Log is NOT a public toilet finder. It is a personal biological diary and tracker to log where and when you relieve yourself, just like Strava for your bathroom habits.',
     1,
     TRUE
 ),
@@ -86,6 +131,8 @@ VALUES
     'faq_2',
     'Apakah ada fitur untuk memberi rating kebersihan toilet?',
     'Tidak ada. Kami tidak menyediakan rating kloset, review kebersihan, atau penilaian fasilitas publik. Semua catatan dan mood murni untuk evaluasi dan kesenangan pribadi Anda.',
+    'Is there a feature to rate toilet cleanliness?',
+    'No. We do not provide toilet ratings, cleanliness reviews, or public facility scores. All notes and moods are strictly for your own personal tracking and enjoyment.',
     2,
     TRUE
 ),
@@ -93,6 +140,8 @@ VALUES
     'faq_3',
     'Apakah teman atau orang lain bisa melihat catatan saya?',
     'Sama sekali tidak bisa. Poop Pee Log menganut prinsip Zero Social. Tidak ada feed pertemanan, tidak ada tautan publik, dan tidak ada leaderboard. Data Anda diisolasi menggunakan Row Level Security (RLS) dan kunci aplikasi PIN/Biometrik.',
+    'Can friends or other people see my logs?',
+    'Never. Poop Pee Log follows a strict Zero Social principle. There are no friend feeds, no public links, and no leaderboards. Your data is isolated with Row Level Security (RLS) and biometric app lock.',
     3,
     TRUE
 ),
@@ -100,6 +149,8 @@ VALUES
     'faq_4',
     'Apakah saya bisa mencatat log saat tidak ada sinyal internet?',
     'Tentu saja! Poop Pee Log dibangun dengan arsitektur Offline-First. Anda bisa mencatat di toilet basement mall atau di puncak gunung tanpa sinyal. Data akan tersimpan di memori HP Anda dan disinkronkan otomatis saat terhubung ke internet.',
+    'Can I record a log when there is no internet connection?',
+    'Of course! Poop Pee Log is built with an Offline-First architecture. You can log in a basement restroom or on a mountain peak without signal. Logs are stored locally on your phone and auto-sync when back online.',
     4,
     TRUE
 ),
@@ -107,10 +158,14 @@ VALUES
     'faq_5',
     'Apakah saya wajib mendaftarkan email saat pertama kali pakai?',
     'Tidak wajib. Anda bisa langsung menggunakan mode tamu (Anonymous Guest) dalam hitungan detik setelah instalasi. Anda baru diminta menghubungkan Google/Apple ID jika ingin mencadangkan data lintas perangkat.',
+    'Do I have to register an email before using the app?',
+    'Not required. You can start immediately in Anonymous Guest mode seconds after installing. You only need to link an email or Google account if you want multi-device cloud backup.',
     5,
     TRUE
 )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET
+    q_en = CASE WHEN public.site_faqs.q_en = '' THEN EXCLUDED.q_en ELSE public.site_faqs.q_en END,
+    a_en = CASE WHEN public.site_faqs.a_en = '' THEN EXCLUDED.a_en ELSE public.site_faqs.a_en END;
 
 -- 4. RPC: Statistik Global untuk Admin Dashboard
 CREATE OR REPLACE FUNCTION public.admin_get_overview()

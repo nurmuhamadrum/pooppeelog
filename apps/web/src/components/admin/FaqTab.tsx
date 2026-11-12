@@ -13,7 +13,7 @@ interface FaqTabProps {
   notify: (msg: string) => void;
 }
 
-const emptyDraft = { q: '', a: '' };
+const emptyDraft = { q: '', a: '', qEn: '', aEn: '' };
 
 export const FaqTab: React.FC<FaqTabProps> = ({ notify }) => {
   const [faqs, setFaqs] = useState<EditableFAQ[]>([]);
@@ -35,19 +35,37 @@ export const FaqTab: React.FC<FaqTabProps> = ({ notify }) => {
 
   const startEdit = (faq?: EditableFAQ) => {
     setEditingId(faq ? faq.id : 'NEW');
-    setDraft(faq ? { q: faq.q, a: faq.a } : emptyDraft);
+    setDraft(
+      faq
+        ? { q: faq.q, a: faq.a, qEn: faq.qEn || '', aEn: faq.aEn || '' }
+        : emptyDraft
+    );
   };
 
   const handleSave = async () => {
     if (!draft.q.trim() || !draft.a.trim()) {
-      notify('Pertanyaan dan jawaban wajib diisi.');
+      notify('Pertanyaan dan jawaban (Indonesia) wajib diisi.');
       return;
     }
 
     const isNew = editingId === 'NEW';
     const target: EditableFAQ = isNew
-      ? { id: `faq_${Date.now()}`, q: draft.q.trim(), a: draft.a.trim(), order: faqs.length + 1, isActive: true }
-      : { ...faqs.find((f) => f.id === editingId)!, q: draft.q.trim(), a: draft.a.trim() };
+      ? {
+          id: `faq_${Date.now()}`,
+          q: draft.q.trim(),
+          a: draft.a.trim(),
+          qEn: draft.qEn.trim(),
+          aEn: draft.aEn.trim(),
+          order: faqs.length + 1,
+          isActive: true,
+        }
+      : {
+          ...faqs.find((f) => f.id === editingId)!,
+          q: draft.q.trim(),
+          a: draft.a.trim(),
+          qEn: draft.qEn.trim(),
+          aEn: draft.aEn.trim(),
+        };
 
     const next = (isNew ? [...faqs, target] : faqs.map((f) => (f.id === target.id ? target : f))).map((f, i) => ({
       ...f,
@@ -66,7 +84,7 @@ export const FaqTab: React.FC<FaqTabProps> = ({ notify }) => {
 
     setFaqs(next);
     saveFaqs(next);
-    notify(isNew ? 'FAQ baru disimpan ke Supabase.' : 'FAQ diperbarui di Supabase.');
+    notify(isNew ? 'FAQ bilingual disimpan ke Supabase.' : 'FAQ bilingual diperbarui di Supabase.');
     setEditingId(null);
     setDraft(emptyDraft);
   };
@@ -119,20 +137,49 @@ export const FaqTab: React.FC<FaqTabProps> = ({ notify }) => {
   };
 
   const editorForm = (
-    <div className="bg-dark-bg border border-both-teal/50 rounded-2xl p-4 space-y-3 animate-fadeIn">
-      <input
-        value={draft.q}
-        onChange={(e) => setDraft({ ...draft, q: e.target.value })}
-        placeholder="Pertanyaan..."
-        className="w-full bg-dark-surface border border-dark-border rounded-xl px-3 py-2.5 text-sm font-bold outline-none focus:border-both-teal"
-      />
-      <textarea
-        value={draft.a}
-        onChange={(e) => setDraft({ ...draft, a: e.target.value })}
-        placeholder="Jawaban..."
-        rows={4}
-        className="w-full bg-dark-surface border border-dark-border rounded-xl px-3 py-2.5 text-xs leading-relaxed outline-none focus:border-both-teal resize-y"
-      />
+    <div className="bg-dark-bg border border-both-teal/50 rounded-2xl p-4 space-y-4 animate-fadeIn">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Bahasa Indonesia */}
+        <div className="space-y-2.5">
+          <div className="text-[11px] font-black text-pee-amber uppercase tracking-wider">
+            🇮🇩 Bahasa Indonesia (Utama)
+          </div>
+          <input
+            value={draft.q}
+            onChange={(e) => setDraft({ ...draft, q: e.target.value })}
+            placeholder="Pertanyaan (ID)..."
+            className="w-full bg-dark-surface border border-dark-border rounded-xl px-3 py-2.5 text-sm font-bold outline-none focus:border-pee-amber"
+          />
+          <textarea
+            value={draft.a}
+            onChange={(e) => setDraft({ ...draft, a: e.target.value })}
+            placeholder="Jawaban (ID)..."
+            rows={4}
+            className="w-full bg-dark-surface border border-dark-border rounded-xl px-3 py-2.5 text-xs leading-relaxed outline-none focus:border-pee-amber resize-y"
+          />
+        </div>
+
+        {/* English */}
+        <div className="space-y-2.5">
+          <div className="text-[11px] font-black text-both-teal uppercase tracking-wider">
+            🇬🇧 English
+          </div>
+          <input
+            value={draft.qEn}
+            onChange={(e) => setDraft({ ...draft, qEn: e.target.value })}
+            placeholder="Question (EN)..."
+            className="w-full bg-dark-surface border border-dark-border rounded-xl px-3 py-2.5 text-sm font-bold outline-none focus:border-both-teal"
+          />
+          <textarea
+            value={draft.aEn}
+            onChange={(e) => setDraft({ ...draft, aEn: e.target.value })}
+            placeholder="Answer (EN)..."
+            rows={4}
+            className="w-full bg-dark-surface border border-dark-border rounded-xl px-3 py-2.5 text-xs leading-relaxed outline-none focus:border-both-teal resize-y"
+          />
+        </div>
+      </div>
+
       <div className="flex justify-end gap-2">
         <button
           onClick={() => setEditingId(null)}
@@ -145,7 +192,7 @@ export const FaqTab: React.FC<FaqTabProps> = ({ notify }) => {
           disabled={saving}
           className="px-4 py-2 rounded-lg text-xs font-black bg-both-teal text-ink flex items-center gap-1 hover:brightness-110 disabled:opacity-60"
         >
-          {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Simpan
+          {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Simpan Bilingual
         </button>
       </div>
     </div>
@@ -156,10 +203,10 @@ export const FaqTab: React.FC<FaqTabProps> = ({ notify }) => {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="font-black text-sm flex items-center gap-2">
-            <HelpCircle className="w-4 h-4 text-pee-amber" /> Manajemen FAQ Landing Page
+            <HelpCircle className="w-4 h-4 text-pee-amber" /> Manajemen FAQ Landing Page (ID &amp; EN)
           </h3>
           <p className="text-[11px] text-peach-tint/60 mt-0.5">
-            Tersimpan langsung di tabel site_faqs Supabase.
+            Kelola konten FAQ dalam Bahasa Indonesia &amp; Inggris, tersimpan langsung di Supabase.
           </p>
         </div>
         <button
@@ -198,12 +245,20 @@ export const FaqTab: React.FC<FaqTabProps> = ({ notify }) => {
                     <ArrowDown className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-bold">
-                    <span className="text-peach-tint/40 mr-1.5">#{faq.order}</span>
-                    {faq.q}
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-bold">
+                      <span className="text-peach-tint/40 mr-1.5">#{faq.order}</span>
+                      {faq.q}
+                    </span>
+                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border ${faq.qEn ? 'border-both-teal/40 text-both-teal bg-both-teal/10' : 'border-dark-border text-peach-tint/40'}`}>
+                      {faq.qEn ? 'ID + EN' : 'ID only'}
+                    </span>
                   </div>
-                  <p className="text-xs text-peach-tint/70 mt-1 line-clamp-2 leading-relaxed">{faq.a}</p>
+                  <p className="text-xs text-peach-tint/70 line-clamp-2 leading-relaxed">{faq.a}</p>
+                  {faq.qEn && (
+                    <p className="text-[11px] text-both-teal/80 italic truncate">EN: {faq.qEn}</p>
+                  )}
                 </div>
                 <div className="flex items-start gap-1">
                   <button
