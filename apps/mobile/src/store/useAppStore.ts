@@ -62,7 +62,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   mapTheme: 'DARK',
   gpsRadiusMeter: 30,
   appLockEnabled: false,
-  language: 'en',
+  language: 'id',
 
   dismissActiveBadgeModal: () => {
     set((state) => ({
@@ -95,7 +95,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       const loadedLogs = await getLocalLogs();
       const savedLang = await SecureStore.getItemAsync('pooppeelog_language').catch(() => null);
-      const activeLang: AppLanguage = savedLang === 'id' || savedLang === 'en' ? savedLang : 'en';
+      const activeLang: AppLanguage = savedLang === 'id' || savedLang === 'en' ? savedLang : 'id';
 
       set({
         userId: activeUserId,

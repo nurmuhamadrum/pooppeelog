@@ -10,16 +10,16 @@ interface LanguageContextValue {
 }
 
 const LanguageContext = createContext<LanguageContextValue>({
-  lang: 'en',
+  lang: 'id',
   setLang: () => {},
   toggleLang: () => {},
 });
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [lang, setLangState] = useState<AppLanguage>(() => {
-    if (typeof window === 'undefined') return 'en';
+    if (typeof window === 'undefined') return 'id';
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    return saved === 'id' || saved === 'en' ? saved : 'en';
+    return saved === 'id' || saved === 'en' ? saved : 'id';
   });
 
   const setLang = (next: AppLanguage) => {
@@ -41,3 +41,4 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 };
 
 export const useLanguage = () => useContext(LanguageContext);
+
