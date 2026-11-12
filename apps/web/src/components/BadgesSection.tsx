@@ -1,9 +1,22 @@
-import React from 'react';
-import { INITIAL_BADGES } from '@poop-pee-log/shared';
+import React, { useEffect, useState } from 'react';
+import { getBadges, CONTENT_UPDATED_EVENT } from '../data/contentStore';
+import { EditableBadge } from '../types/admin';
 import { MrPlopSVG, LilDripSVG, SirFlushSVG } from './MascotSVGs';
 import { Award, Compass, Flame, MapPin, Mountain } from 'lucide-react';
 
 export const BadgesSection: React.FC = () => {
+  const [badges, setBadges] = useState<EditableBadge[]>(getBadges);
+
+  useEffect(() => {
+    const refresh = () => setBadges(getBadges());
+    window.addEventListener(CONTENT_UPDATED_EVENT, refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener(CONTENT_UPDATED_EVENT, refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
+
   const getBadgeIcon = (iconName: string) => {
     switch (iconName) {
       case 'award':
@@ -63,9 +76,9 @@ export const BadgesSection: React.FC = () => {
           </p>
         </div>
 
-        {/* 5 Badges Grid */}
+        {/* Badges Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-          {INITIAL_BADGES.map((badge) => (
+          {badges.map((badge) => (
             <div
               key={badge.id}
               className="group bg-dark-surface border border-dark-border rounded-3xl p-6 text-center hover:border-pee-amber/60 hover:shadow-xl hover:shadow-pee-amber/10 transition-all flex flex-col justify-between"

@@ -1,36 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { getFaqs, CONTENT_UPDATED_EVENT } from '../data/contentStore';
+import { EditableFAQ } from '../types/admin';
 import { ChevronDown, HelpCircle } from 'lucide-react';
-
-interface FAQItem {
-  q: string;
-  a: string;
-}
-
-const FAQS: FAQItem[] = [
-  {
-    q: 'Apakah aplikasi ini bisa mencari toilet umum terdekat?',
-    a: 'Tidak. Poop Pee Log BUKAN aplikasi pencari toilet umum. Aplikasi ini adalah buku harian pribadi (personal diary & tracker) untuk mendokumentasikan tempat dan waktu di mana Anda sendiri buang air, layaknya aplikasi Strava untuk aktivitas biologis.',
-  },
-  {
-    q: 'Apakah ada fitur untuk memberi rating kebersihan toilet?',
-    a: 'Tidak ada. Kami tidak menyediakan rating kloset, review kebersihan, atau penilaian fasilitas publik. Semua catatan dan mood murni untuk evaluasi dan kesenangan pribadi Anda.',
-  },
-  {
-    q: 'Apakah teman atau orang lain bisa melihat catatan saya?',
-    a: 'Sama sekali tidak bisa. Poop Pee Log menganut prinsip Zero Social. Tidak ada feed pertemanan, tidak ada tautan publik, dan tidak ada leaderboard. Data Anda diisolasi menggunakan Row Level Security (RLS) dan kunci aplikasi PIN/Biometrik.',
-  },
-  {
-    q: 'Apakah saya bisa mencatat log saat tidak ada sinyal internet?',
-    a: 'Tentu saja! Poop Pee Log dibangun dengan arsitektur Offline-First. Anda bisa mencatat di toilet basement mall atau di puncak gunung tanpa sinyal. Data akan tersimpan di memori HP Anda dan disinkronkan otomatis saat terhubung ke internet.',
-  },
-  {
-    q: 'Apakah saya wajib mendaftarkan email saat pertama kali pakai?',
-    a: 'Tidak wajib. Anda bisa langsung menggunakan mode tamu (Anonymous Guest) dalam hitungan detik setelah instalasi. Anda baru diminta menghubungkan Google/Apple ID jika ingin mencadangkan data lintas perangkat.',
-  },
-];
 
 export const FAQSection: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [faqs, setFaqs] = useState<EditableFAQ[]>(getFaqs);
+
+  useEffect(() => {
+    const refresh = () => setFaqs(getFaqs());
+    window.addEventListener(CONTENT_UPDATED_EVENT, refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener(CONTENT_UPDATED_EVENT, refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
+
+  const FAQS = faqs.filter((f) => f.isActive).sort((a, b) => a.order - b.order);
 
   return (
     <section className="py-20 md:py-28 border-b border-dark-border">

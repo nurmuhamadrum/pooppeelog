@@ -37,6 +37,7 @@ export const Footer: React.FC = () => {
               <a href="#lencana" className="hover:text-pee-amber">Lencana</a>
               <a href="#privasi" className="hover:text-pee-amber">Privasi</a>
               <a href="#download" className="hover:text-pee-amber">Download</a>
+              <a href="#/admin" className="hover:text-both-teal">Admin</a>
               <a href="https://github.com/nurmuhamadrum/pooppeelog" target="_blank" rel="noreferrer" className="hover:text-pee-amber">GitHub</a>
             </div>
 
