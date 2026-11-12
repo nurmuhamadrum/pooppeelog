@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useAppStore } from '@/src/store/useAppStore';
+import { useMobileI18n } from '@/src/i18n/translations';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from '@/src/components/MascotIcons';
 import {
   Flame,
@@ -42,6 +43,7 @@ interface BadgeItem {
 
 export default function StatsScreen() {
   const { logs } = useAppStore();
+  const { t } = useMobileI18n();
   const [timeRange, setTimeRange] = useState<TimeRange>('ALL');
 
   // Filter logs berdasarkan periode waktu
@@ -194,8 +196,8 @@ export default function StatsScreen() {
 
       {/* Header Area */}
       <View style={styles.headerArea}>
-        <Text style={styles.pageTitle}>Statistik & Lencana</Text>
-        <Text style={styles.pageSubtitle}>Pantau ritme biologis & pencapaian 3 maskot</Text>
+        <Text style={styles.pageTitle}>{t.stats.title}</Text>
+        <Text style={styles.pageSubtitle}>{t.stats.subtitle}</Text>
       </View>
 
       {/* Filter Waktu: Minggu Ini, Bulan Ini, Tahun Ini, Semua */}
@@ -206,7 +208,7 @@ export default function StatsScreen() {
             onPress={() => setTimeRange('WEEK')}
           >
             <Text style={[styles.timePillText, timeRange === 'WEEK' && styles.timePillTextActive]}>
-              7 Hari Terakhir
+              {t.stats.week}
             </Text>
           </TouchableOpacity>
 
@@ -215,7 +217,7 @@ export default function StatsScreen() {
             onPress={() => setTimeRange('MONTH')}
           >
             <Text style={[styles.timePillText, timeRange === 'MONTH' && styles.timePillTextActive]}>
-              Bulan Ini
+              {t.stats.month}
             </Text>
           </TouchableOpacity>
 
@@ -224,7 +226,7 @@ export default function StatsScreen() {
             onPress={() => setTimeRange('YEAR')}
           >
             <Text style={[styles.timePillText, timeRange === 'YEAR' && styles.timePillTextActive]}>
-              Tahun Ini
+              {t.stats.year}
             </Text>
           </TouchableOpacity>
 
@@ -233,7 +235,7 @@ export default function StatsScreen() {
             onPress={() => setTimeRange('ALL')}
           >
             <Text style={[styles.timePillText, timeRange === 'ALL' && styles.timePillTextActive]}>
-              Semua Waktu
+              {t.stats.all}
             </Text>
           </TouchableOpacity>
         </ScrollView>

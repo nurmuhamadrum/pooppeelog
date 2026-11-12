@@ -18,6 +18,7 @@ import * as Location from 'expo-location';
 import { Colors } from '@/constants/Colors';
 import { darkMapStyle, retroMapStyle } from '@/constants/MapStyle';
 import { useAppStore } from '@/src/store/useAppStore';
+import { useMobileI18n } from '@/src/i18n/translations';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from '@/src/components/MascotIcons';
 import { Log } from '@poop-pee-log/shared';
 import {
@@ -99,6 +100,7 @@ interface LocationGroup {
 
 export default function MapScreen() {
   const { logs, mapFilter, setMapFilter, initialize, mapTheme, gpsRadiusMeter } = useAppStore();
+  const { t } = useMobileI18n();
 
   const mapRef = useRef<MapView>(null);
   const [selectedGroup, setSelectedGroup] = useState<LocationGroup | null>(null);
@@ -433,7 +435,7 @@ export default function MapScreen() {
               activeOpacity={0.8}
             >
               <Text style={[styles.pillText, mapFilter === 'ALL' && styles.pillTextActive]}>
-                Semua ({counts.all})
+                {t.map.all} ({counts.all})
               </Text>
             </TouchableOpacity>
 
@@ -443,7 +445,7 @@ export default function MapScreen() {
               activeOpacity={0.8}
             >
               <Text style={[styles.pillText, mapFilter === 'PEE' && styles.pillTextActive]}>
-                💧 Pee ({counts.pee})
+                {t.map.pee} ({counts.pee})
               </Text>
             </TouchableOpacity>
 
@@ -453,7 +455,7 @@ export default function MapScreen() {
               activeOpacity={0.8}
             >
               <Text style={[styles.pillText, mapFilter === 'POOP' && styles.pillTextActive]}>
-                💩 Poop ({counts.poop})
+                {t.map.poop} ({counts.poop})
               </Text>
             </TouchableOpacity>
 
@@ -471,7 +473,7 @@ export default function MapScreen() {
                   mapFilter === 'COMBO' && styles.pillTextActiveDark,
                 ]}
               >
-                🚽 Flush ({counts.combo})
+                {t.map.flush} ({counts.combo})
               </Text>
             </TouchableOpacity>
           </ScrollView>
@@ -482,22 +484,22 @@ export default function MapScreen() {
           <View style={styles.locationAreaPill}>
             <View style={styles.liveIndicatorDot} />
             <Text style={styles.locationAreaText} numberOfLines={1}>
-              {currentAddress}
+              {currentAddress === 'Mencari lokasi...' ? t.map.searchingGps : currentAddress}
             </Text>
             <View style={styles.liveBadge}>
-              <Text style={styles.liveBadgeText}>Live GPS</Text>
+              <Text style={styles.liveBadgeText}>{t.map.liveGps}</Text>
             </View>
           </View>
 
           <View style={styles.mapInfoPill}>
             <MapPin size={11} color={Colors.peeAmber} />
             <Text style={styles.mapInfoPillText}>
-              <Text style={{ fontWeight: '900', color: Colors.creamBg }}>{locationGroups.length}</Text> Titik
+              <Text style={{ fontWeight: '900', color: Colors.creamBg }}>{locationGroups.length}</Text> {t.map.spots}
             </Text>
             <View style={styles.infoPillDivider} />
             <Layers size={11} color={Colors.bothTeal} />
             <Text style={styles.mapInfoPillText}>
-              <Text style={{ fontWeight: '900', color: Colors.creamBg }}>{filteredLogs.length}</Text> Log
+              <Text style={{ fontWeight: '900', color: Colors.creamBg }}>{filteredLogs.length}</Text> {t.map.logs}
             </Text>
           </View>
         </View>
@@ -565,14 +567,14 @@ export default function MapScreen() {
             {/* Footer Pop-up Info & Lihat Detail Button */}
             <View style={styles.popupFooter}>
               <Text style={styles.popupLocationCount}>
-                📍 {selectedGroup.logs.length} kali buang air di titik ini
+                📍 {selectedGroup.logs.length} {t.map.timesAtSpot}
               </Text>
               <TouchableOpacity
                 style={styles.detailButton}
                 onPress={() => setDetailModalVisible(true)}
                 activeOpacity={0.8}
               >
-                <Text style={styles.detailButtonText}>Lihat Detail</Text>
+                <Text style={styles.detailButtonText}>{t.map.seeDetail}</Text>
                 <ChevronRight size={14} color={Colors.peeAmber} />
               </TouchableOpacity>
             </View>
@@ -593,7 +595,7 @@ export default function MapScreen() {
               {/* Header Modal */}
               <View style={styles.modalHeader}>
                 <View>
-                  <Text style={styles.modalTitle}>Detail Titik Lokasi</Text>
+                  <Text style={styles.modalTitle}>{t.map.detailTitle}</Text>
                   <Text style={styles.modalSubtitle}>
                     {selectedGroup.district}, {selectedGroup.city}
                   </Text>
@@ -634,7 +636,7 @@ export default function MapScreen() {
                 </View>
               </View>
 
-              <Text style={styles.timelineSectionTitle}>Riwayat Catatan di Titik Ini</Text>
+              <Text style={styles.timelineSectionTitle}>{t.map.historyAtSpot}</Text>
 
               <ScrollView style={styles.logList} showsVerticalScrollIndicator={false}>
                 {selectedGroup.logs.map((item, idx) => {

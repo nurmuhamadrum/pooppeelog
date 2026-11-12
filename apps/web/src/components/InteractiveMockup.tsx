@@ -1,26 +1,29 @@
 import React, { useState } from 'react';
 import { PhoneMockup, MockupScreen } from './PhoneMockup';
 import { MapPin, Calendar, BarChart3, User, Zap, Smile, Cloud } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 export const InteractiveMockup: React.FC = () => {
   const [activeScreen, setActiveScreen] = useState<MockupScreen>('map');
+  const { lang } = useLanguage();
+  const isEn = lang === 'en';
 
   return (
     <section id="preview" className="py-20 md:py-28 border-b border-dark-border bg-dark-bg/40">
       <div className="max-w-7xl mx-auto px-6">
-        {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
           <span className="text-xs font-black uppercase tracking-wider text-pee-amber bg-pee-amber/10 border border-pee-amber/30 px-3.5 py-1.5 rounded-full">
             Live Interactive Simulator
           </span>
           <h2 className="text-3xl sm:text-5xl font-black text-cream-bg tracking-tight mt-3">
-            Coba Aplikasi Langsung di Layar
+            {isEn ? 'Try the App Right on Screen' : 'Coba Aplikasi Langsung di Layar'}
           </h2>
           <p className="text-peach-tint/80 text-sm sm:text-base mt-2">
-            Pilih menu di bawah atau sentuh tombol di dalam layar HP simulasi untuk merasakan alur sat-set Poop Pee Log.
+            {isEn
+              ? 'Select a tab below or tap buttons inside the phone simulator to experience Poop Pee Log\'s snappy flow.'
+              : 'Pilih menu di bawah atau sentuh tombol di dalam layar HP simulasi untuk merasakan alur sat-set Poop Pee Log.'}
           </p>
 
-          {/* Interactive Screen Navigation Pills */}
           <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
             <button
               onClick={() => setActiveScreen('map')}
@@ -30,7 +33,7 @@ export const InteractiveMockup: React.FC = () => {
                   : 'bg-dark-surface border border-dark-border text-peach-tint/80 hover:text-white'
               }`}
             >
-              <MapPin className="w-3.5 h-3.5" /> 1. Peta Pribadi
+              <MapPin className="w-3.5 h-3.5" /> {isEn ? '1. Personal Map' : '1. Peta Pribadi'}
             </button>
             <button
               onClick={() => setActiveScreen('quick-log')}
@@ -40,7 +43,7 @@ export const InteractiveMockup: React.FC = () => {
                   : 'bg-dark-surface border border-dark-border text-peach-tint/80 hover:text-white'
               }`}
             >
-              <Zap className="w-3.5 h-3.5" /> 2. Quick Log (3 Detik)
+              <Zap className="w-3.5 h-3.5" /> {isEn ? '2. Quick Log (3 Sec)' : '2. Quick Log (3 Detik)'}
             </button>
             <button
               onClick={() => setActiveScreen('mood')}
@@ -60,7 +63,7 @@ export const InteractiveMockup: React.FC = () => {
                   : 'bg-dark-surface border border-dark-border text-peach-tint/80 hover:text-white'
               }`}
             >
-              <Calendar className="w-3.5 h-3.5" /> 4. Buku Harian
+              <Calendar className="w-3.5 h-3.5" /> {isEn ? '4. Diary' : '4. Buku Harian'}
             </button>
             <button
               onClick={() => setActiveScreen('stats')}
@@ -70,7 +73,7 @@ export const InteractiveMockup: React.FC = () => {
                   : 'bg-dark-surface border border-dark-border text-peach-tint/80 hover:text-white'
               }`}
             >
-              <BarChart3 className="w-3.5 h-3.5" /> 5. Stats & Badges
+              <BarChart3 className="w-3.5 h-3.5" /> 5. Stats &amp; Badges
             </button>
             <button
               onClick={() => setActiveScreen('profile')}
@@ -80,7 +83,7 @@ export const InteractiveMockup: React.FC = () => {
                   : 'bg-dark-surface border border-dark-border text-peach-tint/80 hover:text-white'
               }`}
             >
-              <User className="w-3.5 h-3.5" /> 6. Profil & Sync
+              <User className="w-3.5 h-3.5" /> {isEn ? '6. Profile & Sync' : '6. Profil & Sync'}
             </button>
             <button
               onClick={() => setActiveScreen('auth')}
@@ -90,7 +93,7 @@ export const InteractiveMockup: React.FC = () => {
                   : 'bg-dark-surface border border-dark-border text-peach-tint/80 hover:text-white'
               }`}
             >
-              <Cloud className="w-3.5 h-3.5" /> 7. Akun & Auth
+              <Cloud className="w-3.5 h-3.5" /> {isEn ? '7. Account & Auth' : '7. Akun & Auth'}
             </button>
           </div>
         </div>

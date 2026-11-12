@@ -43,10 +43,12 @@ import {
   ChevronRight,
   Compass,
   Palette,
+  Globe,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { signOut } from '@/src/services/authService';
 import { useToast } from '@/src/context/ToastContext';
+import { useMobileI18n } from '@/src/i18n/translations';
 import * as Haptics from 'expo-haptics';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from '@/src/components/MascotIcons';
 import { clearAllLocalData } from '@/src/db/sqlite';
@@ -59,6 +61,7 @@ import * as Sharing from 'expo-sharing';
 export default function ProfileSettingsScreen() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { lang, setLanguage, t } = useMobileI18n();
   const {
     appLockEnabled,
     toggleAppLock,
@@ -309,8 +312,8 @@ export default function ProfileSettingsScreen() {
 
       {/* Header Area */}
       <View style={styles.headerArea}>
-        <Text style={styles.pageTitle}>Profil & Pengaturan</Text>
-        <Text style={styles.pageSubtitle}>Identitas privat, data biologis & keamanan</Text>
+        <Text style={styles.pageTitle}>{t.settings.title}</Text>
+        <Text style={styles.pageSubtitle}>{t.settings.subtitle}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -341,12 +344,12 @@ export default function ProfileSettingsScreen() {
                       !isAnonymous && { color: Colors.peeAmber },
                     ]}
                   >
-                    {isAnonymous ? 'LOKAL OFFLINE' : 'AKUN CLOUD'}
+                    {isAnonymous ? t.settings.localOffline : t.settings.cloudAccount}
                   </Text>
                 </View>
               </View>
               <Text style={styles.profileMemberSince}>
-                {userEmail ? userEmail : `Aktif sejak ${memberSince}`}
+                {userEmail ? userEmail : `${lang === 'en' ? 'Active since' : 'Aktif sejak'} ${memberSince}`}
               </Text>
               <Text style={styles.profileId} numberOfLines={1}>
                 ID: {userId || 'guest-local'}
@@ -358,7 +361,7 @@ export default function ProfileSettingsScreen() {
           <View style={styles.metricsStrip}>
             <View style={styles.metricItem}>
               <Text style={styles.metricValue}>{totalLogs}</Text>
-              <Text style={styles.metricLabel}>Total Log</Text>
+              <Text style={styles.metricLabel}>{t.settings.totalLog}</Text>
             </View>
             <View style={styles.metricDivider} />
             <View style={styles.metricItem}>
@@ -373,7 +376,7 @@ export default function ProfileSettingsScreen() {
             <View style={styles.metricDivider} />
             <View style={styles.metricItem}>
               <Text style={[styles.metricValue, { color: Colors.bothTeal }]}>{uniqueLocations}</Text>
-              <Text style={styles.metricLabel}>Lokasi</Text>
+              <Text style={styles.metricLabel}>{t.settings.location}</Text>
             </View>
           </View>
         </View>
@@ -384,17 +387,54 @@ export default function ProfileSettingsScreen() {
             <Heart size={20} color="#FF6B6B" fill="#FF6B6B" />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.donationTitle}>Dukung Developer di Saweria</Text>
-            <Text style={styles.donationSub}>Traktir kopi agar aplikasi tetap gratis & 100% bebas iklan!</Text>
+            <Text style={styles.donationTitle}>{t.settings.saweriaTitle}</Text>
+            <Text style={styles.donationSub}>{t.settings.saweriaSub}</Text>
           </View>
           <ExternalLink size={16} color={Colors.peachTint} />
         </TouchableOpacity>
+
+        {/* PILIHAN BAHASA / LANGUAGE */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderRow}>
+            <Globe size={16} color={Colors.bothTeal} />
+            <Text style={styles.sectionHeading}>{t.settings.langHeading}</Text>
+          </View>
+          <View style={styles.settingRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.settingLabel}>{t.settings.langLabel}</Text>
+              <Text style={styles.settingDesc}>{t.settings.langDesc}</Text>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 6 }}>
+              {(['en', 'id'] as const).map((code) => {
+                const active = lang === code;
+                return (
+                  <TouchableOpacity
+                    key={code}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+                      setLanguage(code);
+                    }}
+                    style={[
+                      styles.radiusChip,
+                      { flex: 0, paddingHorizontal: 14, paddingVertical: 7 },
+                      active && styles.radiusChipActive,
+                    ]}
+                  >
+                    <Text style={[styles.radiusChipText, active && styles.radiusChipTextActive]}>
+                      {code.toUpperCase()}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        </View>
 
         {/* KEAMANAN & PRIVASI */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <ShieldCheck size={16} color={Colors.bothTeal} />
-            <Text style={styles.sectionHeading}>KEAMANAN & PRIVASI</Text>
+            <Text style={styles.sectionHeading}>{t.settings.securityHeading}</Text>
           </View>
 
           <View style={styles.settingRow}>
@@ -403,8 +443,8 @@ export default function ProfileSettingsScreen() {
                 <Lock size={16} color={Colors.peeAmber} />
               </View>
               <View>
-                <Text style={styles.settingLabel}>App Lock (Biometrik)</Text>
-                <Text style={styles.settingDesc}>Kunci layar aplikasi dengan Face ID / Sidik Jari</Text>
+                <Text style={styles.settingLabel}>{t.settings.appLock}</Text>
+                <Text style={styles.settingDesc}>{t.settings.appLockDesc}</Text>
               </View>
             </View>
             <Switch
@@ -417,7 +457,7 @@ export default function ProfileSettingsScreen() {
 
           <View style={styles.privacyNoteBox}>
             <Text style={styles.privacyNoteText}>
-              🛡️ <Text style={{ fontWeight: '800', color: Colors.creamBg }}>Prinsip Privasi Mutlak:</Text> Data buang air tersimpan di SQLite HP Anda, tidak diunggah ke pihak ketiga, dan tidak ada pelacakan iklan.
+              🛡️ <Text style={{ fontWeight: '800', color: Colors.creamBg }}>{t.settings.privacyPrincipleTitle}</Text> {t.settings.privacyPrincipleBody}
             </Text>
           </View>
         </View>
@@ -426,29 +466,29 @@ export default function ProfileSettingsScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <Compass size={16} color={Colors.peeAmber} />
-            <Text style={styles.sectionHeading}>TEMA PETA & RADIUS GPS</Text>
+            <Text style={styles.sectionHeading}>{t.settings.mapHeading}</Text>
           </View>
 
           {/* Pemilihan Tema Peta */}
           <View style={styles.customSubSection}>
-            <Text style={styles.customSubLabel}>Pilihan Tema Peta:</Text>
+            <Text style={styles.customSubLabel}>{t.settings.mapThemeLabel}</Text>
             <View style={styles.themeSelectorRow}>
               {[
-                { id: 'DARK', label: 'Dark Mode', desc: 'Kontras malam' },
-                { id: 'RETRO', label: 'Vintage Cream', desc: 'Hangat & estetik' },
-                { id: 'STANDARD', label: 'Standar OS', desc: 'Peta bawaan' },
-              ].map((t) => {
-                const isActive = mapTheme === t.id;
+                { id: 'DARK' as const, label: t.settings.themes.DARK.label, desc: t.settings.themes.DARK.desc },
+                { id: 'RETRO' as const, label: t.settings.themes.RETRO.label, desc: t.settings.themes.RETRO.desc },
+                { id: 'STANDARD' as const, label: t.settings.themes.STANDARD.label, desc: t.settings.themes.STANDARD.desc },
+              ].map((item) => {
+                const isActive = mapTheme === item.id;
                 return (
                   <TouchableOpacity
-                    key={t.id}
+                    key={item.id}
                     style={[
                       styles.themeCardOption,
                       isActive && styles.themeCardActive,
                     ]}
                     onPress={() => {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-                      setMapTheme(t.id as any);
+                      setMapTheme(item.id);
                     }}
                     activeOpacity={0.8}
                   >
@@ -458,9 +498,9 @@ export default function ProfileSettingsScreen() {
                         isActive && { color: Colors.creamBg, fontWeight: '900' },
                       ]}
                     >
-                      {t.label}
+                      {item.label}
                     </Text>
-                    <Text style={styles.themeOptionDesc}>{t.desc}</Text>
+                    <Text style={styles.themeOptionDesc}>{item.desc}</Text>
                   </TouchableOpacity>
                 );
               })}
@@ -470,8 +510,8 @@ export default function ProfileSettingsScreen() {
           {/* Pengaturan Radius GPS */}
           <View style={styles.customSubSection}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text style={styles.customSubLabel}>Radius Deteksi Lingkar Radar:</Text>
-              <Text style={styles.radiusMeterBadge}>{gpsRadiusMeter} Meter</Text>
+              <Text style={styles.customSubLabel}>{t.settings.radiusLabel}</Text>
+              <Text style={styles.radiusMeterBadge}>{gpsRadiusMeter} {t.settings.meters}</Text>
             </View>
             <View style={styles.radiusButtonRow}>
               {[15, 30, 50, 100].map((r) => {
@@ -508,7 +548,7 @@ export default function ProfileSettingsScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <Download size={16} color={Colors.bothTeal} />
-            <Text style={styles.sectionHeading}>PORTABILITAS & SINKRONISASI DATA</Text>
+            <Text style={styles.sectionHeading}>{t.settings.dataHeading}</Text>
           </View>
 
           {/* AKUN & AUTENTIKASI */}
@@ -548,12 +588,12 @@ export default function ProfileSettingsScreen() {
                   ]}
                   numberOfLines={1}
                 >
-                  {isAnonymous ? 'Masuk / Buat Akun Cloud' : 'Keluar dari Akun'}
+                  {isAnonymous ? t.settings.signInCloud : t.settings.signOut}
                 </Text>
                 <Text style={styles.actionDesc} numberOfLines={2}>
                   {isAnonymous
-                    ? 'Hubungkan email / Google untuk sinkron data'
-                    : `Sedang login sebagai ${userEmail || 'Pengguna'}`}
+                    ? t.settings.signInDesc
+                    : `${t.settings.loggedInAs} ${userEmail || 'User'}`}
                 </Text>
               </View>
             </View>
@@ -571,14 +611,14 @@ export default function ProfileSettingsScreen() {
                 <Cloud size={16} color={Colors.bothTeal} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.actionLabel}>Sinkronisasi Cloud (Supabase)</Text>
+                <Text style={styles.actionLabel}>{t.settings.cloudSync}</Text>
                 <Text style={styles.actionDesc}>
                   {lastSyncedAt
-                    ? `Terakhir sinkron: ${new Date(lastSyncedAt).toLocaleTimeString('id-ID', {
+                    ? `${t.settings.lastSynced} ${new Date(lastSyncedAt).toLocaleTimeString(lang === 'en' ? 'en-US' : 'id-ID', {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}`
-                    : 'Sinkronkan data offline ke server'}
+                    : t.settings.syncPrompt}
                 </Text>
               </View>
             </View>

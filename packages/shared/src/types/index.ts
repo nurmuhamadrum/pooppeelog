@@ -1,3 +1,5 @@
+export type AppLanguage = 'en' | 'id';
+
 export type LogType = 'PEE' | 'POOP' | 'COMBO';
 
 export type MoodPee = 'LEGA' | 'NAHAN_LAMA' | 'DARURAT';

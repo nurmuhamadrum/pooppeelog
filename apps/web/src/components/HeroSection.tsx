@@ -1,20 +1,27 @@
 import React, { useState } from 'react';
 import { Zap, ShieldCheck, Cloud, Sparkles, HeartHandshake, MapPin, Flame } from 'lucide-react';
 import { MrPlopSVG, LilDripSVG, SirFlushSVG } from './MascotSVGs';
+import { useLanguage } from '../i18n/LanguageContext';
+import { useWebCopy } from '../i18n/translations';
 
 type ActiveMascot = 'plop' | 'drip' | 'flush';
 
 export const HeroSection: React.FC = () => {
+  const { lang } = useLanguage();
+  const t = useWebCopy(lang).hero;
+
   const [activeMascot, setActiveMascot] = useState<ActiveMascot>('flush');
-  const [mascotBubble, setMascotBubble] = useState<string>('Yuk sapa trio maskot di kanan atau langsung mulai catat kelegaan!');
+  const [customBubble, setCustomBubble] = useState<string | null>(null);
   const [poopWiggle, setPoopWiggle] = useState(false);
 
   const triggerBubble = (text: string, mascot?: ActiveMascot) => {
-    setMascotBubble(text);
+    setCustomBubble(text);
     if (mascot) setActiveMascot(mascot);
     setPoopWiggle(true);
     setTimeout(() => setPoopWiggle(false), 800);
   };
+
+  const mascotBubble = customBubble || t.defaultBubble;
 
   return (
     <section className="relative overflow-hidden pt-10 pb-20 md:py-24 border-b border-dark-border bg-gradient-to-b from-dark-bg via-dark-bg/95 to-dark-bg">
@@ -29,7 +36,7 @@ export const HeroSection: React.FC = () => {
           {/* Top Pill Badge with animated sparkle */}
           <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-dark-surface border border-dark-border text-xs font-bold text-pee-amber shadow-sm hover:scale-105 transition-transform cursor-default">
             <Sparkles className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '6s' }} />
-            <span>Lifelogger Biologis Personal & Aman</span>
+            <span>{t.pill}</span>
             <span className="text-[10px] bg-pee-amber/20 text-pee-amber px-2 py-0.5 rounded-full font-extrabold">
               v1.0
             </span>
@@ -52,35 +59,41 @@ export const HeroSection: React.FC = () => {
 
           {/* Tagline Paragraph */}
           <p className="text-sm sm:text-base md:text-lg text-peach-tint/90 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
-            Buku harian buang air pribadi layaknya <strong>Strava biologismu</strong>. Temani kebiasaan sehat bersama trio maskot kocak <strong>Mr. Plop</strong>, <strong>Lil' Drip</strong>, dan <strong>Sir Flush</strong>. Cukup <strong>login / signup</strong> untuk backup riwayat aman maksimal dan sinkronisasi lintas perangkat.
+            {t.taglinePre}
+            <strong>{t.taglineBold1}</strong>
+            {t.taglineMid}
+            <strong>Mr. Plop</strong>, <strong>Lil' Drip</strong>, &amp; <strong>Sir Flush</strong>
+            {t.taglineEnd}
+            <strong>{t.taglineBold2}</strong>
+            {t.taglinePost}
           </p>
 
           {/* Cute Interactive Mascot Bubble Widget */}
           <div className="bg-dark-surface/90 border border-dark-border rounded-2xl p-3.5 max-w-xl mx-auto lg:mx-0 flex items-center gap-3.5 shadow-lg relative group">
-            {/* 3 Mini Mascots that user can click to hear their cute reaction */}
             <div className="flex items-center -space-x-2 flex-shrink-0">
               <button
                 type="button"
-                onClick={() => triggerBubble('Mr. Plop: "Plong itu hak asasi setiap manusia! 🍫"')}
-                className={`w-10 h-10 rounded-full bg-poop-brown p-1 border-2 border-dark-bg shadow-md hover:scale-125 hover:z-20 active:scale-90 transition-all flex items-center justify-center ${poopWiggle ? 'mascot-bounce-wiggle' : ''
-                  }`}
-                title="Sapa Mr. Plop"
+                onClick={() => triggerBubble(t.plopQuote, 'plop')}
+                className={`w-10 h-10 rounded-full bg-poop-brown p-1 border-2 border-dark-bg shadow-md hover:scale-125 hover:z-20 active:scale-90 transition-all flex items-center justify-center ${
+                  poopWiggle ? 'mascot-bounce-wiggle' : ''
+                }`}
+                title="Mr. Plop"
               >
                 <MrPlopSVG />
               </button>
               <button
                 type="button"
-                onClick={() => triggerBubble('Lil\' Drip: "Gluk gluk... Jangan nahan kencing ya! 💧"')}
+                onClick={() => triggerBubble(t.dripQuote, 'drip')}
                 className="w-10 h-10 rounded-full bg-pee-amber p-1 border-2 border-dark-bg shadow-md hover:scale-125 hover:z-20 active:scale-90 transition-all flex items-center justify-center"
-                title="Sapa Lil' Drip"
+                title="Lil' Drip"
               >
                 <LilDripSVG />
               </button>
               <button
                 type="button"
-                onClick={() => triggerBubble('Sir Flush: "Wussshh! Login akunmu melindungi data tetap aman & tersimpan awet! 🛡️"')}
+                onClick={() => triggerBubble(t.flushQuote, 'flush')}
                 className="w-10 h-10 rounded-full bg-both-teal p-1 border-2 border-dark-bg shadow-md hover:scale-125 hover:z-20 active:scale-90 transition-all flex items-center justify-center"
-                title="Sapa Sir Flush"
+                title="Sir Flush"
               >
                 <SirFlushSVG />
               </button>
@@ -89,7 +102,7 @@ export const HeroSection: React.FC = () => {
             <div className="flex-1 text-left min-h-[38px] flex flex-col justify-center">
               <div className="flex items-center gap-1.5 text-[10px] font-bold text-pee-amber uppercase tracking-wider">
                 <HeartHandshake className="w-3 h-3" />
-                <span>Maskot Bilang:</span>
+                <span>{t.mascotSays}</span>
               </div>
               <p className="text-xs sm:text-sm font-bold text-cream-bg line-clamp-2 transition-all">
                 {mascotBubble}
@@ -100,19 +113,18 @@ export const HeroSection: React.FC = () => {
           {/* 3 Core Tenets Chips */}
           <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 pt-1 text-xs text-peach-tint font-bold">
             <span className="flex items-center gap-1.5 bg-dark-surface px-3 py-1.5 rounded-xl border border-dark-border">
-              <Zap className="w-3.5 h-3.5 text-pee-amber" /> 3-Detik Log
+              <Zap className="w-3.5 h-3.5 text-pee-amber" /> {t.chip1}
             </span>
             <span className="flex items-center gap-1.5 bg-dark-surface px-3 py-1.5 rounded-xl border border-dark-border">
-              <Cloud className="w-3.5 h-3.5 text-both-teal" /> Cloud Sync & Backup Akun
+              <Cloud className="w-3.5 h-3.5 text-both-teal" /> {t.chip2}
             </span>
             <span className="flex items-center gap-1.5 bg-dark-surface px-3 py-1.5 rounded-xl border border-dark-border">
-              <ShieldCheck className="w-3.5 h-3.5 text-drip-blue" /> Privasi Enkripsi Total
+              <ShieldCheck className="w-3.5 h-3.5 text-drip-blue" /> {t.chip3}
             </span>
           </div>
 
           {/* App Store Download Buttons */}
           <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3.5 pt-2">
-            {/* Google Play (Coming Soon) */}
             <a
               href="#download"
               className="px-5 py-3 rounded-2xl bg-pee-amber text-ink font-black text-xs flex items-center gap-2.5 shadow-xl shadow-pee-amber/25 hover:scale-105 active:scale-95 transition-all group"
@@ -122,14 +134,13 @@ export const HeroSection: React.FC = () => {
               </svg>
               <div className="text-left">
                 <div className="flex items-center gap-1.5 leading-none">
-                  <span className="text-[9px] block font-semibold opacity-80">TEMUKAN DI</span>
-                  <span className="text-[8px] bg-ink/15 text-ink font-extrabold px-1.5 py-0.5 rounded-full uppercase">Soon</span>
+                  <span className="text-[9px] block font-semibold opacity-80">{t.playSub}</span>
+                  <span className="text-[8px] bg-ink/15 text-ink font-extrabold px-1.5 py-0.5 rounded-full uppercase">{t.soon}</span>
                 </div>
                 <span className="text-xs font-black">Google Play</span>
               </div>
             </a>
 
-            {/* App Store (Coming Soon) */}
             <a
               href="#download"
               className="px-5 py-3 rounded-2xl bg-dark-surface border border-dark-border text-cream-bg font-black text-xs flex items-center gap-2.5 hover:bg-dark-border hover:border-both-teal/40 transition-all group"
@@ -139,64 +150,54 @@ export const HeroSection: React.FC = () => {
               </svg>
               <div className="text-left">
                 <div className="flex items-center gap-1.5 leading-none">
-                  <span className="text-[9px] block font-semibold opacity-80 text-peach-tint/70">UNDUH DI</span>
-                  <span className="text-[8px] bg-both-teal/20 text-both-teal font-extrabold px-1.5 py-0.5 rounded-full uppercase">Soon</span>
+                  <span className="text-[9px] block font-semibold opacity-80 text-peach-tint/70">{t.appSub}</span>
+                  <span className="text-[8px] bg-both-teal/20 text-both-teal font-extrabold px-1.5 py-0.5 rounded-full uppercase">{t.soon}</span>
                 </div>
                 <span className="text-xs font-black">App Store</span>
               </div>
             </a>
           </div>
 
-          <p className="text-[11px] text-peach-tint/60 pt-0.5">
-            *Daftar & login mudah dengan Email / Google Auth. Riwayat data tersimpan aman di cloud pribadi tanpa pernah diumbar.
-          </p>
+          <p className="text-[11px] text-peach-tint/60 pt-0.5">{t.footnote}</p>
         </div>
 
         {/* Right Column: Animated Mascot Stage */}
         <div className="lg:col-span-5 flex flex-col items-center justify-center relative py-6">
           <div className="relative w-[320px] h-[320px] sm:w-[380px] sm:h-[380px] flex items-center justify-center">
-            {/* Ambient Stage Glow */}
             <div className="absolute inset-6 rounded-full bg-gradient-to-tr from-poop-brown/25 via-pee-amber/20 to-both-teal/25 blur-2xl pointer-events-none" />
 
-            {/* Outer Dashed Orbit Ring */}
             <div className="absolute inset-2 rounded-full border border-dashed border-dark-border/80 orbit-spin-slow pointer-events-none">
               <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-pee-amber shadow-lg shadow-pee-amber/50" />
               <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-both-teal shadow-lg shadow-both-teal/50" />
             </div>
 
-            {/* Inner Subtle Orbit Ring */}
             <div className="absolute inset-12 rounded-full border border-dark-border/60 orbit-spin-reverse pointer-events-none">
               <span className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-drip-blue shadow-lg shadow-drip-blue/50" />
             </div>
 
-            {/* Floating Feature Pill Top-Left */}
             <div className="absolute top-4 left-0 sm:-left-2 z-20 bg-dark-surface/95 backdrop-blur border border-dark-border px-3 py-1.5 rounded-2xl shadow-xl flex items-center gap-1.5 text-[11px] font-black text-pee-amber mascot-float">
               <MapPin className="w-3.5 h-3.5" />
-              <span>Live GPS</span>
+              <span>{t.stageChip1}</span>
             </div>
 
-            {/* Floating Feature Pill Top-Right */}
             <div className="absolute top-8 right-0 sm:-right-2 z-20 bg-dark-surface/95 backdrop-blur border border-dark-border px-3 py-1.5 rounded-2xl shadow-xl flex items-center gap-1.5 text-[11px] font-black text-both-teal mascot-float-delayed">
               <Flame className="w-3.5 h-3.5 text-emergency" />
-              <span>Streak Harian</span>
+              <span>{t.stageChip2}</span>
             </div>
 
-            {/* Floating Feature Pill Bottom */}
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 bg-dark-surface/95 backdrop-blur border border-dark-border px-3.5 py-1.5 rounded-full shadow-xl flex items-center gap-1.5 text-[11px] font-bold text-cream-bg whitespace-nowrap">
               <Sparkles className="w-3.5 h-3.5 text-pee-amber" />
-              <span>Klik maskot untuk berinteraksi!</span>
+              <span>{t.stageHint}</span>
             </div>
 
-            {/* Mascot Trio Arrangement */}
             <div className="relative z-10 flex items-end justify-center -space-x-4 sm:-space-x-5">
-              {/* Left Mascot: Mr. Plop */}
               <button
                 type="button"
-                onClick={() => triggerBubble('Mr. Plop: "Plong itu hak asasi setiap manusia! 🍫"', 'plop')}
+                onClick={() => triggerBubble(t.plopQuote, 'plop')}
                 className={`group relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-poop-brown p-3 border-4 border-dark-bg shadow-2xl mascot-bounce-wiggle mascot-interactive flex items-center justify-center transition-all ${
                   activeMascot === 'plop' ? 'ring-4 ring-pee-amber/60 z-20' : 'opacity-95'
                 }`}
-                title="Mr. Plop (BAB)"
+                title="Mr. Plop (Poop)"
               >
                 <MrPlopSVG />
                 <span className="absolute -bottom-2.5 bg-dark-bg border border-dark-border text-[9px] font-black text-peach-tint px-2 py-0.5 rounded-full shadow">
@@ -204,10 +205,9 @@ export const HeroSection: React.FC = () => {
                 </span>
               </button>
 
-              {/* Center Hero Mascot: Sir Flush */}
               <button
                 type="button"
-                onClick={() => triggerBubble('Sir Flush: "Wussshh! Paket kombo & privasimu terjaga aman! 🛡️"', 'flush')}
+                onClick={() => triggerBubble(t.flushQuote, 'flush')}
                 className={`group relative w-32 h-32 sm:w-36 sm:h-36 -translate-y-6 rounded-[2rem] bg-both-teal p-3.5 border-4 border-dark-bg shadow-2xl shadow-both-teal/25 mascot-float mascot-interactive flex items-center justify-center transition-all ${
                   activeMascot === 'flush' ? 'ring-4 ring-both-teal/60 z-30' : 'z-20'
                 }`}
@@ -219,10 +219,9 @@ export const HeroSection: React.FC = () => {
                 </span>
               </button>
 
-              {/* Right Mascot: Lil' Drip */}
               <button
                 type="button"
-                onClick={() => triggerBubble('Lil\' Drip: "Gluk gluk... Jangan lupa minum air & jangan nahan pipis! 💧"', 'drip')}
+                onClick={() => triggerBubble(t.dripQuote, 'drip')}
                 className={`group relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-pee-amber p-3 border-4 border-dark-bg shadow-2xl mascot-float-delayed mascot-interactive flex items-center justify-center transition-all ${
                   activeMascot === 'drip' ? 'ring-4 ring-drip-blue/60 z-20' : 'opacity-95'
                 }`}

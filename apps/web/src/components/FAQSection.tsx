@@ -4,8 +4,12 @@ import { EditableFAQ } from '../types/admin';
 import { ChevronDown, HelpCircle } from 'lucide-react';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { fetchFaqsFromSupabase } from '../services/adminApi';
+import { useLanguage } from '../i18n/LanguageContext';
+import { useWebCopy } from '../i18n/translations';
 
 export const FAQSection: React.FC = () => {
+  const { lang } = useLanguage();
+  const t = useWebCopy(lang).faq;
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const [faqs, setFaqs] = useState<EditableFAQ[]>(getFaqs);
 
@@ -34,10 +38,10 @@ export const FAQSection: React.FC = () => {
       <div className="max-w-4xl mx-auto px-6">
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-dark-surface border border-dark-border text-xs font-bold text-pee-amber mb-3">
-            <HelpCircle className="w-3.5 h-3.5" /> Pertanyaan yang Sering Diajukan
+            <HelpCircle className="w-3.5 h-3.5" /> {t.pill}
           </div>
           <h2 className="text-3xl sm:text-5xl font-black text-cream-bg tracking-tight">
-            FAQ Seputar Poop Pee Log
+            {t.title}
           </h2>
         </div>
 

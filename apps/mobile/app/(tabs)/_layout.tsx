@@ -7,10 +7,12 @@ import { SirFlushIcon } from '@/src/components/MascotIcons';
 import { QuickLogModal } from '@/src/components/QuickLogModal';
 import { BadgeUnlockedModal } from '@/src/components/BadgeUnlockedModal';
 import { useAppStore } from '@/src/store/useAppStore';
+import { useMobileI18n } from '@/src/i18n/translations';
 
 export default function TabLayout() {
   const [quickLogVisible, setQuickLogVisible] = useState(false);
   const { unlockedBadgeQueue, dismissActiveBadgeModal } = useAppStore();
+  const { t } = useMobileI18n();
 
   const activeBadge = unlockedBadgeQueue.length > 0 ? unlockedBadgeQueue[0] : null;
 
@@ -42,7 +44,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Peta',
+            title: t.tabs.map,
             tabBarIcon: ({ color }) => <MapPin size={22} color={color} />,
           }}
         />
@@ -51,7 +53,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="timeline"
           options={{
-            title: 'Diary',
+            title: t.tabs.diary,
             tabBarIcon: ({ color }) => <Calendar size={22} color={color} />,
             tabBarItemStyle: {
               marginRight: 80,
@@ -78,7 +80,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="stats"
           options={{
-            title: 'Stats',
+            title: t.tabs.stats,
             tabBarIcon: ({ color }) => <BarChart3 size={22} color={color} />,
             tabBarItemStyle: {
               marginLeft: 10,
@@ -90,7 +92,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="settings"
           options={{
-            title: 'Profil',
+            title: t.tabs.profile,
             tabBarIcon: ({ color }) => <User size={22} color={color} />,
           }}
         />

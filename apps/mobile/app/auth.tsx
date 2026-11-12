@@ -21,6 +21,7 @@ import {
   signInWithGoogle,
 } from '@/src/services/authService';
 import { useAppStore } from '@/src/store/useAppStore';
+import { useMobileI18n } from '@/src/i18n/translations';
 import { Mail, Lock, ArrowRight, CheckCircle2, AlertCircle, ChevronLeft } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
@@ -29,6 +30,8 @@ type AuthMode = 'SIGN_IN' | 'SIGN_UP' | 'FORGOT_PASSWORD';
 export default function AuthScreen() {
   const router = useRouter();
   const { setUser, syncWithCloud } = useAppStore();
+  const { lang, setLanguage, t } = useMobileI18n();
+  const isEn = lang === 'en';
 
   const [mode, setMode] = useState<AuthMode>('SIGN_IN');
   const [email, setEmail] = useState('');
@@ -158,6 +161,36 @@ export default function AuthScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
+        {/* Language Switcher Top Right */}
+        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            {(['en', 'id'] as const).map((code) => (
+              <TouchableOpacity
+                key={code}
+                onPress={() => setLanguage(code)}
+                style={{
+                  paddingHorizontal: 12,
+                  paddingVertical: 5,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: lang === code ? Colors.bothTeal : Colors.darkBorder,
+                  backgroundColor: lang === code ? 'rgba(47, 184, 172, 0.18)' : Colors.darkSurface,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 11,
+                    fontWeight: '900',
+                    color: lang === code ? Colors.bothTeal : Colors.peachTint,
+                  }}
+                >
+                  {code.toUpperCase()}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
         {/* Tombol Back jika di mode Forgot Password */}
         {mode === 'FORGOT_PASSWORD' && (
           <TouchableOpacity
@@ -166,7 +199,7 @@ export default function AuthScreen() {
             activeOpacity={0.8}
           >
             <ChevronLeft size={20} color={Colors.peachTint} />
-            <Text style={styles.backButtonText}>Kembali ke Masuk</Text>
+            <Text style={styles.backButtonText}>{t.auth.backToLogin}</Text>
           </TouchableOpacity>
         )}
 
@@ -186,9 +219,12 @@ export default function AuthScreen() {
 
           <Text style={styles.appTitle}>POOP PEE LOG</Text>
           <Text style={styles.tagline}>
-            {mode === 'SIGN_IN' && 'Masuk untuk mencadangkan & sinkron riwayat biologis'}
-            {mode === 'SIGN_UP' && 'Buat akun privat untuk menyimpan catatan di cloud'}
-            {mode === 'FORGOT_PASSWORD' && 'Atur ulang kata sandi akun Anda'}
+            {mode === 'SIGN_IN' &&
+              (isEn ? 'Sign in to backup & sync your biological logs' : 'Masuk untuk mencadangkan & sinkron riwayat biologis')}
+            {mode === 'SIGN_UP' &&
+              (isEn ? 'Create a private account to store logs in cloud' : 'Buat akun privat untuk menyimpan catatan di cloud')}
+            {mode === 'FORGOT_PASSWORD' &&
+              (isEn ? 'Reset your account password' : 'Atur ulang kata sandi akun Anda')}
           </Text>
         </View>
 
@@ -231,10 +267,10 @@ export default function AuthScreen() {
           {mode !== 'FORGOT_PASSWORD' && (
             <View style={styles.inputGroup}>
               <View style={styles.labelRow}>
-                <Text style={styles.inputLabel}>KATA SANDI</Text>
+                <Text style={styles.inputLabel}>{isEn ? 'PASSWORD' : 'KATA SANDI'}</Text>
                 {mode === 'SIGN_IN' && (
                   <TouchableOpacity onPress={() => handleSwitchMode('FORGOT_PASSWORD')}>
-                    <Text style={styles.forgotText}>Lupa Password?</Text>
+                    <Text style={styles.forgotText}>{t.auth.forgotLink}</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -242,7 +278,7 @@ export default function AuthScreen() {
                 <Lock size={18} color={Colors.peachTint} opacity={0.6} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Minimal 6 karakter"
+                  placeholder={isEn ? 'Minimum 6 characters' : 'Minimal 6 karakter'}
                   placeholderTextColor="rgba(245, 237, 227, 0.4)"
                   value={password}
                   onChangeText={setPassword}
@@ -256,12 +292,12 @@ export default function AuthScreen() {
           {/* Input Konfirmasi Password (Khusus mode Sign Up) */}
           {mode === 'SIGN_UP' && (
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>KONFIRMASI KATA SANDI</Text>
+              <Text style={styles.inputLabel}>{isEn ? 'CONFIRM PASSWORD' : 'KONFIRMASI KATA SANDI'}</Text>
               <View style={styles.inputWrapper}>
                 <Lock size={18} color={Colors.peachTint} opacity={0.6} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Ulangi kata sandi"
+                  placeholder={isEn ? 'Repeat password' : 'Ulangi kata sandi'}
                   placeholderTextColor="rgba(245, 237, 227, 0.4)"
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
@@ -284,9 +320,9 @@ export default function AuthScreen() {
             ) : (
               <>
                 <Text style={styles.primaryButtonText}>
-                  {mode === 'SIGN_IN' && 'Masuk Akun'}
-                  {mode === 'SIGN_UP' && 'Daftar Sekarang'}
-                  {mode === 'FORGOT_PASSWORD' && 'Kirim Email Pemulihan'}
+                  {mode === 'SIGN_IN' && t.auth.loginBtn}
+                  {mode === 'SIGN_UP' && t.auth.registerBtn}
+                  {mode === 'FORGOT_PASSWORD' && t.auth.sendResetBtn}
                 </Text>
                 <ArrowRight size={18} color="#000" />
               </>
@@ -298,7 +334,7 @@ export default function AuthScreen() {
             <>
               <View style={styles.dividerRow}>
                 <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>ATAU</Text>
+                <Text style={styles.dividerText}>{isEn ? 'OR' : 'ATAU'}</Text>
                 <View style={styles.dividerLine} />
               </View>
 
@@ -310,7 +346,7 @@ export default function AuthScreen() {
                 activeOpacity={0.85}
               >
                 <Text style={styles.googleIconText}>G</Text>
-                <Text style={styles.googleButtonText}>Lanjutkan dengan Google</Text>
+                <Text style={styles.googleButtonText}>{t.auth.googleBtn}</Text>
               </TouchableOpacity>
             </>
           )}
@@ -320,18 +356,18 @@ export default function AuthScreen() {
         <View style={styles.footerSwitch}>
           {mode === 'SIGN_IN' && (
             <View style={styles.switchRow}>
-              <Text style={styles.switchPrompt}>Belum punya akun?</Text>
+              <Text style={styles.switchPrompt}>{isEn ? "Don't have an account?" : 'Belum punya akun?'}</Text>
               <TouchableOpacity onPress={() => handleSwitchMode('SIGN_UP')}>
-                <Text style={styles.switchAction}>Daftar Akun</Text>
+                <Text style={styles.switchAction}>{isEn ? 'Sign Up' : 'Daftar Akun'}</Text>
               </TouchableOpacity>
             </View>
           )}
 
           {mode === 'SIGN_UP' && (
             <View style={styles.switchRow}>
-              <Text style={styles.switchPrompt}>Sudah punya akun?</Text>
+              <Text style={styles.switchPrompt}>{isEn ? 'Already have an account?' : 'Sudah punya akun?'}</Text>
               <TouchableOpacity onPress={() => handleSwitchMode('SIGN_IN')}>
-                <Text style={styles.switchAction}>Masuk Saja</Text>
+                <Text style={styles.switchAction}>{isEn ? 'Sign In' : 'Masuk Saja'}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -342,7 +378,7 @@ export default function AuthScreen() {
             onPress={handleContinueAsGuest}
             activeOpacity={0.7}
           >
-            <Text style={styles.guestLinkText}>Lewati, Lanjutkan sebagai Tamu (Offline)</Text>
+            <Text style={styles.guestLinkText}>{t.auth.guestBtn}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

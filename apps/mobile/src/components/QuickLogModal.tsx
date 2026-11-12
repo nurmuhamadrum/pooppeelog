@@ -18,6 +18,7 @@ import { MrPlopIcon, LilDripIcon, SirFlushIcon } from './MascotIcons';
 import { useAppStore } from '../store/useAppStore';
 import { getCurrentLocationWithAddress } from '../services/location';
 import { useToast } from '../context/ToastContext';
+import { useMobileI18n } from '../i18n/translations';
 import { LogType } from '@poop-pee-log/shared';
 import { X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -30,6 +31,7 @@ interface QuickLogModalProps {
 export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }) => {
   const router = useRouter();
   const { showToast } = useToast();
+  const { t } = useMobileI18n();
   const addLog = useAppStore((state: any) => state.addLog);
   const updateLogMoodAndNote = useAppStore((state: any) => state.updateLogMoodAndNote);
 
@@ -110,7 +112,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
       const typeLabel =
         type === 'PEE' ? "Lil' Drip (Pee)" : type === 'POOP' ? 'Mr. Plop (Poop)' : 'Sir Flush (Combo)';
       showToast({
-        message: `Berhasil mencatat ${typeLabel}!`,
+        message: t.quickLog.toastLogged(typeLabel),
         type: 'success',
       });
 
@@ -120,7 +122,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
       setIsSubmitting(false);
       showToast({
-        message: 'Gagal mencatat lokasi atau waktu.',
+        message: t.quickLog.toastFailed,
         type: 'error',
       });
       handleFinish();
@@ -133,7 +135,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
       await updateLogMoodAndNote(currentCreatedLogId, selectedMood, note);
     }
     showToast({
-      message: 'Catatan & mood berhasil disimpan ke Diary!',
+      message: t.quickLog.toastSaved,
       type: 'success',
     });
     handleFinish();
@@ -186,9 +188,9 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
             <View>
               <View style={styles.headerRow}>
                 <View>
-                  <Text style={styles.title}>Catat Kelegaan</Text>
+                  <Text style={styles.title}>{t.quickLog.title}</Text>
                   <Text style={styles.subtitle}>
-                    Pilih aksi cepat di bawah. Waktu & GPS terisi otomatis!
+                    {t.quickLog.subtitle}
                   </Text>
                 </View>
                 <TouchableOpacity onPress={handleFinish} style={styles.closeBtn}>
@@ -209,7 +211,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
                     <LilDripIcon size={58} />
                   </View>
                   <Text style={[styles.cardName, { color: Colors.peeAmber }]}>LIL' DRIP</Text>
-                  <Text style={styles.cardAction}>PEE (Kencing)</Text>
+                  <Text style={styles.cardAction}>{t.quickLog.peeAction}</Text>
                 </TouchableOpacity>
 
                 {/* MR. PLOP */}
@@ -223,7 +225,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
                     <MrPlopIcon size={58} />
                   </View>
                   <Text style={[styles.cardName, { color: Colors.poopLight }]}>MR. PLOP</Text>
-                  <Text style={styles.cardAction}>POOP (BAB)</Text>
+                  <Text style={styles.cardAction}>{t.quickLog.poopAction}</Text>
                 </TouchableOpacity>
               </View>
 
@@ -238,15 +240,15 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
                   <SirFlushIcon size={36} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.comboTitle}>Sir Flush (Keduanya Sekaligus)</Text>
+                  <Text style={styles.comboTitle}>{t.quickLog.comboTitle}</Text>
                   <Text style={styles.comboSubtitle}>
-                    Paket kombo kencing & BAB dalam satu waktu
+                    {t.quickLog.comboSub}
                   </Text>
                 </View>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.cancelBtn} onPress={handleFinish}>
-                <Text style={styles.cancelBtnText}>Batal</Text>
+                <Text style={styles.cancelBtnText}>{t.quickLog.cancel}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -261,35 +263,46 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
                   {selectedType === 'COMBO' && <SirFlushIcon size={30} />}
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.moodTag}>LEGA TERCATAT! ⚡</Text>
-                  <Text style={styles.moodQuestion}>Bagaimana Suasana Hatimu?</Text>
+                  <Text style={styles.moodTag}>{t.quickLog.recordedTag}</Text>
+                  <Text style={styles.moodQuestion}>{t.quickLog.moodQuestion}</Text>
                 </View>
                 <TouchableOpacity onPress={handleFinish}>
-                  <Text style={styles.skipText}>Lewati</Text>
+                  <Text style={styles.skipText}>{t.quickLog.skip}</Text>
                 </TouchableOpacity>
               </View>
 
               {/* Mood Grid */}
-              <Text style={styles.labelSection}>Pilih Mood:</Text>
+              <Text style={styles.labelSection}>{t.quickLog.chooseMood}</Text>
               <View style={styles.moodGrid}>
-                {[
-                  { text: 'Lega Banget', emoji: '😌', activeBg: 'rgba(47, 184, 172, 0.25)', border: Colors.bothTeal },
-                  { text: 'Nahan Lama', emoji: '⏱️', activeBg: 'rgba(245, 183, 0, 0.25)', border: Colors.peeAmber },
-                  { text: 'Momen Darurat', emoji: '🚨', activeBg: 'rgba(255, 90, 95, 0.25)', border: Colors.emergencyRed },
-                  { text: 'Tragedi Kloset', emoji: '💥', activeBg: 'rgba(201, 138, 88, 0.25)', border: Colors.poopLight },
-                ].map((m) => {
-                  const isSelected = selectedMood === m.text;
+                {t.quickLog.moods.map((m) => {
+                  const isSelected = selectedMood === m.key;
+                  const activeBg =
+                    m.key === 'Lega Banget'
+                      ? 'rgba(47, 184, 172, 0.25)'
+                      : m.key === 'Nahan Lama'
+                      ? 'rgba(245, 183, 0, 0.25)'
+                      : m.key === 'Momen Darurat'
+                      ? 'rgba(255, 90, 95, 0.25)'
+                      : 'rgba(201, 138, 88, 0.25)';
+                  const border =
+                    m.key === 'Lega Banget'
+                      ? Colors.bothTeal
+                      : m.key === 'Nahan Lama'
+                      ? Colors.peeAmber
+                      : m.key === 'Momen Darurat'
+                      ? Colors.emergencyRed
+                      : Colors.poopLight;
                   return (
                     <TouchableOpacity
-                      key={m.text}
+                      key={m.key}
                       style={[
                         styles.moodCard,
                         isSelected && {
-                          backgroundColor: m.activeBg,
-                          borderColor: m.border,
+                          backgroundColor: activeBg,
+                          borderColor: border,
                         },
                       ]}
-                      onPress={() => setSelectedMood(m.text)}
+                      onPress={() => setSelectedMood(m.key)}
                     >
                       <Text style={{ fontSize: 16 }}>{m.emoji}</Text>
                       <Text
@@ -298,7 +311,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
                           isSelected && { color: Colors.creamBg, fontWeight: '900' },
                         ]}
                       >
-                        {m.text}
+                        {m.label}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -307,12 +320,12 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
 
               {/* Catatan Bebas */}
               <View style={styles.labelRow}>
-                <Text style={styles.labelSection}>Catatan Bebas (Opsional):</Text>
+                <Text style={styles.labelSection}>{t.quickLog.noteLabel}</Text>
                 <Text style={styles.charCount}>{note.length}/100</Text>
               </View>
               <TextInput
                 style={styles.input}
-                placeholder="cth: Kopi susu di rest area km 57 juara!"
+                placeholder={t.quickLog.notePlaceholder}
                 placeholderTextColor={Colors.darkBorder}
                 maxLength={100}
                 value={note}
@@ -320,7 +333,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
               />
 
               <TouchableOpacity style={styles.submitBtn} onPress={handleSaveMoodAndNote}>
-                <Text style={styles.submitBtnText}>Simpan & Buka Buku Harian</Text>
+                <Text style={styles.submitBtnText}>{t.quickLog.saveAndOpen}</Text>
               </TouchableOpacity>
             </ScrollView>
           )}
@@ -329,7 +342,7 @@ export const QuickLogModal: React.FC<QuickLogModalProps> = ({ visible, onClose }
           {isSubmitting && (
             <View style={styles.loadingBox}>
               <ActivityIndicator size="large" color={Colors.peeAmber} />
-              <Text style={styles.loadingTxt}>Merekam koordinat & waktu...</Text>
+              <Text style={styles.loadingTxt}>{t.quickLog.recording}</Text>
             </View>
           )}
         </Animated.View>

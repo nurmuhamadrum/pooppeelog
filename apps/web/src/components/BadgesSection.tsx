@@ -5,8 +5,12 @@ import { MrPlopSVG, LilDripSVG, SirFlushSVG } from './MascotSVGs';
 import { Award, Compass, Flame, MapPin, Mountain } from 'lucide-react';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { fetchBadgesFromSupabase } from '../services/adminApi';
+import { useLanguage } from '../i18n/LanguageContext';
+import { useWebCopy } from '../i18n/translations';
 
 export const BadgesSection: React.FC = () => {
+  const { lang } = useLanguage();
+  const t = useWebCopy(lang).badges;
   const [badges, setBadges] = useState<EditableBadge[]>(getBadges);
 
   useEffect(() => {
@@ -76,13 +80,13 @@ export const BadgesSection: React.FC = () => {
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-dark-surface border border-dark-border text-xs font-bold text-pee-amber mb-3">
-            <Award className="w-3.5 h-3.5" /> Gamifikasi & Pencapaian Eksentrik
+            <Award className="w-3.5 h-3.5" /> {t.pill}
           </div>
           <h2 className="text-3xl sm:text-5xl font-black text-cream-bg tracking-tight">
-            Koleksi Lencana Penjelajah Toilet
+            {t.title}
           </h2>
           <p className="text-peach-tint/80 text-sm sm:text-base mt-3 leading-relaxed">
-            Setiap buang air adalah pencapaian biologis. Buka lencana unik dan banggakan rekormu secara privat.
+            {t.subtitle}
           </p>
         </div>
 

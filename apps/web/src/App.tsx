@@ -11,6 +11,7 @@ import { FAQSection } from './components/FAQSection';
 import { DownloadSection } from './components/DownloadSection';
 import { Footer } from './components/Footer';
 import { AdminDashboard } from './components/admin/AdminDashboard';
+import { LanguageProvider } from './i18n/LanguageContext';
 
 /** Admin bisa diakses lewat /admin (dev server) atau #/admin (aman untuk hosting statis). */
 const isAdminRoute = () =>
@@ -32,21 +33,23 @@ export const App: React.FC = () => {
   if (adminMode) return <AdminDashboard />;
 
   return (
-    <div className="min-h-screen bg-dark-bg text-cream-bg flex flex-col selection:bg-pee-amber selection:text-ink">
-      <Navbar />
-      <main className="flex-1">
-        <HeroSection />
-        <MascotSection />
-        <FeaturesSection />
-        <InteractiveMockup />
-        <BadgesSection />
-        <PrivacyManifesto />
-        <DownloadSection />
-        <BuyMeACoffeeSection />
-        <FAQSection />
-      </main>
-      <Footer />
-    </div>
+    <LanguageProvider>
+      <div className="min-h-screen bg-dark-bg text-cream-bg flex flex-col selection:bg-pee-amber selection:text-ink">
+        <Navbar />
+        <main className="flex-1">
+          <HeroSection />
+          <MascotSection />
+          <FeaturesSection />
+          <InteractiveMockup />
+          <BadgesSection />
+          <PrivacyManifesto />
+          <DownloadSection />
+          <BuyMeACoffeeSection />
+          <FAQSection />
+        </main>
+        <Footer />
+      </div>
+    </LanguageProvider>
   );
 };
 

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { Log } from '@poop-pee-log/shared';
+import { AppLanguage, Log } from '@poop-pee-log/shared';
+import * as SecureStore from 'expo-secure-store';
 import {
   getLocalLogs,
   insertLocalLog,
@@ -32,6 +33,7 @@ interface AppState {
   mapTheme: 'DARK' | 'RETRO' | 'STANDARD';
   gpsRadiusMeter: number;
   appLockEnabled: boolean;
+  language: AppLanguage;
 
   initialize: () => Promise<void>;
   setUser: (userId: string, email?: string | null, isAnonymous?: boolean) => void;
@@ -44,6 +46,7 @@ interface AppState {
   setMapTheme: (theme: 'DARK' | 'RETRO' | 'STANDARD') => void;
   setGpsRadiusMeter: (radius: number) => void;
   toggleAppLock: () => void;
+  setLanguage: (lang: AppLanguage) => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -59,6 +62,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   mapTheme: 'DARK',
   gpsRadiusMeter: 30,
   appLockEnabled: false,
+  language: 'en',
 
   dismissActiveBadgeModal: () => {
     set((state) => ({
@@ -90,12 +94,15 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
 
       const loadedLogs = await getLocalLogs();
+      const savedLang = await SecureStore.getItemAsync('pooppeelog_language').catch(() => null);
+      const activeLang: AppLanguage = savedLang === 'id' || savedLang === 'en' ? savedLang : 'en';
 
       set({
         userId: activeUserId,
         userEmail: activeEmail,
         isAnonymous: isAnon,
         logs: loadedLogs,
+        language: activeLang,
         isLoading: false,
       });
 
@@ -215,4 +222,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   setMapTheme: (theme) => set({ mapTheme: theme }),
   setGpsRadiusMeter: (radius) => set({ gpsRadiusMeter: radius }),
   toggleAppLock: () => set((state) => ({ appLockEnabled: !state.appLockEnabled })),
+  setLanguage: async (language: AppLanguage) => {
+    set({ language });
+    await SecureStore.setItemAsync('pooppeelog_language', language).catch(() => {});
+  },
 }));

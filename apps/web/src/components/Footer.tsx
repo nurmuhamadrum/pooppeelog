@@ -1,8 +1,13 @@
 import React from 'react';
 import { MrPlopSVG, LilDripSVG, SirFlushSVG } from './MascotSVGs';
 import { Heart } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
+import { useWebCopy } from '../i18n/translations';
 
 export const Footer: React.FC = () => {
+  const { lang } = useLanguage();
+  const t = useWebCopy(lang);
+
   return (
     <footer className="bg-dark-bg text-peach-tint/70 pt-16 pb-12">
       <div className="max-w-7xl mx-auto px-6">
@@ -24,19 +29,19 @@ export const Footer: React.FC = () => {
               <span className="font-black text-lg text-cream-bg">Poop Pee Log</span>
             </div>
             <p className="text-xs text-peach-tint/60 mt-1.5 font-medium">
-              Track. Log. Lega. — Lifelogger biologis personal nomor satu.
+              {t.footer.tagline}
             </p>
           </div>
 
-          {/* Quick Links & Buy Me A Coffee Button */}
+          {/* Quick Links & Saweria Button */}
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="flex flex-wrap items-center justify-center gap-6 text-xs font-semibold text-peach-tint/80">
-              <a href="#fitur" className="hover:text-pee-amber">Fitur</a>
-              <a href="#maskot" className="hover:text-pee-amber">Maskot</a>
-              <a href="#preview" className="hover:text-pee-amber">Simulator</a>
-              <a href="#lencana" className="hover:text-pee-amber">Lencana</a>
-              <a href="#privasi" className="hover:text-pee-amber">Privasi</a>
-              <a href="#download" className="hover:text-pee-amber">Download</a>
+              <a href="#fitur" className="hover:text-pee-amber">{t.nav.features}</a>
+              <a href="#maskot" className="hover:text-pee-amber">{t.nav.mascots}</a>
+              <a href="#preview" className="hover:text-pee-amber">{lang === 'en' ? 'Simulator' : 'Simulator'}</a>
+              <a href="#lencana" className="hover:text-pee-amber">{t.nav.badges}</a>
+              <a href="#privasi" className="hover:text-pee-amber">{lang === 'en' ? 'Privacy' : 'Privasi'}</a>
+              <a href="#download" className="hover:text-pee-amber">{t.nav.download}</a>
               <a href="#/admin" className="hover:text-both-teal">Admin</a>
               <a href="https://github.com/nurmuhamadrum/pooppeelog" target="_blank" rel="noreferrer" className="hover:text-pee-amber">GitHub</a>
             </div>
@@ -48,7 +53,7 @@ export const Footer: React.FC = () => {
               className="px-4 py-2 rounded-xl bg-[#FAAE2B] text-black font-black text-xs flex items-center gap-2 shadow hover:bg-[#fbb944] transition-transform hover:scale-105 active:scale-95"
             >
               <span>☕</span>
-              <span>Dukung di Saweria</span>
+              <span>{t.nav.support}</span>
             </a>
           </div>
         </div>
@@ -56,10 +61,10 @@ export const Footer: React.FC = () => {
         {/* Legal Disclaimer & Copyright */}
         <div className="pt-8 text-center text-[11px] text-peach-tint/50 space-y-2">
           <p>
-            <strong>Disclaimer Medis:</strong> Poop Pee Log dirancang sebagai buku harian catatan pribadi mandiri. Aplikasi ini bukan perangkat medis dan tidak dimaksudkan untuk mendiagnosis, mengobati, atau mencegah penyakit apa pun. Konsultasikan dengan tenaga medis profesional jika Anda memiliki keluhan pencernaan atau saluran kemih.
+            <strong>{t.footer.disclaimerTitle}</strong> {t.footer.disclaimer}
           </p>
           <p className="flex items-center justify-center gap-1 text-peach-tint/60 pt-2">
-            Dibuat dengan <Heart className="w-3.5 h-3.5 text-emergency fill-emergency" /> oleh Tim Poop Pee Log © 2026. Seluruh hak cipta dilindungi undang-undang.
+            {t.footer.copyright} <Heart className="w-3.5 h-3.5 text-emergency fill-emergency ml-1" />
           </p>
         </div>
       </div>

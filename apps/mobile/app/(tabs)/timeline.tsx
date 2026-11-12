@@ -20,6 +20,7 @@ import { Colors } from '@/constants/Colors';
 import { useAppStore } from '@/src/store/useAppStore';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from '@/src/components/MascotIcons';
 import { useToast } from '@/src/context/ToastContext';
+import { useMobileI18n } from '@/src/i18n/translations';
 import { Log } from '@poop-pee-log/shared';
 import {
   Trash2,
@@ -42,6 +43,8 @@ type TimeFilter = 'WEEK' | 'MONTH' | 'YEAR' | 'CUSTOM' | 'ALL';
 export default function TimelineScreen() {
   const { logs, removeLog } = useAppStore();
   const { showToast } = useToast();
+  const { lang, t } = useMobileI18n();
+  const locale = lang === 'en' ? 'en-US' : 'id-ID';
   const [selectedDetailLog, setSelectedDetailLog] = useState<Log | null>(null);
   const [logToDelete, setLogToDelete] = useState<Log | null>(null);
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('ALL');
@@ -129,20 +132,20 @@ export default function TimelineScreen() {
   const handleApplyCustomDateRange = () => {
     if (startDate > endDate) {
       showToast({
-        message: 'Tanggal mulai tidak boleh melebihi tanggal akhir.',
+        message: t.timeline.invalidRange,
         type: 'error',
       });
       return;
     }
 
-    const startFmt = startDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-    const endFmt = endDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    const startFmt = startDate.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+    const endFmt = endDate.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
 
     setTimeFilter('CUSTOM');
     setActiveDateFilterLabel(`${startFmt} - ${endFmt}`);
     handleCloseCalendarModal();
     showToast({
-      message: `Filter tanggal aktif: ${startFmt} - ${endFmt}`,
+      message: t.timeline.rangeApplied(`${startFmt} - ${endFmt}`),
       type: 'success',
     });
   };
@@ -209,7 +212,7 @@ export default function TimelineScreen() {
     handleCloseDetailModal();
     removeLog(idToDelete);
     showToast({
-      message: `Catatan ${typeName} berhasil dihapus.`,
+      message: t.timeline.deletedToast(typeName),
       type: 'delete',
     });
   };
@@ -429,11 +432,11 @@ export default function TimelineScreen() {
 
       {/* Header Area */}
       <View style={styles.headerArea}>
-        <Text style={styles.pageTitle}>Buku Harian Lega</Text>
+        <Text style={styles.pageTitle}>{t.timeline.title}</Text>
         <Text style={styles.pageSubtitle}>
           {filteredLogs.length > 0
-            ? `Menampilkan ${filteredLogs.length} dari ${logs.length} catatan aktivitas`
-            : 'Belum ada catatan pada periode ini'}
+            ? t.timeline.subtitleCount(filteredLogs.length, logs.length)
+            : t.timeline.subtitleEmpty}
         </Text>
       </View>
 
@@ -443,7 +446,7 @@ export default function TimelineScreen() {
           <Search size={16} color={Colors.peachTint} opacity={0.6} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Cari lokasi, kota, mood, atau catatan..."
+            placeholder={t.timeline.searchPlaceholder}
             placeholderTextColor="rgba(245, 237, 227, 0.4)"
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -469,7 +472,7 @@ export default function TimelineScreen() {
             }}
           >
             <Text style={[styles.filterPillText, timeFilter === 'WEEK' && styles.filterPillTextActive]}>
-              7 Hari Terakhir
+              {t.timeline.week}
             </Text>
           </TouchableOpacity>
 
@@ -481,7 +484,7 @@ export default function TimelineScreen() {
             }}
           >
             <Text style={[styles.filterPillText, timeFilter === 'MONTH' && styles.filterPillTextActive]}>
-              Bulan Ini
+              {t.timeline.month}
             </Text>
           </TouchableOpacity>
 
@@ -493,7 +496,7 @@ export default function TimelineScreen() {
             }}
           >
             <Text style={[styles.filterPillText, timeFilter === 'YEAR' && styles.filterPillTextActive]}>
-              Tahun Ini
+              {t.timeline.year}
             </Text>
           </TouchableOpacity>
 
@@ -524,7 +527,7 @@ export default function TimelineScreen() {
               ]}
               numberOfLines={1}
             >
-              {activeDateFilterLabel ? activeDateFilterLabel : 'Pilih Tanggal'}
+              {activeDateFilterLabel ? activeDateFilterLabel : t.timeline.pickDate}
             </Text>
           </TouchableOpacity>
 
@@ -536,7 +539,7 @@ export default function TimelineScreen() {
             }}
           >
             <Text style={[styles.filterPillText, timeFilter === 'ALL' && styles.filterPillTextActive]}>
-              Semua Waktu ({logs.length})
+              {t.timeline.allTime} ({logs.length})
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -545,9 +548,9 @@ export default function TimelineScreen() {
       {filteredLogs.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyEmoji}>📜</Text>
-          <Text style={styles.emptyTitle}>Tidak Ada Catatan di Periode Ini</Text>
+          <Text style={styles.emptyTitle}>{t.timeline.emptyTitle}</Text>
           <Text style={styles.emptySubtitle}>
-            Pilih filter waktu lain atau gunakan tombol (+) di tengah bawah untuk mulai mendokumentasikan kelegaanmu.
+            {t.timeline.emptySub}
           </Text>
         </View>
       ) : (
@@ -631,14 +634,13 @@ export default function TimelineScreen() {
                 <View style={styles.detailRow}>
                   <Clock size={16} color={Colors.peeAmber} />
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.detailLabel}>WAKTU TERCATAT</Text>
+                    <Text style={styles.detailLabel}>{t.timeline.detailTime}</Text>
                     <Text style={styles.detailValue}>
-                      {new Date(selectedDetailLog.loggedAt).toLocaleTimeString('id-ID', {
+                      {new Date(selectedDetailLog.loggedAt).toLocaleTimeString(locale, {
                         hour: '2-digit',
                         minute: '2-digit',
                         second: '2-digit',
-                      })}{' '}
-                      WIB
+                      })}
                     </Text>
                   </View>
                 </View>
@@ -647,12 +649,12 @@ export default function TimelineScreen() {
                 <View style={styles.detailRow}>
                   <MapPin size={16} color={Colors.bothTeal} />
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.detailLabel}>LOKASI & DAERAH</Text>
+                    <Text style={styles.detailLabel}>{t.timeline.detailLocation}</Text>
                     <Text style={styles.detailValue}>
                       {selectedDetailLog.district}, {selectedDetailLog.city}
                     </Text>
                     <Text style={styles.detailSubValue}>
-                      Koordinat:{' '}
+                      {t.timeline.detailCoords}:{' '}
                       {selectedDetailLog.latitude.toFixed(4)}, {selectedDetailLog.longitude.toFixed(4)}
                     </Text>
                   </View>
@@ -662,7 +664,7 @@ export default function TimelineScreen() {
                 <View style={styles.detailRow}>
                   <Smile size={16} color={Colors.peeAmber} />
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.detailLabel}>SUASANA HATI / MOOD</Text>
+                    <Text style={styles.detailLabel}>{t.timeline.detailMood}</Text>
                     <Text style={styles.detailValue}>{selectedDetailLog.mood || 'Lega Banget 😊'}</Text>
                   </View>
                 </View>
@@ -671,9 +673,9 @@ export default function TimelineScreen() {
                 <View style={styles.detailRow}>
                   <Info size={16} color={Colors.poopLight} />
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.detailLabel}>PESAN / CATATAN BEBAS</Text>
+                    <Text style={styles.detailLabel}>{t.timeline.detailNote}</Text>
                     <Text style={[styles.detailValue, { fontStyle: selectedDetailLog.note ? 'normal' : 'italic' }]}>
-                      {selectedDetailLog.note ? `"${selectedDetailLog.note}"` : 'Tidak ada catatan tambahan.'}
+                      {selectedDetailLog.note ? `"${selectedDetailLog.note}"` : t.timeline.noNote}
                     </Text>
                   </View>
                 </View>
@@ -682,7 +684,7 @@ export default function TimelineScreen() {
                 <View style={styles.privacyBox}>
                   <Shield size={14} color={Colors.bothTeal} />
                   <Text style={styles.privacyBoxText}>
-                    Data tersimpan terenkripsi secara lokal di perangkat Anda (Offline-First).
+                    {t.timeline.privacyNote}
                   </Text>
                 </View>
               </ScrollView>
@@ -697,14 +699,14 @@ export default function TimelineScreen() {
                   }}
                 >
                   <Trash2 size={16} color={Colors.emergencyRed} />
-                  <Text style={styles.deleteModalBtnText}>Hapus Catatan Ini</Text>
+                  <Text style={styles.deleteModalBtnText}>{t.timeline.deleteBtn}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.closeModalBtn}
                   onPress={handleCloseDetailModal}
                 >
-                  <Text style={styles.closeModalBtnText}>Tutup</Text>
+                  <Text style={styles.closeModalBtnText}>{t.timeline.closeBtn}</Text>
                 </TouchableOpacity>
               </View>
             </Animated.View>
@@ -734,21 +736,23 @@ export default function TimelineScreen() {
                 <Trash2 size={28} color={Colors.emergencyRed} />
               </View>
 
-              <Text style={styles.confirmTitle}>Hapus Catatan Ini?</Text>
+              <Text style={styles.confirmTitle}>{t.timeline.confirmDeleteTitle}</Text>
               <Text style={styles.confirmDescription}>
-                Catatan{' '}
+                {lang === 'en' ? 'Your ' : 'Catatan '}
                 <Text style={{ fontWeight: '900', color: Colors.creamBg }}>
                   {logToDelete.type === 'PEE'
-                    ? "Lil' Drip (Kencing)"
+                    ? "Lil' Drip (Pee)"
                     : logToDelete.type === 'POOP'
-                    ? 'Mr. Plop (BAB)'
+                    ? 'Mr. Plop (Poop)'
                     : 'Sir Flush (Combo)'}
-                </Text>{' '}
-                di{' '}
+                </Text>
+                {lang === 'en' ? ' log at ' : ' di '}
                 <Text style={{ fontWeight: '700', color: Colors.peeAmber }}>
-                  {logToDelete.district || logToDelete.city || 'lokasi ini'}
-                </Text>{' '}
-                akan dihapus permanen dari riwayat perangkat Anda.
+                  {logToDelete.district || logToDelete.city || (lang === 'en' ? 'this spot' : 'lokasi ini')}
+                </Text>
+                {lang === 'en'
+                  ? ' will be permanently deleted from your device.'
+                  : ' akan dihapus permanen dari riwayat perangkat Anda.'}
               </Text>
 
               {/* Action Buttons */}
@@ -758,7 +762,7 @@ export default function TimelineScreen() {
                   onPress={handleCloseConfirmModal}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.confirmCancelText}>Batal</Text>
+                  <Text style={styles.confirmCancelText}>{t.timeline.confirmDeleteCancel}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -767,7 +771,7 @@ export default function TimelineScreen() {
                   activeOpacity={0.8}
                 >
                   <Trash2 size={15} color="#FFFFFF" />
-                  <Text style={styles.confirmDeleteText}>Ya, Hapus</Text>
+                  <Text style={styles.confirmDeleteText}>{t.timeline.confirmDeleteOk}</Text>
                 </TouchableOpacity>
               </View>
             </Animated.View>
@@ -796,9 +800,9 @@ export default function TimelineScreen() {
                 <Calendar size={26} color={Colors.bothTeal} />
               </View>
 
-              <Text style={styles.confirmTitle}>Filter Rentang Tanggal</Text>
+              <Text style={styles.confirmTitle}>{t.timeline.dateModalTitle}</Text>
               <Text style={styles.confirmDescription}>
-                Pilih tanggal mulai dan tanggal akhir untuk melihat riwayat aktivitas buang air:
+                {t.timeline.dateModalDesc}
               </Text>
 
               {/* Selector Tanggal Mulai & Akhir dengan UI Interaktif */}
@@ -816,15 +820,15 @@ export default function TimelineScreen() {
                   }}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.dateSelectLabel}>DARI TANGGAL</Text>
+                  <Text style={styles.dateSelectLabel}>{t.timeline.fromDate}</Text>
                   <Text style={styles.dateSelectValue}>
-                    {startDate.toLocaleDateString('id-ID', {
+                    {startDate.toLocaleDateString(locale, {
                       day: 'numeric',
                       month: 'short',
                       year: 'numeric',
                     })}
                   </Text>
-                  <Text style={styles.dateSelectHint}>Tap untuk ganti</Text>
+                  <Text style={styles.dateSelectHint}>{t.timeline.tapToChange}</Text>
                 </TouchableOpacity>
 
                 {/* Arrow Divider */}
@@ -845,15 +849,15 @@ export default function TimelineScreen() {
                   }}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.dateSelectLabel}>SAMPAI TANGGAL</Text>
+                  <Text style={styles.dateSelectLabel}>{t.timeline.toDate}</Text>
                   <Text style={styles.dateSelectValue}>
-                    {endDate.toLocaleDateString('id-ID', {
+                    {endDate.toLocaleDateString(locale, {
                       day: 'numeric',
                       month: 'short',
                       year: 'numeric',
                     })}
                   </Text>
-                  <Text style={styles.dateSelectHint}>Tap untuk ganti</Text>
+                  <Text style={styles.dateSelectHint}>{t.timeline.tapToChange}</Text>
                 </TouchableOpacity>
               </View>
 
@@ -874,7 +878,7 @@ export default function TimelineScreen() {
                       style={styles.pickerDoneBtn}
                       onPress={() => setPickerTarget(null)}
                     >
-                      <Text style={styles.pickerDoneBtnText}>Selesai Pilih</Text>
+                      <Text style={styles.pickerDoneBtnText}>{t.timeline.donePick}</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -887,7 +891,7 @@ export default function TimelineScreen() {
                   onPress={handleCloseCalendarModal}
                   activeOpacity={0.8}
                 >
-                  <Text style={styles.confirmCancelText}>Batal</Text>
+                  <Text style={styles.confirmCancelText}>{t.timeline.confirmDeleteCancel}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -896,7 +900,7 @@ export default function TimelineScreen() {
                   activeOpacity={0.8}
                 >
                   <Filter size={15} color="#000" />
-                  <Text style={[styles.confirmDeleteText, { color: '#000' }]}>Terapkan</Text>
+                  <Text style={[styles.confirmDeleteText, { color: '#000' }]}>{t.timeline.applyBtn}</Text>
                 </TouchableOpacity>
               </View>
             </Animated.View>

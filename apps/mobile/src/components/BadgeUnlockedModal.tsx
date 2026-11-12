@@ -13,6 +13,7 @@ import {
 import { Colors } from '@/constants/Colors';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from './MascotIcons';
 import { BadgeDefinition } from '../services/badgeEvaluator';
+import { useMobileI18n } from '../i18n/translations';
 import { Award, Sparkles, Share2, X } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 
@@ -27,6 +28,7 @@ export const BadgeUnlockedModal: React.FC<BadgeUnlockedModalProps> = ({
   badge,
   onClose,
 }) => {
+  const { t } = useMobileI18n();
   const scaleAnim = useRef(new Animated.Value(0.7)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -107,7 +109,7 @@ export const BadgeUnlockedModal: React.FC<BadgeUnlockedModalProps> = ({
           {/* Floating Pill Ribbon */}
           <View style={styles.ribbonPill}>
             <Sparkles size={14} color={Colors.peeAmber} />
-            <Text style={styles.ribbonText}>PENCAPAIAN BARU TERBUKA!</Text>
+            <Text style={styles.ribbonText}>{t.badgeModal.ribbon}</Text>
           </View>
 
           {/* Mascot Center Glow */}
@@ -138,7 +140,7 @@ export const BadgeUnlockedModal: React.FC<BadgeUnlockedModalProps> = ({
               activeOpacity={0.85}
             >
               <Share2 size={16} color={Colors.creamBg} />
-              <Text style={styles.shareButtonText}>Bagikan</Text>
+              <Text style={styles.shareButtonText}>{t.badgeModal.share}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -147,7 +149,7 @@ export const BadgeUnlockedModal: React.FC<BadgeUnlockedModalProps> = ({
               activeOpacity={0.85}
             >
               <Award size={16} color="#000" />
-              <Text style={styles.claimButtonText}>Lega Banget!</Text>
+              <Text style={styles.claimButtonText}>{t.badgeModal.claim}</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
