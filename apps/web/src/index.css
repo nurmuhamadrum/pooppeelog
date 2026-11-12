@@ -95,3 +95,24 @@ body {
   transform-origin: center;
   animation: eyeBlink 4s infinite;
 }
+
+@keyframes orbitSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.orbit-spin-slow {
+  animation: orbitSpin 36s linear infinite;
+}
+
+.orbit-spin-reverse {
+  animation: orbitSpin 28s linear infinite reverse;
+}
+
+.mascot-float-delayed {
+  animation: softFloat 3.4s ease-in-out 0.8s infinite;
+}
