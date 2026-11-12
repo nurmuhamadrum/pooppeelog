@@ -2,12 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { getFaqs, CONTENT_UPDATED_EVENT } from '../data/contentStore';
 import { EditableFAQ } from '../types/admin';
 import { ChevronDown, HelpCircle } from 'lucide-react';
+import { isSupabaseConfigured } from '../lib/supabase';
+import { fetchFaqsFromSupabase } from '../services/adminApi';
 
 export const FAQSection: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const [faqs, setFaqs] = useState<EditableFAQ[]>(getFaqs);
 
   useEffect(() => {
+    if (isSupabaseConfigured) {
+      fetchFaqsFromSupabase(true)
+        .then((remote) => {
+          if (remote.length > 0) setFaqs(remote);
+        })
+        .catch(() => {});
+    }
+
     const refresh = () => setFaqs(getFaqs());
     window.addEventListener(CONTENT_UPDATED_EVENT, refresh);
     window.addEventListener('storage', refresh);

@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
-import { Lock, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { Lock, ShieldCheck, ArrowLeft, Mail, Loader2 } from 'lucide-react';
 import { SirFlushSVG } from '../MascotSVGs';
+import { isSupabaseConfigured } from '../../lib/supabase';
+import { signInAdminWithEmail } from '../../services/adminApi';
 
-/**
- * Gerbang login admin SEMENTARA (sisi klien).
- * PERINGATAN: passcode ini ikut ter-bundle ke JavaScript dan BUKAN keamanan sungguhan.
- * Untuk produksi, ganti dengan Supabase Auth + kolom `role = 'admin'` di tabel profiles
- * dan RLS / Edge Function yang memverifikasi role tersebut di server.
- */
 const ADMIN_PASSCODE = (import.meta.env.VITE_ADMIN_PASSCODE as string | undefined) || 'lega-admin';
 const SESSION_KEY = 'ppl_admin_session';
 
@@ -15,21 +11,44 @@ export const isAdminSessionActive = () => sessionStorage.getItem(SESSION_KEY) ==
 export const clearAdminSession = () => sessionStorage.removeItem(SESSION_KEY);
 
 interface AdminLoginProps {
-  onSuccess: () => void;
+  onSuccess: (mode: 'supabase' | 'local') => void;
 }
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [passcode, setPasscode] = useState('');
+  const [useLocalPasscode, setUseLocalPasscode] = useState(!isSupabaseConfigured);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passcode === ADMIN_PASSCODE) {
-      sessionStorage.setItem(SESSION_KEY, '1');
-      setError(null);
-      onSuccess();
+    setError(null);
+
+    if (useLocalPasscode) {
+      if (passcode === ADMIN_PASSCODE) {
+        sessionStorage.setItem(SESSION_KEY, '1');
+        onSuccess('local');
+      } else {
+        setError('Passcode salah. Coba lagi.');
+      }
+      return;
+    }
+
+    if (!email.trim() || !password) {
+      setError('Email dan password wajib diisi.');
+      return;
+    }
+
+    setLoading(true);
+    const res = await signInAdminWithEmail(email.trim(), password);
+    setLoading(false);
+
+    if (res.ok) {
+      onSuccess('supabase');
     } else {
-      setError('Passcode salah. Coba lagi.');
+      setError(res.error || 'Gagal login.');
     }
   };
 
@@ -41,38 +60,86 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         </div>
         <h1 className="text-2xl font-black text-center tracking-tight">Admin Console</h1>
         <p className="text-xs text-peach-tint/70 text-center mt-1 mb-6">
-          Poop Pee Log · Manajemen Konten & Statistik
+          Poop Pee Log · {useLocalPasscode ? 'Mode Demo Lokal' : 'Supabase Real-Time Data'}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <label className="block">
-            <span className="text-[11px] font-bold text-peach-tint/80 uppercase tracking-wider">Passcode Admin</span>
-            <div className="mt-1.5 flex items-center gap-2 bg-dark-bg border border-dark-border rounded-xl px-3 focus-within:border-both-teal transition-colors">
-              <Lock className="w-4 h-4 text-peach-tint/50" />
-              <input
-                type="password"
-                value={passcode}
-                onChange={(e) => setPasscode(e.target.value)}
-                className="flex-1 bg-transparent py-3 text-sm outline-none placeholder:text-peach-tint/30"
-                placeholder="••••••••"
-                autoFocus
-              />
-            </div>
-          </label>
+          {useLocalPasscode ? (
+            <label className="block">
+              <span className="text-[11px] font-bold text-peach-tint/80 uppercase tracking-wider">Passcode Admin</span>
+              <div className="mt-1.5 flex items-center gap-2 bg-dark-bg border border-dark-border rounded-xl px-3 focus-within:border-both-teal transition-colors">
+                <Lock className="w-4 h-4 text-peach-tint/50" />
+                <input
+                  type="password"
+                  value={passcode}
+                  onChange={(e) => setPasscode(e.target.value)}
+                  className="flex-1 bg-transparent py-3 text-sm outline-none placeholder:text-peach-tint/30"
+                  placeholder="••••••••"
+                  autoFocus
+                />
+              </div>
+            </label>
+          ) : (
+            <>
+              <label className="block">
+                <span className="text-[11px] font-bold text-peach-tint/80 uppercase tracking-wider">Email Admin</span>
+                <div className="mt-1.5 flex items-center gap-2 bg-dark-bg border border-dark-border rounded-xl px-3 focus-within:border-both-teal transition-colors">
+                  <Mail className="w-4 h-4 text-peach-tint/50" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="flex-1 bg-transparent py-3 text-sm outline-none placeholder:text-peach-tint/30"
+                    placeholder="admin@email.com"
+                    autoFocus
+                  />
+                </div>
+              </label>
 
-          {error && <p className="text-xs font-bold text-emergency">{error}</p>}
+              <label className="block">
+                <span className="text-[11px] font-bold text-peach-tint/80 uppercase tracking-wider">Password</span>
+                <div className="mt-1.5 flex items-center gap-2 bg-dark-bg border border-dark-border rounded-xl px-3 focus-within:border-both-teal transition-colors">
+                  <Lock className="w-4 h-4 text-peach-tint/50" />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="flex-1 bg-transparent py-3 text-sm outline-none placeholder:text-peach-tint/30"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </label>
+            </>
+          )}
+
+          {error && <p className="text-xs font-bold text-emergency leading-relaxed">{error}</p>}
 
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-both-teal text-ink font-black text-sm flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all"
+            disabled={loading}
+            className="w-full py-3 rounded-xl bg-both-teal text-ink font-black text-sm flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-60"
           >
-            <ShieldCheck className="w-4 h-4" /> Masuk Dashboard
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
+            {loading ? 'Memverifikasi...' : 'Masuk Dashboard'}
           </button>
         </form>
 
+        {isSupabaseConfigured && (
+          <button
+            type="button"
+            onClick={() => {
+              setUseLocalPasscode(!useLocalPasscode);
+              setError(null);
+            }}
+            className="mt-4 w-full text-center text-[11px] font-bold text-peach-tint/50 hover:text-both-teal transition-colors"
+          >
+            {useLocalPasscode ? 'Gunakan Login Akun Supabase Admin →' : 'Atau masuk dengan Passcode Demo Lokal'}
+          </button>
+        )}
+
         <a
           href="/"
-          className="mt-6 flex items-center justify-center gap-1.5 text-xs font-bold text-peach-tint/60 hover:text-pee-amber"
+          className="mt-5 flex items-center justify-center gap-1.5 text-xs font-bold text-peach-tint/60 hover:text-pee-amber"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Kembali ke Landing Page
         </a>

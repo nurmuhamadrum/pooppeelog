@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BarChart3, Users, HelpCircle, Award, LogOut, ExternalLink, RotateCcw, CheckCircle2, Info } from 'lucide-react';
+import { BarChart3, Users, HelpCircle, Award, LogOut, ExternalLink, RotateCcw, CheckCircle2, Info, Loader2 } from 'lucide-react';
 import { SirFlushSVG } from '../MascotSVGs';
 import { AdminLogin, isAdminSessionActive, clearAdminSession } from './AdminLogin';
 import { StatsTab } from './StatsTab';
@@ -7,6 +7,8 @@ import { UsersTab } from './UsersTab';
 import { FaqTab } from './FaqTab';
 import { BadgesTab } from './BadgesTab';
 import { resetContent } from '../../data/contentStore';
+import { checkCurrentAdminSession, signOutAdmin } from '../../services/adminApi';
+import { isSupabaseConfigured } from '../../lib/supabase';
 
 type TabId = 'stats' | 'users' | 'faq' | 'badges';
 
@@ -18,7 +20,11 @@ const TABS: { id: TabId; label: string; icon: React.ElementType; desc: string }[
 ];
 
 export const AdminDashboard: React.FC = () => {
-  const [authed, setAuthed] = useState(isAdminSessionActive);
+  const [checkingSession, setCheckingSession] = useState(isSupabaseConfigured);
+  const [authMode, setAuthMode] = useState<'none' | 'supabase' | 'local'>(() =>
+    isAdminSessionActive() ? 'local' : 'none'
+  );
+  const [adminEmail, setAdminEmail] = useState<string | null>(null);
   const [tab, setTab] = useState<TabId>('stats');
   const [toast, setToast] = useState<string | null>(null);
   const [contentVersion, setContentVersion] = useState(0);
@@ -26,6 +32,16 @@ export const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     document.title = 'Admin · Poop Pee Log';
+    if (!isSupabaseConfigured) return;
+
+    checkCurrentAdminSession()
+      .then((res) => {
+        if (res.authenticated) {
+          setAuthMode('supabase');
+          setAdminEmail(res.email ?? null);
+        }
+      })
+      .finally(() => setCheckingSession(false));
   }, []);
 
   const notify = (msg: string) => {
@@ -34,10 +50,37 @@ export const AdminDashboard: React.FC = () => {
     toastTimer.current = setTimeout(() => setToast(null), 2600);
   };
 
-  if (!authed) return <AdminLogin onSuccess={() => setAuthed(true)} />;
+  const handleLogout = async () => {
+    clearAdminSession();
+    await signOutAdmin();
+    setAuthMode('none');
+    setAdminEmail(null);
+  };
 
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-dark-bg text-cream-bg flex items-center justify-center gap-2 text-xs font-bold">
+        <Loader2 className="w-4 h-4 animate-spin text-both-teal" /> Memeriksa sesi admin...
+      </div>
+    );
+  }
+
+  if (authMode === 'none') {
+    return (
+      <AdminLogin
+        onSuccess={(mode) => {
+          setAuthMode(mode);
+          if (mode === 'supabase') {
+            checkCurrentAdminSession().then((res) => setAdminEmail(res.email ?? null));
+          }
+        }}
+      />
+    );
+  }
+
+  const isLiveMode = authMode === 'supabase';
   const active = TABS.find((t) => t.id === tab)!;
-  const showsMockNotice = tab === 'stats' || tab === 'users';
+  const showsMockNotice = !isLiveMode && (tab === 'stats' || tab === 'users');
 
   return (
     <div className="min-h-screen bg-dark-bg text-cream-bg flex flex-col lg:flex-row">
@@ -47,9 +90,11 @@ export const AdminDashboard: React.FC = () => {
           <div className="w-10 h-10 rounded-xl bg-both-teal p-1.5 flex items-center justify-center">
             <SirFlushSVG />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="font-black text-sm">Poop Pee Log</div>
-            <div className="text-[10px] font-bold text-both-teal uppercase tracking-wider">Admin Console</div>
+            <div className="text-[10px] font-bold text-both-teal uppercase tracking-wider truncate">
+              {isLiveMode ? adminEmail || 'Admin Supabase' : 'Demo Mode'}
+            </div>
           </div>
         </div>
 
@@ -72,10 +117,7 @@ export const AdminDashboard: React.FC = () => {
             <ExternalLink className="w-4 h-4" /> Lihat Landing Page
           </a>
           <button
-            onClick={() => {
-              clearAdminSession();
-              setAuthed(false);
-            }}
+            onClick={handleLogout}
             className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-emergency hover:bg-emergency/10"
           >
             <LogOut className="w-4 h-4" /> Keluar
@@ -91,7 +133,7 @@ export const AdminDashboard: React.FC = () => {
             <p className="text-[11px] text-peach-tint/60 font-semibold">{active.desc}</p>
           </div>
           <div className="flex items-center gap-2">
-            {(tab === 'faq' || tab === 'badges') && (
+            {!isLiveMode && (tab === 'faq' || tab === 'badges') && (
               <button
                 onClick={() => {
                   if (window.confirm('Kembalikan seluruh FAQ & lencana ke konten bawaan?')) {
@@ -106,10 +148,7 @@ export const AdminDashboard: React.FC = () => {
               </button>
             )}
             <button
-              onClick={() => {
-                clearAdminSession();
-                setAuthed(false);
-              }}
+              onClick={handleLogout}
               className="lg:hidden p-2 rounded-xl text-emergency border border-dark-border"
               title="Keluar"
             >
@@ -123,16 +162,15 @@ export const AdminDashboard: React.FC = () => {
             <div className="flex items-start gap-2.5 bg-drip-blue/10 border border-drip-blue/30 rounded-xl px-4 py-3 text-[11px] text-drip-blue font-semibold">
               <Info className="w-4 h-4 flex-shrink-0 mt-px" />
               <span>
-                Data di halaman ini masih <b>data contoh (mock)</b>. Untuk data asli, perlu endpoint server
-                (Supabase Edge Function / view khusus admin) karena RLS memblokir akses lintas-pengguna dari browser.
+                Anda sedang di <b>Mode Demo Lokal</b> (data contoh). Untuk melihat data real dari Supabase, keluar dan login menggunakan akun Admin Supabase Anda.
               </span>
             </div>
           )}
 
-          {tab === 'stats' && <StatsTab />}
-          {tab === 'users' && <UsersTab />}
-          {tab === 'faq' && <FaqTab key={`faq-${contentVersion}`} notify={notify} />}
-          {tab === 'badges' && <BadgesTab key={`badges-${contentVersion}`} notify={notify} />}
+          {tab === 'stats' && <StatsTab isLiveMode={isLiveMode} />}
+          {tab === 'users' && <UsersTab isLiveMode={isLiveMode} />}
+          {tab === 'faq' && <FaqTab key={`faq-${contentVersion}`} isLiveMode={isLiveMode} notify={notify} />}
+          {tab === 'badges' && <BadgesTab key={`badges-${contentVersion}`} isLiveMode={isLiveMode} notify={notify} />}
         </div>
       </main>
 

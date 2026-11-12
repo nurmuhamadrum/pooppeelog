@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react';
-import { Search, UserCircle2, Ghost, Award, ListChecks } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Search, UserCircle2, Ghost, Award, ListChecks, RefreshCw, AlertCircle } from 'lucide-react';
 import { INITIAL_USERS, INITIAL_ACTIVITY_LOGS } from '../../data/mockAdminData';
+import { AdminActivityLogItem, AdminUserItem } from '../../types/admin';
+import { fetchAdminRecentLogs, fetchAdminUsers } from '../../services/adminApi';
 
 const TYPE_STYLE: Record<string, string> = {
   PEE: 'bg-pee-amber/15 text-pee-amber border-pee-amber/40',
@@ -8,22 +10,71 @@ const TYPE_STYLE: Record<string, string> = {
   COMBO: 'bg-both-teal/15 text-both-teal border-both-teal/40',
 };
 
-export const UsersTab: React.FC = () => {
+interface UsersTabProps {
+  isLiveMode: boolean;
+}
+
+export const UsersTab: React.FC<UsersTabProps> = ({ isLiveMode }) => {
+  const [rawUsers, setRawUsers] = useState<AdminUserItem[]>(isLiveMode ? [] : INITIAL_USERS);
+  const [recentLogs, setRecentLogs] = useState<AdminActivityLogItem[]>(isLiveMode ? [] : INITIAL_ACTIVITY_LOGS);
+  const [loading, setLoading] = useState(isLiveMode);
+  const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [accountFilter, setAccountFilter] = useState<'ALL' | 'CLOUD' | 'GUEST'>('ALL');
 
+  const load = useCallback(async () => {
+    if (!isLiveMode) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const [u, l] = await Promise.all([fetchAdminUsers(), fetchAdminRecentLogs(30)]);
+      setRawUsers(u);
+      setRecentLogs(l);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Gagal memuat data pengguna dari Supabase.');
+    } finally {
+      setLoading(false);
+    }
+  }, [isLiveMode]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
   const users = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return INITIAL_USERS.filter((u) => {
+    return rawUsers.filter((u) => {
       if (accountFilter === 'CLOUD' && u.isAnonymous) return false;
       if (accountFilter === 'GUEST' && !u.isAnonymous) return false;
       if (!q) return true;
       return u.displayName.toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
     });
-  }, [query, accountFilter]);
+  }, [rawUsers, query, accountFilter]);
 
   return (
     <div className="space-y-6">
+      {isLiveMode && (
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-both-teal flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-both-teal animate-pulse" />
+            Data Real dari Supabase
+          </span>
+          <button
+            onClick={load}
+            disabled={loading}
+            className="px-3 py-1.5 rounded-xl bg-dark-surface border border-dark-border text-xs font-bold text-peach-tint/80 hover:text-cream-bg flex items-center gap-1.5 disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Segarkan
+          </button>
+        </div>
+      )}
+
+      {error && (
+        <div className="flex items-center gap-2 bg-emergency/15 border border-emergency/40 rounded-xl px-4 py-3 text-xs font-bold text-emergency">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" /> {error}
+        </div>
+      )}
+
       {/* Users table */}
       <div className="bg-dark-surface border border-dark-border rounded-2xl overflow-hidden">
         <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-dark-border">
@@ -72,34 +123,42 @@ export const UsersTab: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => (
-                <tr key={u.id} className="border-t border-dark-border/60 hover:bg-dark-bg/40 transition-colors">
-                  <td className="px-5 py-3">
-                    <div className="font-bold text-cream-bg">{u.displayName}</div>
-                    <div className="text-[11px] text-peach-tint/60">{u.email || '— tanpa email —'}</div>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="px-5 py-10 text-center text-peach-tint/50 font-semibold">
+                    Memuat data pengguna dari Supabase...
                   </td>
-                  <td className="px-5 py-3">
-                    {u.isAnonymous ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-dark-bg border border-dark-border text-peach-tint/70">
-                        <Ghost className="w-3 h-3" /> Tamu
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-pee-amber/15 border border-pee-amber/40 text-pee-amber">
-                        Cloud
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3 text-right font-black">{u.totalLogs}</td>
-                  <td className="px-5 py-3 text-right">
-                    <span className="inline-flex items-center gap-1 font-bold text-both-teal">
-                      <Award className="w-3 h-3" /> {u.badgesCount}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 text-peach-tint/80">{u.lastActive}</td>
-                  <td className="px-5 py-3 text-peach-tint/60">{u.joinedAt}</td>
                 </tr>
-              ))}
-              {users.length === 0 && (
+              ) : (
+                users.map((u) => (
+                  <tr key={u.id} className="border-t border-dark-border/60 hover:bg-dark-bg/40 transition-colors">
+                    <td className="px-5 py-3">
+                      <div className="font-bold text-cream-bg">{u.displayName}</div>
+                      <div className="text-[11px] text-peach-tint/60">{u.email || '— tanpa email —'}</div>
+                    </td>
+                    <td className="px-5 py-3">
+                      {u.isAnonymous ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-dark-bg border border-dark-border text-peach-tint/70">
+                          <Ghost className="w-3 h-3" /> Tamu
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-pee-amber/15 border border-pee-amber/40 text-pee-amber">
+                          Cloud
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3 text-right font-black">{u.totalLogs}</td>
+                    <td className="px-5 py-3 text-right">
+                      <span className="inline-flex items-center gap-1 font-bold text-both-teal">
+                        <Award className="w-3 h-3" /> {u.badgesCount}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 text-peach-tint/80">{u.lastActive}</td>
+                    <td className="px-5 py-3 text-peach-tint/60">{u.joinedAt}</td>
+                  </tr>
+                ))
+              )}
+              {!loading && users.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-5 py-10 text-center text-peach-tint/50 font-semibold">
                     Tidak ada pengguna yang cocok.
@@ -116,30 +175,35 @@ export const UsersTab: React.FC = () => {
         <h3 className="font-black text-sm flex items-center gap-2 mb-4">
           <ListChecks className="w-4 h-4 text-pee-amber" /> Aktivitas Log Terbaru
         </h3>
-        <div className="space-y-2.5">
-          {INITIAL_ACTIVITY_LOGS.map((l) => (
-            <div
-              key={l.id}
-              className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 bg-dark-bg/60 border border-dark-border rounded-xl px-4 py-3"
-            >
-              <span className={`self-start text-[10px] font-black px-2 py-0.5 rounded-md border ${TYPE_STYLE[l.type]}`}>
-                {l.type}
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-bold truncate">
-                  {l.district}, {l.city} <span className="text-peach-tint/50 font-semibold">· {l.mood}</span>
+        {loading ? (
+          <p className="text-xs text-peach-tint/50 py-6 text-center">Memuat aktivitas log...</p>
+        ) : recentLogs.length === 0 ? (
+          <p className="text-xs text-peach-tint/50 py-6 text-center">Belum ada log tercatat di Supabase.</p>
+        ) : (
+          <div className="space-y-2.5">
+            {recentLogs.map((l) => (
+              <div
+                key={l.id}
+                className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 bg-dark-bg/60 border border-dark-border rounded-xl px-4 py-3"
+              >
+                <span className={`self-start text-[10px] font-black px-2 py-0.5 rounded-md border ${TYPE_STYLE[l.type] || TYPE_STYLE.PEE}`}>
+                  {l.type}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-bold truncate">
+                    {l.district}, {l.city} <span className="text-peach-tint/50 font-semibold">· {l.mood}</span>
+                  </div>
+                  <div className="text-[11px] text-peach-tint/60 truncate">
+                    {l.userEmail}
+                    {l.note ? ` — "${l.note}"` : ''}
+                  </div>
                 </div>
-                <div className="text-[11px] text-peach-tint/60 truncate">
-                  {l.userEmail}
-                  {l.note ? ` — "${l.note}"` : ''}
-                </div>
+                <span className="text-[11px] text-peach-tint/60 font-semibold whitespace-nowrap">{l.loggedAt}</span>
               </div>
-              <span className="text-[11px] text-peach-tint/60 font-semibold whitespace-nowrap">{l.loggedAt}</span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 };
-

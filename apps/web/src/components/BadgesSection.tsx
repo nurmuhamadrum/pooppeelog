@@ -3,11 +3,21 @@ import { getBadges, CONTENT_UPDATED_EVENT } from '../data/contentStore';
 import { EditableBadge } from '../types/admin';
 import { MrPlopSVG, LilDripSVG, SirFlushSVG } from './MascotSVGs';
 import { Award, Compass, Flame, MapPin, Mountain } from 'lucide-react';
+import { isSupabaseConfigured } from '../lib/supabase';
+import { fetchBadgesFromSupabase } from '../services/adminApi';
 
 export const BadgesSection: React.FC = () => {
   const [badges, setBadges] = useState<EditableBadge[]>(getBadges);
 
   useEffect(() => {
+    if (isSupabaseConfigured) {
+      fetchBadgesFromSupabase()
+        .then((remote) => {
+          if (remote.length > 0) setBadges(remote);
+        })
+        .catch(() => {});
+    }
+
     const refresh = () => setBadges(getBadges());
     window.addEventListener(CONTENT_UPDATED_EVENT, refresh);
     window.addEventListener('storage', refresh);
