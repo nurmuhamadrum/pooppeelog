@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { MrPlopSVG, LilDripSVG, SirFlushSVG } from './MascotSVGs';
-import { Download, Menu, X, ShieldCheck, Coffee, Globe } from 'lucide-react';
+import { Menu, X, ShieldCheck, Coffee, Globe } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useWebCopy } from '../i18n/translations';
 
@@ -84,14 +84,6 @@ export const Navbar: React.FC = () => {
             <Coffee className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>{t.support}</span>
           </a>
-
-          <a
-            href="#download"
-            className="px-4 py-2.5 rounded-full bg-pee-amber text-ink font-black text-xs flex items-center gap-1.5 shadow-lg shadow-pee-amber/25 hover:scale-105 active:scale-95 transition-all"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>{t.download}</span>
-          </a>
         </div>
 
         {/* Mobile Hamburger Toggle */}
@@ -125,14 +117,6 @@ export const Navbar: React.FC = () => {
             >
               <Coffee className="w-4 h-4 stroke-[2.5]" />
               <span>{t.support}</span>
-            </a>
-            <a
-              href="#download"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full py-3 rounded-xl bg-pee-amber text-ink font-black text-xs flex items-center justify-center gap-2 shadow"
-            >
-              <Download className="w-4 h-4" />
-              <span>{t.downloadNow}</span>
             </a>
           </div>
         </div>
