@@ -1,29 +1,34 @@
 <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Circle background (teal seperti Sir Flush) -->
-  <circle cx="50" cy="50" r="48" fill="#2FB8AC" />
+  <defs>
+    <linearGradient id="plopBodyGrad" x1="50" y1="12" x2="50" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#C98A58" />
+      <stop offset="50%" stop-color="#A86A3D" />
+      <stop offset="100%" stop-color="#7A4824" />
+    </linearGradient>
+    <linearGradient id="plopGlossGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.45" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </linearGradient>
+  </defs>
 
-  <!-- Toilet icon in solid white -->
-  <!-- Water Tank Lid -->
-  <rect x="34" y="16" width="32" height="6" rx="3" fill="#FFFFFF" />
+  <!-- Rounded dark background badge so Mr. Plop pops on light & dark browser tabs -->
+  <rect x="2" y="2" width="96" height="96" rx="26" fill="#1E1A17" stroke="#3D352E" stroke-width="4" />
 
-  <!-- Water Tank -->
-  <rect x="28" y="21" width="44" height="25" rx="5" fill="#FFFFFF" />
+  <g transform="translate(0 2) scale(0.92)" style="transform-origin: 50px 50px">
+    <ellipse cx="50" cy="88" rx="34" ry="5" fill="#000000" opacity="0.3" />
+    <path d="M16 68C14 78 26 88 50 88C74 88 86 78 84 68C82 58 70 54 50 54C30 54 18 58 16 68Z" fill="url(#plopBodyGrad)" stroke="#4A260F" stroke-width="3.5" stroke-linejoin="round" />
+    <path d="M26 66C32 60 44 58 56 58C62 58 68 60 72 63" stroke="url(#plopGlossGrad)" stroke-width="3.5" stroke-linecap="round" />
+    <path d="M24 45C22 53 32 60 50 60C68 60 78 53 76 45C74 37 66 32 50 32C34 32 26 37 24 45Z" fill="url(#plopBodyGrad)" stroke="#4A260F" stroke-width="3.5" stroke-linejoin="round" />
+    <path d="M32 41C38 36 46 35 56 36C62 36.5 66 38 68 40" stroke="url(#plopGlossGrad)" stroke-width="3" stroke-linecap="round" />
+    <path d="M50 10C46 16 38 21 36 26C34 31 39 34 50 34C61 34 66 31 64 26C62 21 54 16 50 10Z" fill="url(#plopBodyGrad)" stroke="#4A260F" stroke-width="3.5" stroke-linejoin="round" />
 
-  <!-- Flush Handle -->
-  <rect x="23" y="27" width="6" height="4" rx="2" fill="#FFFFFF" />
-
-  <!-- Toilet Rim / Seat -->
-  <rect x="20" y="45" width="60" height="9" rx="4.5" fill="#FFFFFF" />
-
-  <!-- Toilet Bowl -->
-  <path
-    d="M28 53 C28 69, 38 76, 44 78 L56 78 C62 76, 72 69, 72 53 Z"
-    fill="#FFFFFF"
-  />
-
-  <!-- Toilet Base Stand -->
-  <path
-    d="M38 75 L62 75 L65 85 L35 85 Z"
-    fill="#FFFFFF"
-  />
+    <!-- Eyes & Blush -->
+    <circle cx="38" cy="54" r="5.5" fill="#2B1A0E" />
+    <circle cx="62" cy="54" r="5.5" fill="#2B1A0E" />
+    <circle cx="40" cy="52" r="2.2" fill="#FFFFFF" />
+    <circle cx="64" cy="52" r="2.2" fill="#FFFFFF" />
+    <ellipse cx="30" cy="63" rx="4.5" ry="2.5" fill="#FF8FA3" opacity="0.75" />
+    <ellipse cx="70" cy="63" rx="4.5" ry="2.5" fill="#FF8FA3" opacity="0.75" />
+    <path d="M43 65Q50 72 57 65" stroke="#2B1A0E" stroke-width="3.5" stroke-linecap="round" fill="none" />
+  </g>
 </svg>
