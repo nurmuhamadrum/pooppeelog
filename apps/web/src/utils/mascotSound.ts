@@ -115,3 +115,4 @@ export function playMascotSound(type: MascotSoundType): void {
   chime.start(now + 0.24);
   chime.stop(now + 0.5);
 }
+
