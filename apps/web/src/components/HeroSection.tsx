@@ -24,17 +24,17 @@ export const HeroSection: React.FC = () => {
   const mascotBubble = customBubble || t.defaultBubble;
 
   return (
-    <section className="relative overflow-hidden pt-10 pb-20 md:py-24 border-b border-dark-border bg-gradient-to-b from-dark-bg via-dark-bg/95 to-dark-bg">
+    <section className="relative overflow-hidden pt-6 pb-14 sm:pt-10 sm:pb-20 md:py-24 border-b border-dark-border bg-gradient-to-b from-dark-bg via-dark-bg/95 to-dark-bg">
       {/* Ambient gradient glows */}
       <div className="absolute -top-32 -right-32 w-80 md:w-96 h-80 md:h-96 bg-pee-amber/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-1/2 -left-32 w-80 md:w-96 h-80 md:h-96 bg-both-teal/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-32 right-1/4 w-80 md:w-96 h-80 md:h-96 bg-[#C98A58]/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
         {/* Left Column: Headline, Mascot Greetings, & Value Props */}
-        <div className="lg:col-span-7 space-y-5 text-center lg:text-left z-10">
+        <div className="lg:col-span-7 space-y-4 sm:space-y-5 text-center lg:text-left z-10">
           {/* Top Pill Badge with animated sparkle */}
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-dark-surface border border-dark-border text-xs font-bold text-pee-amber shadow-sm hover:scale-105 transition-transform cursor-default">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-dark-surface border border-dark-border text-[11px] sm:text-xs font-bold text-pee-amber shadow-sm hover:scale-105 transition-transform cursor-default">
             <Sparkles className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '6s' }} />
             <span>{t.pill}</span>
             <span className="text-[10px] bg-pee-amber/20 text-pee-amber px-2 py-0.5 rounded-full font-extrabold">
@@ -68,8 +68,8 @@ export const HeroSection: React.FC = () => {
             {t.taglinePost}
           </p>
 
-          {/* Cute Interactive Mascot Bubble Widget */}
-          <div className="bg-dark-surface/90 border border-dark-border rounded-2xl p-3.5 max-w-xl mx-auto lg:mx-0 flex items-center gap-3.5 shadow-lg relative group">
+          {/* Cute Interactive Mascot Bubble Widget (hidden on mobile to keep hero clean, shown sm+) */}
+          <div className="hidden sm:flex bg-dark-surface/90 border border-dark-border rounded-2xl p-3.5 max-w-xl mx-auto lg:mx-0 items-center gap-3.5 shadow-lg relative group">
             <div className="flex items-center -space-x-2 flex-shrink-0">
               <button
                 type="button"
@@ -110,8 +110,8 @@ export const HeroSection: React.FC = () => {
             </div>
           </div>
 
-          {/* 3 Core Tenets Chips */}
-          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 pt-1 text-xs text-peach-tint font-bold">
+          {/* 3 Core Tenets Chips (hidden on very small mobile to reduce clutter) */}
+          <div className="hidden sm:flex flex-wrap items-center justify-center lg:justify-start gap-2.5 pt-1 text-xs text-peach-tint font-bold">
             <span className="flex items-center gap-1.5 bg-dark-surface px-3 py-1.5 rounded-xl border border-dark-border">
               <Zap className="w-3.5 h-3.5 text-pee-amber" /> {t.chip1}
             </span>
@@ -161,31 +161,31 @@ export const HeroSection: React.FC = () => {
           <p className="text-[11px] text-peach-tint/60 pt-0.5">{t.footnote}</p>
         </div>
 
-        {/* Right Column: Animated Mascot Stage */}
-        <div className="lg:col-span-5 flex flex-col items-center justify-center relative py-6">
-          <div className="relative w-[320px] h-[320px] sm:w-[380px] sm:h-[380px] flex items-center justify-center">
-            <div className="absolute inset-6 rounded-full bg-gradient-to-tr from-poop-brown/25 via-pee-amber/20 to-both-teal/25 blur-2xl pointer-events-none" />
+        {/* Right Column: Animated Mascot Stage (placed above text on mobile) */}
+        <div className="order-first lg:order-last lg:col-span-5 flex flex-col items-center justify-center relative py-2 sm:py-6">
+          <div className="relative w-[260px] h-[190px] sm:w-[380px] sm:h-[380px] flex items-center justify-center">
+            <div className="absolute inset-4 sm:inset-6 rounded-full bg-gradient-to-tr from-poop-brown/25 via-pee-amber/20 to-both-teal/25 blur-2xl pointer-events-none" />
 
-            <div className="absolute inset-2 rounded-full border border-dashed border-dark-border/80 orbit-spin-slow pointer-events-none">
+            <div className="hidden sm:block absolute inset-2 rounded-full border border-dashed border-dark-border/80 orbit-spin-slow pointer-events-none">
               <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-pee-amber shadow-lg shadow-pee-amber/50" />
               <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-both-teal shadow-lg shadow-both-teal/50" />
             </div>
 
-            <div className="absolute inset-12 rounded-full border border-dark-border/60 orbit-spin-reverse pointer-events-none">
+            <div className="hidden sm:block absolute inset-12 rounded-full border border-dark-border/60 orbit-spin-reverse pointer-events-none">
               <span className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-drip-blue shadow-lg shadow-drip-blue/50" />
             </div>
 
-            <div className="absolute top-4 left-0 sm:-left-2 z-20 bg-dark-surface/95 backdrop-blur border border-dark-border px-3 py-1.5 rounded-2xl shadow-xl flex items-center gap-1.5 text-[11px] font-black text-pee-amber mascot-float">
+            <div className="hidden sm:flex absolute top-4 left-0 sm:-left-2 z-20 bg-dark-surface/95 backdrop-blur border border-dark-border px-3 py-1.5 rounded-2xl shadow-xl items-center gap-1.5 text-[11px] font-black text-pee-amber mascot-float">
               <MapPin className="w-3.5 h-3.5" />
               <span>{t.stageChip1}</span>
             </div>
 
-            <div className="absolute top-8 right-0 sm:-right-2 z-20 bg-dark-surface/95 backdrop-blur border border-dark-border px-3 py-1.5 rounded-2xl shadow-xl flex items-center gap-1.5 text-[11px] font-black text-both-teal mascot-float-delayed">
+            <div className="hidden sm:flex absolute top-8 right-0 sm:-right-2 z-20 bg-dark-surface/95 backdrop-blur border border-dark-border px-3 py-1.5 rounded-2xl shadow-xl items-center gap-1.5 text-[11px] font-black text-both-teal mascot-float-delayed">
               <Flame className="w-3.5 h-3.5 text-emergency" />
               <span>{t.stageChip2}</span>
             </div>
 
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 bg-dark-surface/95 backdrop-blur border border-dark-border px-3.5 py-1.5 rounded-full shadow-xl flex items-center gap-1.5 text-[11px] font-bold text-cream-bg whitespace-nowrap">
+            <div className="hidden sm:flex absolute bottom-3 left-1/2 -translate-x-1/2 z-20 bg-dark-surface/95 backdrop-blur border border-dark-border px-3.5 py-1.5 rounded-full shadow-xl items-center gap-1.5 text-[11px] font-bold text-cream-bg whitespace-nowrap">
               <Sparkles className="w-3.5 h-3.5 text-pee-amber" />
               <span>{t.stageHint}</span>
             </div>
@@ -194,13 +194,13 @@ export const HeroSection: React.FC = () => {
               <button
                 type="button"
                 onClick={() => triggerBubble(t.plopQuote, 'plop')}
-                className={`group relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-poop-brown p-3 border-4 border-dark-bg shadow-2xl mascot-bounce-wiggle mascot-interactive flex items-center justify-center transition-all ${
+                className={`group relative w-20 h-20 sm:w-28 sm:h-28 rounded-3xl bg-poop-brown p-2.5 sm:p-3 border-4 border-dark-bg shadow-2xl mascot-bounce-wiggle mascot-interactive flex items-center justify-center transition-all ${
                   activeMascot === 'plop' ? 'ring-4 ring-pee-amber/60 z-20' : 'opacity-95'
                 }`}
                 title="Mr. Plop (Poop)"
               >
                 <MrPlopSVG />
-                <span className="absolute -bottom-2.5 bg-dark-bg border border-dark-border text-[9px] font-black text-peach-tint px-2 py-0.5 rounded-full shadow">
+                <span className="hidden sm:inline-block absolute -bottom-2.5 bg-dark-bg border border-dark-border text-[9px] font-black text-peach-tint px-2 py-0.5 rounded-full shadow">
                   Mr. Plop
                 </span>
               </button>
@@ -208,13 +208,13 @@ export const HeroSection: React.FC = () => {
               <button
                 type="button"
                 onClick={() => triggerBubble(t.flushQuote, 'flush')}
-                className={`group relative w-32 h-32 sm:w-36 sm:h-36 -translate-y-6 rounded-[2rem] bg-both-teal p-3.5 border-4 border-dark-bg shadow-2xl shadow-both-teal/25 mascot-float mascot-interactive flex items-center justify-center transition-all ${
+                className={`group relative w-24 h-24 sm:w-36 sm:h-36 -translate-y-4 sm:-translate-y-6 rounded-[1.75rem] sm:rounded-[2rem] bg-both-teal p-3 sm:p-3.5 border-4 border-dark-bg shadow-2xl shadow-both-teal/25 mascot-float mascot-interactive flex items-center justify-center transition-all ${
                   activeMascot === 'flush' ? 'ring-4 ring-both-teal/60 z-30' : 'z-20'
                 }`}
                 title="Sir Flush (Combo)"
               >
                 <SirFlushSVG />
-                <span className="absolute -bottom-2.5 bg-dark-bg border border-both-teal/50 text-[10px] font-black text-both-teal px-2.5 py-0.5 rounded-full shadow">
+                <span className="hidden sm:inline-block absolute -bottom-2.5 bg-dark-bg border border-both-teal/50 text-[10px] font-black text-both-teal px-2.5 py-0.5 rounded-full shadow">
                   Sir Flush
                 </span>
               </button>
@@ -222,13 +222,13 @@ export const HeroSection: React.FC = () => {
               <button
                 type="button"
                 onClick={() => triggerBubble(t.dripQuote, 'drip')}
-                className={`group relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-pee-amber p-3 border-4 border-dark-bg shadow-2xl mascot-float-delayed mascot-interactive flex items-center justify-center transition-all ${
+                className={`group relative w-20 h-20 sm:w-28 sm:h-28 rounded-3xl bg-pee-amber p-2.5 sm:p-3 border-4 border-dark-bg shadow-2xl mascot-float-delayed mascot-interactive flex items-center justify-center transition-all ${
                   activeMascot === 'drip' ? 'ring-4 ring-drip-blue/60 z-20' : 'opacity-95'
                 }`}
                 title="Lil' Drip (Pee)"
               >
                 <LilDripSVG />
-                <span className="absolute -bottom-2.5 bg-dark-bg border border-dark-border text-[9px] font-black text-pee-amber px-2 py-0.5 rounded-full shadow">
+                <span className="hidden sm:inline-block absolute -bottom-2.5 bg-dark-bg border border-dark-border text-[9px] font-black text-pee-amber px-2 py-0.5 rounded-full shadow">
                   Lil' Drip
                 </span>
               </button>

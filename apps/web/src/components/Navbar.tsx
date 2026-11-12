@@ -10,8 +10,8 @@ export const Navbar: React.FC = () => {
   const t = useWebCopy(lang).nav;
 
   const LangSwitcher = () => (
-    <div className="inline-flex items-center bg-dark-surface border border-dark-border rounded-full p-0.5 text-[11px] font-black">
-      <Globe className="w-3.5 h-3.5 text-peach-tint/60 ml-2 mr-1" />
+    <div className="inline-flex items-center bg-dark-surface border border-dark-border rounded-full p-0.5 text-[10px] sm:text-[11px] font-black flex-shrink-0">
+      <Globe className="hidden sm:block w-3.5 h-3.5 text-peach-tint/60 ml-2 mr-1" />
       <button
         type="button"
         onClick={() => setLang('en')}
@@ -35,26 +35,26 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 bg-dark-bg/90 backdrop-blur-md border-b border-dark-border">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2">
         {/* Logo with Mascot Trio */}
-        <a href="#" className="flex items-center gap-3.5 group">
-          <div className="flex items-center -space-x-2">
-            <div className="w-9 h-9 rounded-full bg-poop-brown p-1 border-2 border-dark-bg shadow-md flex items-center justify-center transform group-hover:-translate-y-1 transition-transform">
+        <a href="#" className="flex items-center gap-2.5 sm:gap-3.5 group min-w-0">
+          <div className="flex items-center -space-x-2 flex-shrink-0">
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-poop-brown p-1 border-2 border-dark-bg shadow-md flex items-center justify-center transform group-hover:-translate-y-1 transition-transform">
               <MrPlopSVG />
             </div>
-            <div className="w-9 h-9 rounded-full bg-pee-amber p-1 border-2 border-dark-bg shadow-md flex items-center justify-center transform group-hover:-translate-y-1.5 transition-transform">
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-pee-amber p-1 border-2 border-dark-bg shadow-md flex items-center justify-center transform group-hover:-translate-y-1.5 transition-transform">
               <LilDripSVG />
             </div>
-            <div className="w-9 h-9 rounded-full bg-both-teal p-1 border-2 border-dark-bg shadow-md flex items-center justify-center transform group-hover:-translate-y-1 transition-transform">
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-both-teal p-1 border-2 border-dark-bg shadow-md flex items-center justify-center transform group-hover:-translate-y-1 transition-transform">
               <SirFlushSVG />
             </div>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-black text-lg text-cream-bg tracking-tight">Poop Pee Log</span>
-              <span className="text-[10px] bg-both-teal/20 text-both-teal border border-both-teal/40 px-2 py-0.5 rounded-full font-bold">v1.0</span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="font-black text-sm sm:text-lg text-cream-bg tracking-tight truncate">Poop Pee Log</span>
+              <span className="hidden sm:inline-block text-[10px] bg-both-teal/20 text-both-teal border border-both-teal/40 px-2 py-0.5 rounded-full font-bold">v1.0</span>
             </div>
-            <span className="text-[11px] text-peach-tint/70 font-medium block -mt-0.5">Track. Log. Lega.</span>
+            <span className="text-[10px] sm:text-[11px] text-peach-tint/70 font-medium block -mt-0.5 truncate">Track. Log. Lega.</span>
           </div>
         </a>
 
