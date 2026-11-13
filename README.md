@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="./docs/assets/mascots-banner.svg" alt="Poop Pee Log Mascots Banner" width="100%" />
-
 # 🚽 Poop Pee Log 🧻
 ### *"Track. Log. Lega."*
 
@@ -15,25 +13,19 @@
 [![Supabase](https://img.shields.io/badge/Backend-Supabase_PostgreSQL-3ECF8E.svg)](https://supabase.com/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/nurmuhamadrum/pooppeelog/pulls)
 
-[📱 Fitur Utama](#-fitur-unggulan) • [🖼️ Mockup Aplikasi](#-mockup-antarmuka-aplikasi) • [🎭 Trio Maskot](#-trio-maskot-resmi) • [🛠️ Menjalankan Proyek](#-panduan-instalasi--menjalankan-proyek) • [📚 Dokumentasi](#-indeks-dokumentasi-lengkap)
+[📱 Fitur Utama](#-fitur-unggulan) • [📱 Antarmuka Aplikasi](#-antarmuka-aplikasi) • [🎭 Trio Maskot](#-trio-maskot-resmi) • [🛠️ Menjalankan Proyek](#-panduan-instalasi--menjalankan-proyek) • [📚 Dokumentasi](#-indeks-dokumentasi-lengkap)
 
 </div>
 
 ---
 
-## 🖼️ Mockup Antarmuka Aplikasi
+## 📱 Antarmuka Aplikasi
 
-Berikut adalah visualisasi antarmuka aplikasi **Poop Pee Log** (Mobile App) yang mengusung tema *Warm Dark Canvas* (`#1E1A17`), kontras ramah mata, dan aksen warna maskot resmi:
-
-<div align="center">
-  <img src="./docs/assets/mockup-showcase.svg" alt="Poop Pee Log Mobile Mockup Showcase" width="100%" />
-</div>
-
-<br/>
+Aplikasi **Poop Pee Log** (Mobile App & Web Simulator) mengusung tema *Warm Dark Canvas* (`#1E1A17`), kontras ramah mata, dan alur sat-set:
 
 | 🗺️ **1. Peta Pribadi Realtime** | ⚡ **2. Quick Log 3-Detik** | 📖 **3. Buku Harian & Streak** |
 | :--- | :--- | :--- |
-| • Persis seperti simulator peta di landing page (`PhoneMockup.tsx`).<br/>• Blok perkotaan realistis, kanal sungai, dan taman hijau.<br/>• Radar denyut GPS aktif dengan titik lokasi presisi.<br/>• Pin maskot **Lil' Drip** (Pee `#F5B700`) & **Mr. Plop** (Poop `#8B5E3C`).<br/>• Filter bar (`ALL`, `PEE`, `POOP`, `COMBO`) & kartu detail lokasi pop-up. | • Modal taktil 2-tap sat-set ($<100\text{ ms}$).<br/>• Tombol besar **Lil' Drip** (Pee) & **Mr. Plop** (Poop) berdampingan.<br/>• Tombol penuh **Sir Flush** untuk kombo kencing & BAB sekaligus.<br/>• Pemilih mood kelegaan (*Lega Banget, Nahan Lama, Darurat*).<br/>• Otomatis merekam waktu dan koordinat GPS. | • Tampilan buku harian riwayat lengkap sesuai simulator web.<br/>• Kartu catatan harian dengan avatar maskot sesuai tipe log.<br/>• Waktu presisi, distrik/kota, dan kutipan catatan personal.<br/>• Banner **Streak 7 Hari Beruntun** untuk habit sehat.<br/>• Navigasi tab bar dengan tombol FAB `+ LOG` emas tengah. |
+| • Radar denyut GPS aktif dengan titik lokasi presisi.<br/>• Pin maskot **Lil' Drip** (Pee `#F5B700`) & **Mr. Plop** (Poop `#8B5E3C`).<br/>• Pilihan tema peta: *Dark Mode*, *Vintage Cream*, dan *OS Standard*.<br/>• Filter bar (`ALL`, `PEE`, `POOP`, `COMBO`) & kartu pop-up detail lokasi.<br/>• 100% peta pribadi tanpa pelacak pihak ketiga. | • Modal taktil 2-tap sat-set ($<100\text{ ms}$).<br/>• Tombol besar **Lil' Drip** (Pee) & **Mr. Plop** (Poop) berdampingan.<br/>• Tombol penuh **Sir Flush** untuk kombo kencing & BAB sekaligus.<br/>• Pemilih mood kelegaan (*Lega Banget, Nahan Lama, Darurat*).<br/>• Otomatis merekam waktu dan koordinat GPS. | • Tampilan buku harian riwayat lengkap sesuai simulator web.<br/>• Kartu catatan harian dengan avatar maskot sesuai tipe log.<br/>• Waktu presisi, distrik/kota, dan kutipan catatan personal.<br/>• Banner **Streak 7 Hari Beruntun** untuk habit sehat.<br/>• Navigasi tab bar dengan tombol FAB `+ LOG` emas tengah. |
 
 ---
 
