@@ -31,9 +31,9 @@ Berikut adalah visualisasi antarmuka aplikasi **Poop Pee Log** (Mobile App) yang
 
 <br/>
 
-| 🗺️ **1. Peta Pribadi Realtime** | ⚡ **2. Quick Log 3-Detik** | 🏆 **3. Habit & Gamifikasi** |
+| 🗺️ **1. Peta Pribadi Realtime** | ⚡ **2. Quick Log 3-Detik** | 📖 **3. Buku Harian & Streak** |
 | :--- | :--- | :--- |
-| • Radar GPS aktif dengan radius dinamis (15m – 100m).<br/>• Pin maskot **Mr. Plop** (Poop) & **Lil' Drip** (Pee).<br/>• Pilihan tema peta: *Dark Mode*, *Vintage Cream*, dan *OS Standard*.<br/>• 100% peta pribadi tanpa pelacak pihak ketiga. | • 2-tap recording instan ($<100\text{ ms}$).<br/>• Otomatis menyimpan koordinat GPS, distrik, kota, dan waktu.<br/>• Bottom sheet mood kelegaan opsional (*Lega, Nahan, Darurat, Kloset Drama*).<br/>• Offline-first: berfungsi normal di basement atau tanpa sinyal. | • Penghitung **Streak Harian** berturut-turut.<br/>• Statistik mingguan & rasio volume buang air.<br/>• Koleksi lencana unik penjelajah toilet (*First Timer, City Explorer, Smooth Flow, dll.*).<br/>• Total data & log terenkripsi. |
+| • Persis seperti simulator peta di landing page (`PhoneMockup.tsx`).<br/>• Blok perkotaan realistis, kanal sungai, dan taman hijau.<br/>• Radar denyut GPS aktif dengan titik lokasi presisi.<br/>• Pin maskot **Lil' Drip** (Pee `#F5B700`) & **Mr. Plop** (Poop `#8B5E3C`).<br/>• Filter bar (`ALL`, `PEE`, `POOP`, `COMBO`) & kartu detail lokasi pop-up. | • Modal taktil 2-tap sat-set ($<100\text{ ms}$).<br/>• Tombol besar **Lil' Drip** (Pee) & **Mr. Plop** (Poop) berdampingan.<br/>• Tombol penuh **Sir Flush** untuk kombo kencing & BAB sekaligus.<br/>• Pemilih mood kelegaan (*Lega Banget, Nahan Lama, Darurat*).<br/>• Otomatis merekam waktu dan koordinat GPS. | • Tampilan buku harian riwayat lengkap sesuai simulator web.<br/>• Kartu catatan harian dengan avatar maskot sesuai tipe log.<br/>• Waktu presisi, distrik/kota, dan kutipan catatan personal.<br/>• Banner **Streak 7 Hari Beruntun** untuk habit sehat.<br/>• Navigasi tab bar dengan tombol FAB `+ LOG` emas tengah. |
 
 ---
 
@@ -51,13 +51,13 @@ Poop Pee Log dirancang murni untuk kepuasan pribadi (*personal biological satisf
 
 ## 🎭 Trio Maskot Resmi
 
-Untuk mengubah rutinitas biologis menjadi pengalaman yang ceria dan santai, Poop Pee Log ditemani oleh trio maskot ramah:
+Untuk mengubah rutinitas biologis menjadi pengalaman yang ceria dan santai, Poop Pee Log ditemani oleh trio maskot ramah dengan warna token resmi aplikasi:
 
-| Maskot | Peran & Identitas | Warna Token | Kepribadian & Fungsi |
+| Maskot | Peran & Identitas | Warna Token Resmi | Kepribadian & Fungsi |
 | :---: | :--- | :---: | :--- |
-| <img src="./docs/assets/mascots-banner.svg#plop" width="60" /> <br/> **Mr. Plop** | **Poop Companion**<br/>*(Buang Air Besar)* | `#8B5E3C`<br/>*(Poop Brown)* | Karakter *swirl* coklat hangat tersenyum manis dengan pipi merona. Selalu siap merayakan setiap buang air besar yang sehat dan plong tanpa canggung. |
-| <img src="./docs/assets/mascots-banner.svg#drip" width="60" /> <br/> **Lil' Drip** | **Pee Companion**<br/>*(Buang Air Kecil)* | `#F5B700` / `#25A5F4`<br/>*(Pee Amber / Blue)* | Tetesan air biru ceria di atas lingkaran kuning emas. Mengingatkan hidrasi sehat dan membantu mencatat buang air kecil dalam sekejap. |
-| <img src="./docs/assets/mascots-banner.svg#flush" width="60" /> <br/> **Sir Flush** | **Combo & Privacy Guardian**<br/>*(Kloset Pelindung)* | `#2FB8AC`<br/>*(Both Teal)* | Kloset putih bersahabat yang menjaga Mr. Plop dan Lil' Drip. Melambangkan sesi kombo (kencing & BAB sekaligus) serta pelindung privasi data biometrik. |
+| 🍫<br/>**Mr. Plop** | **Poop Companion**<br/>*(Buang Air Besar)* | `#8B5E3C`<br/>*(Poop Brown)* | Karakter *swirl* coklat hangat (`#C98A58` → `#7A4824`) dengan mata berbinar dan pipi merona (`#FF6B6B`). Selalu siap merayakan setiap buang air besar yang sehat dan plong tanpa canggung. |
+| 💧<br/>**Lil' Drip** | **Pee Companion**<br/>*(Buang Air Kecil)* | `#F5B700` &amp; `#3BA3E8`<br/>*(Pee Amber / Drip Blue)* | Tetesan air biru segar (`#67D5FD` → `#0E78C2`) di atas lingkaran kuning emas (`#F5B700`). Mengingatkan hidrasi sehat dan membantu mencatat buang air kecil dalam sekejap. |
+| 🚽<br/>**Sir Flush** | **Combo & Privacy Guardian**<br/>*(Kloset Pelindung)* | `#2FB8AC`<br/>*(Both Teal)* | Kloset putih keramik bersahabat dengan tuas emas dan pusaran air teal (`#2FB8AC`). Menjaga Mr. Plop dan Lil' Drip, melambangkan sesi kombo serta pelindung privasi data biometrik. |
 
 > 🔊 **Fitur Unik Landing Page:** Buka website landing page dan klik maskot trio di panggung interaktif untuk mendengarkan efek suara Web Audio API interaktif!
 
