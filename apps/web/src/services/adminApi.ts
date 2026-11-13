@@ -1,12 +1,14 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import {
   AdminActivityLogItem,
+  AdminFeedbackItem,
   AdminStatOverview,
   AdminUserItem,
   CityDistribution,
   DailyLogStat,
   EditableBadge,
   EditableFAQ,
+  SubmitFeedbackPayload,
 } from '../types/admin';
 
 export interface OverviewResponse extends AdminStatOverview {
@@ -210,4 +212,54 @@ export async function deleteBadgeFromSupabase(id: string): Promise<void> {
   const { error } = await supabase.from('badges').delete().eq('id', id);
   if (error) throw new Error(error.message);
 }
+
+// ==========================================
+// USER FEEDBACKS (public.user_feedbacks)
+// ==========================================
+export async function submitFeedback(payload: SubmitFeedbackPayload): Promise<{ ok: boolean; error?: string }> {
+  if (!supabase) {
+    return { ok: false, error: 'Supabase client is not available.' };
+  }
+  const { error } = await supabase.from('user_feedbacks').insert({
+    email: payload.email?.trim() || null,
+    category: payload.category,
+    message: payload.message.trim(),
+    rating: payload.rating || null,
+    platform: payload.platform,
+    user_id: payload.userId || null,
+  });
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+  return { ok: true };
+}
+
+export async function fetchAdminFeedbacks(): Promise<AdminFeedbackItem[]> {
+  if (!supabase) throw new Error('Supabase tidak tersedia');
+  const { data, error } = await supabase
+    .from('user_feedbacks')
+    .select('id, user_id, email, category, message, rating, platform, created_at')
+    .order('created_at', { ascending: false });
+
+  if (error) throw new Error(error.message);
+
+  return (data || []).map((row) => ({
+    id: row.id,
+    userId: row.user_id,
+    email: row.email,
+    category: row.category,
+    message: row.message,
+    rating: row.rating,
+    platform: row.platform,
+    createdAt: row.created_at,
+  }));
+}
+
+export async function deleteFeedbackFromSupabase(id: string): Promise<void> {
+  if (!supabase) throw new Error('Supabase tidak tersedia');
+  const { error } = await supabase.from('user_feedbacks').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
 

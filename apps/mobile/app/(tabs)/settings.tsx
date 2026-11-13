@@ -44,6 +44,7 @@ import {
   Compass,
   Palette,
   Globe,
+  MessageSquarePlus,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { signOut } from '@/src/services/authService';
@@ -51,6 +52,7 @@ import { useToast } from '@/src/context/ToastContext';
 import { useMobileI18n } from '@/src/i18n/translations';
 import * as Haptics from 'expo-haptics';
 import { MrPlopIcon, LilDripIcon, SirFlushIcon } from '@/src/components/MascotIcons';
+import { FeedbackModal } from '@/src/components/FeedbackModal';
 import { clearAllLocalData } from '@/src/db/sqlite';
 import { authenticateWithBiometrics } from '@/src/services/auth';
 import * as Linking from 'expo-linking';
@@ -84,6 +86,7 @@ export default function ProfileSettingsScreen() {
   const [exportModalVisible, setExportModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+  const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
 
@@ -675,6 +678,26 @@ export default function ProfileSettingsScreen() {
             </View>
             <Download size={16} color={Colors.peachTint} />
           </TouchableOpacity>
+
+          {/* Kritik & Saran */}
+          <TouchableOpacity
+            style={styles.actionRow}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+              setFeedbackModalVisible(true);
+            }}
+          >
+            <View style={styles.actionLeft}>
+              <View style={[styles.settingIconBox, { backgroundColor: 'rgba(47, 184, 172, 0.15)' }]}>
+                <MessageSquarePlus size={16} color={Colors.bothTeal} />
+              </View>
+              <View>
+                <Text style={styles.actionLabel}>{t.settings.feedbackTitle}</Text>
+                <Text style={styles.actionDesc}>{t.settings.feedbackDesc}</Text>
+              </View>
+            </View>
+            <ChevronRight size={16} color={Colors.peachTint} />
+          </TouchableOpacity>
         </View>
 
         {/* ZONA DATA PRIBADI (HAPUS RIWAYAT) */}
@@ -979,6 +1002,20 @@ export default function ProfileSettingsScreen() {
           </Animated.View>
         </Modal>
       )}
+
+      {/* 4. MODAL KRITIK & SARAN (FEEDBACK) */}
+      <FeedbackModal
+        visible={feedbackModalVisible}
+        onClose={() => setFeedbackModalVisible(false)}
+        userEmail={userEmail}
+        userId={userId}
+        onSuccess={() => {
+          showToast({
+            message: lang === 'en' ? 'Thank you for your feedback!' : 'Terima kasih atas masukan Anda!',
+            type: 'success',
+          });
+        }}
+      />
     </SafeAreaView>
   );
 }

@@ -1,20 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BarChart3, Users, HelpCircle, Award, LogOut, ExternalLink, CheckCircle2, Loader2 } from 'lucide-react';
+import { BarChart3, Users, HelpCircle, Award, MessageSquare, LogOut, ExternalLink, CheckCircle2, Loader2 } from 'lucide-react';
 import { SirFlushSVG } from '../MascotSVGs';
 import { AdminLogin } from './AdminLogin';
 import { StatsTab } from './StatsTab';
 import { UsersTab } from './UsersTab';
 import { FaqTab } from './FaqTab';
 import { BadgesTab } from './BadgesTab';
+import { FeedbackTab } from './FeedbackTab';
 import { checkCurrentAdminSession, signOutAdmin } from '../../services/adminApi';
 
-type TabId = 'stats' | 'users' | 'faq' | 'badges';
+type TabId = 'stats' | 'users' | 'faq' | 'badges' | 'feedback';
 
 const TABS: { id: TabId; label: string; icon: React.ElementType; desc: string }[] = [
   { id: 'stats', label: 'Statistik', icon: BarChart3, desc: 'Ringkasan aktivitas global aplikasi' },
   { id: 'users', label: 'Pengguna & Log', icon: Users, desc: 'Daftar pengguna dan aktivitas terbaru' },
   { id: 'faq', label: 'Konten FAQ', icon: HelpCircle, desc: 'Kelola pertanyaan di landing page' },
   { id: 'badges', label: 'Lencana', icon: Award, desc: 'Kelola master lencana pencapaian' },
+  { id: 'feedback', label: 'Kritik & Saran', icon: MessageSquare, desc: 'Lihat saran & masukan dari pengguna' },
 ];
 
 export const AdminDashboard: React.FC = () => {
@@ -134,6 +136,7 @@ export const AdminDashboard: React.FC = () => {
           {tab === 'users' && <UsersTab />}
           {tab === 'faq' && <FaqTab notify={notify} />}
           {tab === 'badges' && <BadgesTab notify={notify} />}
+          {tab === 'feedback' && <FeedbackTab />}
         </div>
       </main>
 

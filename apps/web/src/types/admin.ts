@@ -70,3 +70,27 @@ export interface EditableBadge {
   requirementTextEn: string;
 }
 
+export type FeedbackCategory = 'SUGGESTION' | 'BUG' | 'PRAISE' | 'OTHER';
+export type FeedbackPlatform = 'WEB' | 'MOBILE';
+
+export interface AdminFeedbackItem {
+  id: string;
+  userId?: string | null;
+  email?: string | null;
+  category: FeedbackCategory;
+  message: string;
+  rating?: number | null;
+  platform: FeedbackPlatform;
+  createdAt: string;
+}
+
+export interface SubmitFeedbackPayload {
+  email?: string;
+  category: FeedbackCategory;
+  message: string;
+  rating?: number;
+  platform: FeedbackPlatform;
+  userId?: string;
+}
+
+

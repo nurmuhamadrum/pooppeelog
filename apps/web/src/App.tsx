@@ -7,6 +7,7 @@ import { InteractiveMockup } from './components/InteractiveMockup';
 import { BadgesSection } from './components/BadgesSection';
 import { PrivacyManifesto } from './components/PrivacyManifesto';
 import { BuyMeACoffeeSection } from './components/BuyMeACoffeeSection';
+import { FeedbackSection } from './components/FeedbackSection';
 import { FAQSection } from './components/FAQSection';
 import { DownloadSection } from './components/DownloadSection';
 import { Footer } from './components/Footer';
@@ -45,6 +46,7 @@ export const App: React.FC = () => {
           <PrivacyManifesto />
           <DownloadSection />
           <BuyMeACoffeeSection />
+          <FeedbackSection />
           <FAQSection />
         </main>
         <Footer />

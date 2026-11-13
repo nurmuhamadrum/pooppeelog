@@ -41,6 +41,7 @@ export const Footer: React.FC = () => {
               <a href="#preview" className="hover:text-pee-amber">{lang === 'en' ? 'Simulator' : 'Simulator'}</a>
               <a href="#lencana" className="hover:text-pee-amber">{t.nav.badges}</a>
               <a href="#privasi" className="hover:text-pee-amber">{lang === 'en' ? 'Privacy' : 'Privasi'}</a>
+              <a href="#feedback" className="hover:text-pee-amber">{t.nav.feedback}</a>
               <a href="#download" className="hover:text-pee-amber">{t.nav.download}</a>
               <a href="#/admin" className="hover:text-both-teal">Admin</a>
               <a href="https://github.com/nurmuhamadrum/pooppeelog" target="_blank" rel="noreferrer" className="hover:text-pee-amber">GitHub</a>

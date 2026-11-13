@@ -68,6 +68,7 @@ export const Navbar: React.FC = () => {
             <ShieldCheck className="w-4 h-4 text-both-teal" />
             {t.privacy}
           </a>
+          <a href="#feedback" className="hover:text-pee-amber transition-colors">{t.feedback}</a>
         </nav>
 
         {/* CTA Buttons & Language Toggle */}
@@ -107,6 +108,7 @@ export const Navbar: React.FC = () => {
           <a href="#preview" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-pee-amber">{t.preview}</a>
           <a href="#lencana" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-pee-amber">{t.badges}</a>
           <a href="#privasi" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-pee-amber">{t.privacy}</a>
+          <a href="#feedback" onClick={() => setMobileMenuOpen(false)} className="block py-1 hover:text-pee-amber">{t.feedback}</a>
           <div className="pt-2 flex flex-col gap-2.5">
             <a
               href="https://saweria.co/pooppeelog"

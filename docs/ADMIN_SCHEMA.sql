@@ -326,3 +326,39 @@ BEGIN
     ), '[]'::jsonb);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ==============================================================================
+-- 7. TABEL USER_FEEDBACKS (Kritik & Saran dari Landing Page & Mobile App)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.user_feedbacks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    email TEXT,
+    category VARCHAR(50) NOT NULL DEFAULT 'SUGGESTION', -- 'SUGGESTION' | 'BUG' | 'PRAISE' | 'OTHER'
+    message TEXT NOT NULL,
+    rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+    platform VARCHAR(20) NOT NULL DEFAULT 'WEB', -- 'WEB' | 'MOBILE'
+    created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+-- Index untuk filter platform & waktu
+CREATE INDEX IF NOT EXISTS idx_user_feedbacks_created_at ON public.user_feedbacks(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_user_feedbacks_platform ON public.user_feedbacks(platform);
+CREATE INDEX IF NOT EXISTS idx_user_feedbacks_category ON public.user_feedbacks(category);
+
+-- Aktifkan RLS
+ALTER TABLE public.user_feedbacks ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Siapapun (pengunjung web anonim maupun user mobile) boleh kirim feedback
+DROP POLICY IF EXISTS "Public & authenticated can insert feedback" ON public.user_feedbacks;
+CREATE POLICY "Public & authenticated can insert feedback"
+    ON public.user_feedbacks FOR INSERT
+    WITH CHECK (TRUE);
+
+-- Policy: Hanya Admin yang dapat membaca dan menghapus feedback
+DROP POLICY IF EXISTS "Admins can view and manage feedbacks" ON public.user_feedbacks;
+CREATE POLICY "Admins can view and manage feedbacks"
+    ON public.user_feedbacks FOR ALL
+    USING (public.is_current_user_admin())
+    WITH CHECK (public.is_current_user_admin());
+
